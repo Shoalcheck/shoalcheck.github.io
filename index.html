@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#f5f8f8" media="(prefers-color-scheme: light)">
 <!-- Where the download buttons look for files: a GitHub repository whose releases carry the archives. -->
 <meta name="shoalcheck:releases" content="shoalcheck/shoalcheck">
-<!-- Where a licence or a trial key is asked for. EMPTY UNTIL THE PROJECT OWNS AN ADDRESS: the plan buttons then
+<!-- Where a licence key is bought. EMPTY UNTIL THE PROJECT OWNS AN ADDRESS: the plan buttons then
      say keys are not on sale yet, rather than sending anyone to an address nobody reads. -->
 <meta name="shoalcheck:contact" content="">
 <link rel="icon" href="brand/shoalcheck-icon.svg" type="image/svg+xml">
@@ -205,7 +205,6 @@
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Preflight: drain, zone, upgrade</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>An audit's opening and its top 5 problems, in the terminal</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>The desktop app's live run</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Community support</li>
         </ul>
         <a class="btn" href="#download">Download</a>
       </article>
@@ -221,7 +220,6 @@
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>History, diff and comparisons</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Markdown, CSV and SARIF exports</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>The desktop app's workspace</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Support within 3 business days</li>
         </ul>
         <a class="btn" data-plan-cta href="#pricing">Buy Pro</a>
       </article>
@@ -239,9 +237,8 @@
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Scheduled readings</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Jira and Linear tickets</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>The MCP server, for an assistant</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Support within 1 business day</li>
         </ul>
-        <a class="btn btn-primary" data-plan-cta data-trial href="#pricing">Start a 14-day trial</a>
+        <a class="btn btn-primary" data-plan-cta href="#pricing">Buy Team</a>
       </article>
       <article class="plan">
         <h3>Business</h3>
@@ -251,15 +248,9 @@
         <div class="cap">100 clusters in any 30 days</div>
         <ul>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Everything in Team</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Support within 4 business hours</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Paid by invoice</li>
         </ul>
-        <a class="btn" data-plan-cta href="#pricing">Talk to us</a>
+        <a class="btn" data-plan-cta href="#pricing">Buy Business</a>
       </article>
-    </div>
-    <div class="plans-foot">
-      <div><h3>14 days of Team, free</h3><p>A signed trial key, no card. Everything in Team for 14 days, then the free line unless you buy a plan.</p></div>
-      <div><h3>Audit as a service — $2,500</h3><p>One-off, up to 5 clusters. A person reads the report with your team and writes the remediation plan. Paid by invoice.</p></div>
     </div>
   </div>
 </section>
@@ -393,7 +384,7 @@
      instead of sending anyone to an address nobody reads. */
   document.querySelectorAll('[data-plan-cta]').forEach(function (a) {
     if (contact) {
-      a.href = /^https?:/.test(contact) ? contact : 'mailto:' + contact + '?subject=' + encodeURIComponent(a.hasAttribute('data-trial') ? 'Shoalcheck trial key' : 'Shoalcheck ' + a.textContent.trim());
+      a.href = /^https?:/.test(contact) ? contact : 'mailto:' + contact + '?subject=' + encodeURIComponent('Shoalcheck ' + a.textContent.trim());
       return;
     }
     var p = document.createElement('div');
