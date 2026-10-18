@@ -8,12 +8,17 @@
 <meta name="color-scheme" content="dark" />
 <meta name="theme-color" content="#08080a" />
 <link rel="icon" href="brand/shoalcheck-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="landing.css" />
 
 <style>
-/* This page is prose and tables, not the landing's stage: no WebGL intro, no scroll
-   choreography, no vendored animation libraries. It borrows the site's tokens and
-   type from /styles.css and adds only what a reference page needs. */
+/* This page is prose and tables, not the landing's stage: no scroll choreography and no scene. It wears the
+   landing's stylesheet, header and footer — it had kept the old site's, a second design one click away — and
+   adds only what a reference page needs, named here in the landing's own tokens. */
+:root { --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 56px; --s-8: 80px;
+        --t-xs: 12.5px; --t-sm: 14px; --t-lg: 18px; --t-xl: clamp(1.4rem, 2.6vw, 1.9rem);
+        --fg-muted: var(--dim); --fg-soft: var(--fg2); --fg-faint: var(--faint); --border: var(--line2);
+        --border-subtle: var(--line); --font-mono: var(--mono); --primary: var(--accent); --bg-sunk: var(--surface); }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent2); }
 .ro-head { padding: var(--s-8) 0 var(--s-6); }
 .ro-title { font-size: clamp(1.9rem, 4vw, 3rem); line-height: 1.08; letter-spacing: -0.02em; margin: var(--s-4) 0 0; }
 .ro-deck { margin-top: var(--s-5); font-size: var(--t-lg); line-height: 1.55; color: var(--fg-muted); max-width: 62ch; }
@@ -50,6 +55,7 @@
            font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1.7;
            color: var(--fg-soft); overflow-x: auto; white-space: pre; }
 .ro-code .cm { color: var(--fg-faint); }
+.ro-cap { margin-top: var(--s-2); font-size: 13px; color: var(--fg-faint); }
 
 .ro-note { margin-top: var(--s-6); padding: var(--s-5); border: 1px solid var(--border);
            border-left: 3px solid var(--primary); border-radius: 6px; }
@@ -59,21 +65,24 @@
 </head>
 <body>
 
-<header class="topbar">
-  <div class="wrap topbar-inner">
-    <a class="brand" href="./" aria-label="Shoalcheck home">
-      <svg class="brand-mark" viewBox="0 0 100 100" role="img" aria-hidden="true">
-        <rect width="100" height="100" rx="25" fill="#0b1417" /><g transform="scale(4.1667)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g>
-      </svg>
-      <span class="brand-name">Shoalcheck</span>
-      <span class="brand-tag">read-only</span>
+<header class="top" id="top">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="Shoalcheck, home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0b1417"/><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g></svg>
+      Shoalcheck
     </a>
-    <div class="topbar-spacer"></div>
-    <nav class="topbar-links" aria-label="Primary">
-      <a class="topbar-link" href="sample-report.html">Sample report</a>
-      <a class="topbar-link" href="read-only.html" aria-current="page">Your cluster</a>
-      <a class="topbar-link" href="index.html#download">Download</a>
+    <button class="menu" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Sections">
+      <a href="index.html#zone">Lose a zone</a>
+      <a href="index.html#reading">The reading</a>
+      <a href="index.html#arithmetic">The arithmetic</a>
+      <a href="index.html#pricing">Pricing</a>
+      <a href="index.html#faq">FAQ</a>
     </nav>
+    <div class="top-cta">
+      <a class="btn btn-ghost" href="app-demo.html">Live demo</a>
+      <a class="btn btn-primary" href="index.html#download">Download</a>
+    </div>
   </div>
 </header>
 
@@ -90,7 +99,9 @@
       </p>
       <p class="ro-deck">
         Every claim below names the file or the gate that holds it, because a page about trust that asks to
-        be trusted is the wrong shape. The repository is source-available: you can read all of it.
+        be trusted is the wrong shape. The source is not public yet, so every check below is one you can run
+        without it: the binary prints its own permissions, and your API server's audit log is a witness we do
+        not control.
       </p>
     </div>
   </section>
@@ -98,9 +109,9 @@
   <section class="ro-sec">
     <div class="wrap">
       <div class="eyebrow">The permission</div>
-      <h2>One ClusterRole, and it is in the repository</h2>
+      <h2>One ClusterRole, and the binary prints it</h2>
       <p>
-        <code>deploy/rbac.yaml</code> is the exact access the collector needs — <strong>get and list, on 47
+        <code>deploy/rbac.yaml</code>, in every command-line download, is the exact access the collector needs — <strong>get and list, on 47
         resource types, and no <code>watch</code></strong>. An audit is one snapshot; a watch is a
         subscription, and this tool has no time axis to spend one on. Apply that role and nothing else, and
         the audit either completes or tells you which kind it was refused. It never turns a refusal into
@@ -180,9 +191,10 @@
         produced.
       </p>
 
-      <div class="ro-code">reads   66      <span class="cm">every get and list this run issued</span>
+      <div class="ro-code">reads   32      <span class="cm">every get and list this run issued</span>
 writes   0      <span class="cm">create, update, patch or delete against an object</span>
 streams  0      <span class="cm">watches and long-lived connections</span></div>
+      <p class="ro-cap">The totals a reading of our kind test cluster printed on 18 October 2026.</p>
 
       <div class="ro-claim">
         <p class="c">No client can slip past the recorder. Three layers check it: which packages may build
@@ -247,41 +259,44 @@ streams  0      <span class="cm">watches and long-lived connections</span></div>
       <div class="eyebrow">Checking it yourself</div>
       <h2>Three ways, none of which involve believing this page</h2>
       <p>
-        Read <code>deploy/rbac.yaml</code> — it is the whole permission surface, in the repository, next to
-        the code that uses it. Apply it as its own ServiceAccount and run the audit under that; anything
-        beyond the role fails at your API server. Then read the reading's own request ledger, which lists
+        Print it with <code>shoalcheck audit --show-permissions</code> — it is the whole permission surface,
+        one line per resource, get and list only. Grant exactly that to its own ServiceAccount and run the
+        audit under it; anything beyond the role fails at your API server. Then read the reading's own request ledger, which lists
         every call by verb and target.
       </p>
       <div class="ro-note">
         <p><strong>The strongest check is your own audit log.</strong> Run Shoalcheck against a cluster whose
           API server audit log you can read, and compare it against the request count the reading prints.
           The two numbers are the same claim from two directions, and only one of them is ours.</p>
-        <p>If they disagree, that is a defect worth telling us about, and it is the kind we would rather
-          hear from you than not hear at all.</p>
+        <p>If they disagree, that is a defect in the reading, and the two numbers side by side are the
+          evidence for it.</p>
       </div>
     </div>
   </section>
 
-  <footer class="footer">
+  <section class="ro-sec">
     <div class="wrap">
-      <div class="footer-grid">
-        <div>
-          <a class="brand" href="./" aria-label="Shoalcheck home" style="margin-bottom:var(--s-4)">
-            <svg class="brand-mark" viewBox="0 0 100 100" role="img" aria-hidden="true"><rect width="100" height="100" rx="25" fill="#0b1417" /><g transform="scale(4.1667)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g></svg>
-            <span class="brand-name">Shoalcheck</span>
-          </a>
-          <p class="footer-disclaimer"><span class="label">Not a certified audit</span>Shoalcheck produces observations and potential gaps mapped to control frameworks for convenience — indicators for further review, not pass/fail attestations, and not issued by a QSA, CPA, or accredited auditor.</p>
-        </div>
-        <div class="footer-meta">
-          <a href="sample-report.html">Sample report</a>
-          <a href="read-only.html">What it does to your cluster</a>
-          <a href="index.html#download">Download</a>
-        </div>
-      </div>
-      <div class="footer-bottom"><span>Source-available · Apache-2.0 core</span><span>·</span><span>No agent · no SaaS · your data stays on your machine</span></div>
+      <div class="ro-note"><p><b>Not a certified audit.</b> Shoalcheck produces observations and potential gaps mapped to
+        control frameworks for convenience — indicators for further review, not pass/fail attestations, and not
+        issued by a QSA, CPA, or accredited auditor.</p></div>
     </div>
-  </footer>
+  </section>
 
 </main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <span class="brand small"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0b1417"/><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g></svg>Shoalcheck</span>
+    <ul>
+      <li><a href="sample-report.html">The sample reading</a></li>
+      <li><a href="sample-compare.html">A real comparison</a></li>
+      <li><a href="sample-fleet.html">A real fleet</a></li>
+      <li><a href="app-demo.html">The interactive demo</a></li>
+      <li><a href="read-only.html" aria-current="page">What it reads</a></li>
+      <li><a href="https://github.com/shoalcheck/shoalcheck/releases">Releases</a></li>
+    </ul>
+  </div>
+</footer>
+<script src="nav.js"></script>
 </body>
 </html>

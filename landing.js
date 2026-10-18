@@ -22,9 +22,12 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  /* ── the terminal types itself, once ──────────────────────────────────── */
-  var term = $('[data-type]');
-  if (term && !reduce) {
+  /* ── a terminal types itself, once ────────────────────────────────────
+     The hero's, and each preflight question's the first time it is shown: the real output of the command, line by
+     line at the pace a terminal prints it. Nothing is typed for anyone who asked for reduced motion. */
+  var typeOut = function (term, delay) {
+    if (!term || reduce || term.getAttribute('data-typed')) return;
+    term.setAttribute('data-typed', '1');
     var lines = term.innerHTML.split('\n');
     term.innerHTML = '';
     var i = 0;
@@ -39,8 +42,9 @@
       i++;
       setTimeout(step, plain.indexOf('$') === 0 ? 420 : (plain.trim() ? 90 : 160));
     };
-    setTimeout(step, 500);
-  }
+    setTimeout(step, delay);
+  };
+  typeOut($('[data-type]'), 500);
 
   /* ── tabs ─────────────────────────────────────────────────────────────── */
   var tabs = $$('.tab');
@@ -50,8 +54,22 @@
       x.setAttribute('aria-selected', on ? 'true' : 'false');
       var p = document.getElementById(x.getAttribute('aria-controls'));
       if (p) p.hidden = !on;
+      if (on && p) typeOut(p.querySelector('pre.term-body'), 120);
     });
   };
+  /* The question already open types when it is scrolled to, not while it is off screen. */
+  var firstPane = $('.panes');
+  if (firstPane && 'IntersectionObserver' in window) {
+    var seen = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var open = firstPane.querySelector('.pane-q:not([hidden]) pre.term-body');
+        typeOut(open, 200);
+        seen.disconnect();
+      });
+    }, { threshold: 0.4 });
+    seen.observe(firstPane);
+  }
   tabs.forEach(function (t, k) {
     t.addEventListener('click', function () { select(t); });
     t.addEventListener('keydown', function (e) {
@@ -169,17 +187,24 @@
   }
 
   /* ── the app video plays while it is on screen ────────────────────────────
-     Muted and looped, and only while visible, so it never runs unseen. Anyone who asked for reduced motion
-     gets the poster and the controls, and starts it themselves. */
+     Muted and looped, and only while visible, so it never runs unseen. It always has its controls: a
+     32-second loop that starts by itself must be stoppable (WCAG 2.2.2). Anyone who asked for reduced motion
+     gets the poster and starts it themselves. */
   var vid = $('#app-video');
   if (vid) {
     if (reduce || !('IntersectionObserver' in window)) {
       vid.controls = true;
     } else {
+      /* A pause the reader chose is kept: scrolling past and back does not start it again. */
+      var ours = false, chosen = false;
+      vid.addEventListener('pause', function () { if (!ours) chosen = true; ours = false; });
+      vid.addEventListener('play', function () { chosen = false; });
       new IntersectionObserver(function (es) {
         es.forEach(function (e) {
-          if (e.isIntersecting) { var p = vid.play(); if (p && p.catch) p.catch(function () { vid.controls = true; }); }
-          else vid.pause();
+          if (e.isIntersecting) {
+            if (chosen) return;
+            var p = vid.play(); if (p && p.catch) p.catch(function () {});
+          } else if (!vid.paused) { ours = true; vid.pause(); }
         });
       }, { threshold: 0.4 }).observe(vid);
     }
@@ -208,24 +233,36 @@
       return fmtTok(lo) + '–' + fmtTok(hi);
     };
     var fmtUsd = function (x) { return x >= 100 ? '$' + Math.round(x).toLocaleString('en-US') : '$' + x.toFixed(2); };
+    /* ONE MODEL FOR THE CHART AND THE CALCULATOR, calibrated on our kind test cluster (24 pods, 259 objects,
+       287 KB, 1,894 checks): about 160 cluster-wide objects (nodes, namespaces, roles, bindings, CRDs) plus
+       four per pod; a pod 5.4 KB as kubectl prints it, 9.3 KB with a mesh sidecar; everything else 0.67 KB;
+       7.3 rule-by-object checks per object. The chart's 1,500-pod line is this function at 1,500, so the two
+       cannot disagree; at 24 pods it gives the kind cluster's own 71 k tokens and about 16 hours. */
+    var model = function (pods) {
+      var objects = 160 + 4 * pods, others = objects - pods;
+      return {
+        objects: objects, checks: objects * 7.3,
+        lo: (pods * 5400 + others * 670) / P.charsHi,
+        hi: (pods * 9300 + others * 670) / P.charsLo
+      };
+    };
+    var big = model(1500);
+    if ($('#r-1500')) $('#r-1500').textContent = tokRange(big.lo, big.hi);
     var calc = function () {
       var pods = Number($('#i-pods').value), clusters = Number($('#i-clusters').value), reads = Number($('#i-reads').value);
-      var m = P.models[Number(sel.value)];
+      var sec = Number($('#i-sec').value), rate = Number($('#i-rate').value);
+      var m = P.models[Number(sel.value)], c = model(pods);
       $('#o-pods').textContent = pods.toLocaleString('en-US');
       $('#o-clusters').textContent = clusters; $('#o-reads').textContent = reads;
-      // Measured per-object sizes: a pod 5.4–9.3 KB as kubectl prints it, and about three other objects per pod
-      // at about 1 KB each (deployments, services, endpoint slices, bindings...).
-      var lo = (pods * 5400 + pods * 3 * 900) / P.charsHi, hi = (pods * 9300 + pods * 3 * 1300) / P.charsLo;
+      $('#o-sec').textContent = sec; $('#o-rate').textContent = '$' + rate;
       var perMonth = clusters * reads;
-      $('#r-tokens').textContent = tokRange(lo, hi);
-      $('#r-ctx').textContent = Math.round(lo / P.context * 100) + '–' + Math.round(hi / P.context * 100) + '%';
-      $('#r-agent').textContent = fmtUsd(cost(lo, m) * perMonth) + '–' + fmtUsd(cost(hi, m) * perMonth);
-      // Checks: about four objects per pod, and 7.3 rule-by-object checks per object — the ratio measured on
-      // our kind test cluster (1,894 checks over 259 objects).
-      var hours = pods * 4 * 7.3 * P.secPerCheck / 3600;
-      $('#r-hours').textContent = Math.round(hours).toLocaleString('en-US') + ' h';
+      $('#r-tokens').textContent = tokRange(c.lo, c.hi);
+      $('#r-ctx').textContent = Math.round(c.lo / P.context * 100) + '–' + Math.round(c.hi / P.context * 100) + '%';
+      $('#r-agent').textContent = fmtUsd(cost(c.lo, m) * perMonth) + '–' + fmtUsd(cost(c.hi, m) * perMonth);
+      var hours = c.checks * sec / 3600;
+      $('#r-hours').textContent = Math.round(hours).toLocaleString('en-US') + ' h · ' + fmtUsd(hours * rate);
     };
-    ['#i-pods', '#i-clusters', '#i-reads', '#i-model'].forEach(function (s) { $(s).addEventListener('input', calc); });
+    ['#i-pods', '#i-clusters', '#i-reads', '#i-model', '#i-sec', '#i-rate'].forEach(function (s) { $(s).addEventListener('input', calc); });
     calc();
   }
 
@@ -298,4 +335,49 @@
       }
     })
     .catch(function () { /* the rows already point at the releases page */ });
+})();
+
+/* ── a screenshot opens at full size ──────────────────────────────────────────
+   Every screenshot here is a 1440-wide capture drawn at a third to a half of that, where its text cannot be read;
+   the adversarial review could not enlarge one. Each opens over the page at the size it was taken, and closes with
+   Escape, the button or a click outside it; focus returns to the image it came from. */
+(function () {
+  var shots = Array.prototype.slice.call(document.querySelectorAll('.gallery img, .compare img, .shot-img'));
+  if (!shots.length) return;
+  var box = null, from = null;
+  function close() {
+    if (!box) return;
+    box.remove(); box = null;
+    document.documentElement.classList.remove('zoomed');
+    if (from) from.focus();
+  }
+  function open(img) {
+    from = img;
+    box = document.createElement('div');
+    box.className = 'zoom';
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-modal', 'true');
+    box.setAttribute('aria-label', 'The screenshot at full size');
+    var big = document.createElement('img');
+    big.src = img.currentSrc || img.src; big.alt = img.alt; big.width = img.width; big.height = img.height;
+    var x = document.createElement('button');
+    x.className = 'zoom-close'; x.type = 'button'; x.textContent = 'Close';
+    x.addEventListener('click', close);
+    box.appendChild(big); box.appendChild(x);
+    box.addEventListener('click', function (e) { if (e.target === box) close(); });
+    document.body.appendChild(box);
+    document.documentElement.classList.add('zoomed');
+    x.focus();
+  }
+  shots.forEach(function (img) {
+    img.classList.add('zoomable');
+    img.setAttribute('tabindex', '0');
+    img.setAttribute('role', 'button');
+    img.setAttribute('aria-label', 'Open at full size: ' + (img.alt || 'screenshot'));
+    img.addEventListener('click', function () { open(img); });
+    img.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(img); }
+    });
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
 })();

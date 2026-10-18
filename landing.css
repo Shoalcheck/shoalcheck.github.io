@@ -75,7 +75,18 @@ p { margin: 0; }
 .nav a:hover { color: var(--fg); }
 .top-cta { margin-left: auto; display: flex; gap: 8px; }
 .top-cta .btn { min-height: 36px; padding: 0 14px; font-size: 13.5px; border-radius: 9px; }
-@media (max-width: 900px) { .nav { display: none; } }
+.menu { display: none; }
+/* Under 900px the sections fold behind a Menu button (nav.js), and open as a list under the bar. */
+@media (max-width: 900px) {
+  .nav { display: none; }
+  .menu { display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; border: 1px solid var(--line2);
+          border-radius: 9px; background: none; color: var(--fg2); font: inherit; font-size: 13.5px; cursor: pointer; }
+  .top.open .nav { display: flex; flex-direction: column; gap: 0; position: absolute; top: 100%; left: 0; right: 0;
+                   padding: 6px max(20px, env(safe-area-inset-left, 0px)) 14px; background: var(--bg2);
+                   border-bottom: 1px solid var(--line); }
+  .top.open .nav a { padding: 11px 0; font-size: 15px; border-bottom: 1px solid var(--line); }
+  .top.open .nav a:last-child { border-bottom: 0; }
+}
 @media (max-width: 480px) { .top-cta .btn-ghost { display: none; } }
 
 /* ── hero ───────────────────────────────────────────────────────────────── */
@@ -189,7 +200,10 @@ p { margin: 0; }
 @media (max-width: 900px) { .gallery { grid-template-columns: minmax(0, 1fr); } .gallery .g-main { grid-row: auto; } }
 
 /* ── the app ────────────────────────────────────────────────────────────── */
-.app-grid { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 48px; align-items: center; }
+/* The video takes the full width under the words: in a half column it played at half its size, where the
+   window's text could not be read. */
+.app-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; align-items: start; }
+.app-grid .band-head { max-width: 70ch; }
 .app-grid .band-head { margin-bottom: 0; }
 .app-video { margin: 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .app-video video { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line2); background: #0b0b0d; box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .9); }
@@ -206,7 +220,7 @@ p { margin: 0; }
 .bt { height: 12px; border-radius: 6px; background: rgba(255, 255, 255, .05); overflow: visible; position: relative; }
 .bt i { display: block; height: 100%; width: 0; border-radius: 6px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 1.2s var(--ease); }
 .bars.in .bt i { width: var(--w); }
-.bt i.range { background: linear-gradient(90deg, rgba(253, 176, 34, .5), var(--warn)); }
+.bt i.range { background: linear-gradient(90deg, rgba(253, 176, 34, .5), var(--warn)); margin-left: var(--from, 0); }
 .bt.over i { background: linear-gradient(90deg, var(--accent), var(--bad)); }
 .bv { font: 600 13px var(--mono); color: var(--fg); text-align: right; }
 .ctx-line { position: absolute; top: -6px; bottom: -6px; left: calc(124px + (100% - 228px) * .4); width: 0; border-left: 1px dashed var(--warn); }
@@ -311,3 +325,14 @@ p { margin: 0; }
   .bt i, #scene .pod, .tray .t-row, .gallery img { transition: none; }
   .cursor { animation: none; }
 }
+
+/* ── a screenshot at full size (landing.js) ─────────────────────────────── */
+.zoomable { cursor: zoom-in; }
+.zoomed, .zoomed body { overflow: hidden; }
+.zoom { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center;
+        padding: max(16px, 3vh) max(16px, 3vw); background: rgba(3, 6, 7, .9); cursor: zoom-out; }
+.zoom img { max-width: 100%; max-height: calc(100dvh - 32px); width: auto; height: auto; border-radius: 10px;
+            border: 1px solid var(--line2); cursor: default; }
+.zoom-close { position: absolute; top: max(12px, env(safe-area-inset-top, 0px)); right: max(12px, env(safe-area-inset-right, 0px));
+              min-height: 36px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 9px; background: var(--surface);
+              color: var(--fg); font: inherit; font-size: 13.5px; cursor: pointer; }

@@ -8,6 +8,11 @@
 <meta name="theme-color" content="#06090a">
 <meta property="og:title" content="Shoalcheck — don't start a change you can't finish">
 <meta property="og:description" content="Read-only Kubernetes preflight and audit from your laptop. Which node won't drain, what a lost zone leaves stranded, what blocks the upgrade — before you start.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://shoalcheck.github.io/">
+<meta property="og:image" content="https://shoalcheck.github.io/assets/shot-reading.png">
+<meta property="og:image:alt" content="The overview of the sample reading of acme-pay-prod, labelled Illustrative sample.">
+<meta name="twitter:card" content="summary_large_image">
 <!-- Where the download buttons look for files: a GitHub repository whose releases carry the archives. -->
 <meta name="shoalcheck:releases" content="shoalcheck/shoalcheck">
 <!-- Where a licence key is bought. EMPTY UNTIL THE PROJECT OWNS AN ADDRESS: the plan buttons then
@@ -27,7 +32,8 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0b1417"/><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g></svg>
       Shoalcheck
     </a>
-    <nav class="nav" aria-label="Sections">
+    <button class="menu" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Sections">
       <a href="index.html#zone">Lose a zone</a>
       <a href="index.html#reading">The reading</a>
       <a href="index.html#arithmetic">The arithmetic</a>
@@ -71,21 +77,22 @@
     <figure class="term reveal" aria-label="A real preflight against a kind test cluster: the drain of assay-e2e-worker is blocked by a PodDisruptionBudget, exit code 2.">
       <div class="term-bar"><span></span><span></span><span></span><b>kind-assay-e2e</b></div>
       <pre class="term-body" data-type><span class="p">$</span> shoalcheck preflight drain assay-e2e-worker
-<span class="bad">✗ assay-e2e-worker cannot be evacuated:</span>
-<span class="bad">  1 thing stops the drain</span>
+<span class="bad">✗ assay-e2e-worker cannot be evacuated: 1 thing stops the drain</span>
 
 1. Drain of assay-e2e-worker is blocked by budget
    e2e-demo/drain-blocked-pdb
-   · evicting 1 pod covered by the budget is required
-   · disruptionsAllowed=0, maxUnavailable=0,
-     expectedPods=2
-   · the eviction API would reject it, so
-     `kubectl drain` would not complete
+   Evacuating node assay-e2e-worker requires evicting
+   1 pod(s) covered by PodDisruptionBudget
+   e2e-demo/drain-blocked-pdb.
+   · … reports status.disruptionsAllowed=0 with
+     spec.maxUnavailable=0 … The eviction API would
+     reject each of those 1 evictions, so `kubectl drain
+     assay-e2e-worker` would not complete …
 
-<span class="dim">basis: 12 kinds read · 16 requests, 0 object writes</span>
+<span class="dim">basis: 12 kind(s) read · 16 request(s), 0 object write(s)</span>
 <span class="p">$</span> echo $?
 <span class="exit">2</span></pre>
-      <figcaption>Real output from our kind test cluster, shortened where the evidence runs on. The drain would have stopped here.</figcaption>
+      <figcaption>Real output from our kind test cluster, word for word and wrapped to fit; “…” marks where the evidence runs on. The drain would have stopped here.</figcaption>
     </figure>
   </div>
 </section>
@@ -110,7 +117,7 @@
         <ol class="scene-steps" id="scene-steps">
           <li data-step="0"><b>A real-shaped cluster.</b> Three zones, twelve nodes, thirty-two pods — the sample cluster, acme-pay-prod.</li>
           <li data-step="1"><b>eu-central-1a goes dark.</b> Four nodes and thirteen pods with it.</li>
-          <li data-step="2"><b>Eleven find room.</b> Their requests and placement rules still fit on the nodes that remain.</li>
+          <li data-step="2"><b>Eleven are not stopped.</b> Nothing this model checks — requests, placement rules, volumes — keeps them from the nodes that remain. Where they are drawn is for the picture: the reading names only what has nowhere to go.</li>
           <li data-step="3"><b>Two have nowhere to go.</b> A database whose volume is pinned to the lost zone, and a job whose placement rules no surviving node satisfies — each named, each with its reason.</li>
           <li data-step="4"><b>One command, before the outage.</b> <code>shoalcheck preflight zone eu-central-1a</code> — exit <b>2</b>.</li>
         </ol>
@@ -118,7 +125,7 @@
       </div>
       <div class="scene-art">
         <svg id="scene" viewBox="0 0 640 520" role="img" aria-labelledby="scene-desc">
-          <desc id="scene-desc">Three availability zones of the sample cluster. When eu-central-1a is lost, eleven of its thirteen pods are re-placed on surviving nodes and two are stranded, each with the reason the reading gives.</desc>
+          <desc id="scene-desc">Three availability zones of the sample cluster. When eu-central-1a is lost, nothing the model checks stops eleven of its thirteen pods — where they are drawn on surviving nodes is illustrative — and two are stranded, each with the reason the reading gives.</desc>
         </svg>
         <div class="tray" id="tray" aria-live="polite"></div>
       </div>
@@ -136,6 +143,7 @@
     </div>
     <div class="tabs reveal" role="tablist" aria-label="Preflight questions">
       <button class="tab" role="tab" aria-selected="true" aria-controls="t-drain" id="tab-drain">Will this node drain?</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="t-zone" id="tab-zone">What if a zone fails?</button>
       <button class="tab" role="tab" aria-selected="false" aria-controls="t-upgrade" id="tab-upgrade">Is the upgrade safe?</button>
       <button class="tab" role="tab" aria-selected="false" aria-controls="t-app" id="tab-app">In the app</button>
     </div>
@@ -151,14 +159,21 @@
 
 <span class="dim">basis: 12 kind(s) read · 16 request(s), 0 object write(s)</span>   <span class="exit">exit 2</span></pre>
       </div>
+      <div class="pane-q" role="tabpanel" id="t-zone" aria-labelledby="tab-zone" hidden>
+        <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight zone eu-central-1a --context kind-assay-mesh
+<span class="ok">✓ zone eu-central-1a: every pod this model can place has somewhere else to go</span>
+
+<span class="dim">basis: 11 kind(s) read · 15 request(s), 0 object write(s) · checks: k8s.reliability.zone-loss-feasibility, k8s.reliability.zone-pinned-volume
+this model checks a subset of what the scheduler checks: it can say a change will stop, and it cannot promise one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
+      </div>
       <div class="pane-q" role="tabpanel" id="t-upgrade" aria-labelledby="tab-upgrade" hidden>
         <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight upgrade 1.37
 <span class="ok">✓ upgrading to 1.37: nothing this model checks stops it</span>
 
-<span class="dim">basis: 8 kind(s) read · 12 request(s), 0 object write(s)
-checks: node-pool-cannot-roll, crd-conversion-webhook-unbacked, api-removals@2026-08-30
-this model checks a subset of what the scheduler checks: it can say a change
-will stop, and it cannot promise one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
+<span class="dim">basis: 8 kind(s) read · 12 request(s), 0 object write(s) · checks: k8s.upgrade.node-pool-cannot-roll,
+k8s.upgrade.crd-conversion-webhook-unbacked, api-removals@2026-08-30
+this model checks a subset of what the scheduler checks: it can say a change will stop, and it cannot promise
+one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
       </div>
       <div class="pane-q" role="tabpanel" id="t-app" aria-labelledby="tab-app" hidden>
         <img class="shot-img" src="assets/app-preflight.png" width="1440" height="900" loading="lazy" alt="The Preflight screen of the Shoalcheck app: the nodes of the kind test cluster, assay-e2e-worker chosen, and the verdict — assay-e2e-worker cannot be evacuated, 16 reads, 0 writes.">
@@ -214,7 +229,7 @@ will stop, and it cannot promise one will succeed.</span>   <span class="exit ok
         <a class="btn" href="sample-fleet.html">Open the fleet</a>
       </div>
       <figure>
-        <img src="assets/reading-fleet.png" width="1440" height="900" loading="lazy" alt="The fleet overview of our two kind test clusters: kind-assay-e2e, 56 findings, unpriced; kind-assay-mesh, 151 findings, $42 a month identified; 207 findings across the fleet; every context read; and what they declare differently — the operators installed, and seven namespaces present in one cluster and not the other.">
+        <img src="assets/reading-fleet.png" width="1440" height="900" loading="lazy" alt="The fleet overview of our two kind test clusters, labelled with the words they were read with — kind-assay-mesh's cloud labels are set by hand: kind-assay-e2e, 56 findings, unpriced; kind-assay-mesh, 151 findings, $42 a month identified; 207 findings across the fleet; every context read; and what they declare differently — the operators installed, and seven namespaces present in one cluster and not the other.">
       </figure>
     </div>
   </div>
@@ -234,12 +249,12 @@ will stop, and it cannot promise one will succeed.</span>   <span class="exit ok
       <p class="note">The demo is the real window replaying a session recorded against our kind test cluster. Nothing in it talks to a cluster.</p>
     </div>
     <figure class="app-video reveal">
-      <video id="app-video" muted loop playsinline preload="none" width="1280" height="800" poster="assets/app-session-poster.jpg"
-        aria-label="The interactive demo, recorded: the app reads the kind test cluster — the four named steps, the kinds it read, findings arriving, every request it issued — writes the reading, which says unpriced because kind has no list price, opens it, then asks on the Preflight screen whether assay-e2e-worker can be drained and answers that it cannot: one thing stops the drain.">
+      <video id="app-video" muted loop playsinline controls preload="none" width="1280" height="800" poster="assets/app-session-poster.jpg"
+        aria-label="The interactive demo, recorded: the app reads the kind test cluster — its four named steps in turn, the kinds it read, findings arriving, every request it issued, and a Stop button while it runs — writes the reading, which says unpriced because kind has no list price, and names the most severe finding its first three left out and why; opens the reading; then asks on the Preflight screen whether assay-e2e-worker can be drained, and what losing zone eu-central-1a would do to the mesh test cluster.">
         <source src="assets/app-session.webm" type="video/webm">
         <source src="assets/app-session.mp4" type="video/mp4">
       </video>
-      <figcaption>The interactive demo, recorded: read the cluster, open the reading, ask whether a node can be drained. 24 seconds of the real window replaying a real session; the banner on every frame says so.</figcaption>
+      <figcaption>The interactive demo, recorded: read the cluster, open the reading, ask whether a node can be drained and what losing a zone would do. 32 seconds of the real window replaying a real session, at 25 frames a second; the banner on every frame says so.</figcaption>
     </figure>
   </div>
 </section>
@@ -258,19 +273,19 @@ will stop, and it cannot promise one will succeed.</span>   <span class="exit ok
         <div class="bars" id="bars-hours">
           <div class="bar"><span class="bn">Shoalcheck</span><span class="bt"><i style="--w:1%"></i></span><span class="bv">0.1 s</span></div>
           <div class="bar"><span class="bn">By hand</span><span class="bt"><i style="--w:40%"></i></span><span class="bv">≈16 h</span></div>
-          <div class="bar"><span class="bn">An assessment</span><span class="bt"><i style="--w:100%" class="range"></i></span><span class="bv">1–5 days</span></div>
+          <div class="bar"><span class="bn">An assessment</span><span class="bt"><i style="--w:80%;--from:20%" class="range"></i></span><span class="bv">1–5 days</span></div>
         </div>
-        <figcaption>Shoalcheck: measured on our kind test cluster (259 objects). By hand: its 1,894 rule-by-object checks at an assumed 30 s each. An assessment: single-cluster engagements are sold as 1–5 business days (AWS Marketplace, Jetstack, Kinect listings). Log scale.</figcaption>
+        <figcaption>Shoalcheck: measured on our kind test cluster on 17 October (259 objects). By hand: its 1,894 rule-by-object checks at an assumed 30 s each. An assessment: single-cluster engagements are sold as 1–5 business days of 8 hours (AWS Marketplace, Jetstack, Kinect listings). Linear: the full bar is a 40-hour working week, and Shoalcheck's 0.1 s is drawn at the thinnest visible width.</figcaption>
       </figure>
       <figure class="chart reveal" aria-labelledby="c2-t">
         <h3 id="c2-t">Tokens an AI agent needs just to read the cluster once</h3>
         <div class="bars tokens" id="bars-tokens">
           <div class="bar"><span class="bn">kind, 24 pods</span><span class="bt"><i style="--w:3.8%"></i></span><span class="bv">72–96 k</span></div>
           <div class="bar"><span class="bn">mesh, 38 pods</span><span class="bt"><i style="--w:9.9%"></i></span><span class="bv">185–247 k</span></div>
-          <div class="bar"><span class="bn">1,500 pods</span><span class="bt over"><i style="--w:100%"></i></span><span class="bv">2.5–5.7 M</span></div>
-          <div class="ctx-line" style="--x:40%"><span>1 M — the largest context window</span></div>
+          <div class="bar"><span class="bn">1,500 pods</span><span class="bt over"><i style="--w:100%"></i></span><span class="bv" id="r-1500">2.8–5.7 M</span></div>
+          <div class="ctx-line" style="--x:40%"><span>1 M — the largest window of the models priced here</span></div>
         </div>
-        <figcaption>Objects as <code>kubectl get -o yaml</code> prints them, at 3–4 characters a token. Measured on our two test clusters; the 1,500-pod line uses the same per-object sizes. Scale: 2.5 M tokens across. Past the line, an agent can only read a sample — and an audit of a sample is not an audit.</figcaption>
+        <figcaption>Objects as <code>kubectl get -o yaml</code> prints them, at 3–4 characters a token. Measured on our two test clusters on 17 October; the 1,500-pod line is the calculator below, set to 1,500 pods. Scale: 2.5 M tokens across. Past the line, an agent can only read a sample — and an audit of a sample is not an audit.</figcaption>
       </figure>
     </div>
 
@@ -281,13 +296,15 @@ will stop, and it cannot promise one will succeed.</span>   <span class="exit ok
         <label>Clusters <output id="o-clusters">3</output><input type="range" id="i-clusters" min="1" max="50" step="1" value="3"></label>
         <label>Readings a month, per cluster <output id="o-reads">8</output><input type="range" id="i-reads" min="1" max="60" step="1" value="8"></label>
         <label>Model <select id="i-model"></select></label>
+        <label>Seconds a check takes by hand <output id="o-sec">30</output><input type="range" id="i-sec" min="5" max="120" step="5" value="30"></label>
+        <label>An engineer's hour <output id="o-rate">$90</output><input type="range" id="i-rate" min="30" max="250" step="10" value="90"></label>
       </div>
       <div class="calc-out" aria-live="polite">
         <div><b id="r-tokens">—</b><span>tokens an agent reads, just to look once</span></div>
-        <div><b id="r-ctx">—</b><span>of the largest context window, per cluster</span></div>
+        <div><b id="r-ctx">—</b><span>of a 1 M-token window, per cluster</span></div>
         <div><b id="r-agent">—</b><span>a month in input tokens alone, at list price</span></div>
-        <div><b id="r-hours">—</b><span>hours by hand for one reading, at 30 s a check</span></div>
-        <p class="calc-basis">A floor for the agent: no reasoning, no output, nothing read twice — an agent loop re-sends its whole context on every call. Per-object sizes measured on our test clusters (pods 5.4–9.3 KB, everything else about 1 KB). List input prices from platform.claude.com, fetched 2026-10-18.</p>
+        <div><b id="r-hours">—</b><span>hours by hand for one reading of one cluster, and what they cost at that rate</span></div>
+        <p class="calc-basis">A floor for the agent: no reasoning, no output, nothing read twice — an agent loop re-sends its whole context on every call. The model, from our kind test cluster: about 160 cluster-wide objects plus four per pod; a pod 5.4 KB as kubectl prints it, 9.3 KB with a mesh sidecar, everything else 0.67 KB; 7.3 rule-by-object checks per object. List input prices from platform.claude.com, fetched 2026-10-18. Hours by hand are your seconds and your rate, not a measurement.</p>
       </div>
     </div>
   </div>
@@ -379,7 +396,7 @@ will stop, and it cannot promise one will succeed.</span>   <span class="exit ok
         <a class="btn" data-plan-cta href="index.html#pricing">Buy Business</a>
       </article>
     </div>
-    <p class="plans-note">A licence is a signed key the binary checks offline — no phoning home. Reading the same cluster again costs nothing, and preflight is never counted.</p>
+    <p class="plans-note">A licence is a signed key the binary checks offline — no phoning home. Reading the same cluster again costs nothing, and preflight is never counted. Prices in US dollars, before any sales tax or VAT.</p>
   </div>
 </section>
 
@@ -399,7 +416,7 @@ will stop, and it cannot promise one will succeed.</span>   <span class="exit ok
           <li><a data-asset="^shoalcheck_.*_darwin_arm64\.tar\.gz$" href="index.html#download"><span>Command line — Apple silicon</span><small>.tar.gz</small></a></li>
           <li><a data-asset="^shoalcheck_.*_darwin_amd64\.tar\.gz$" href="index.html#download"><span>Command line — Intel</span><small>.tar.gz</small></a></li>
         </ul>
-        <p class="note">Not notarized by Apple yet: the first time, Control-click the app and choose Open.</p>
+        <p class="note">Not notarized by Apple yet, so macOS stops it the first time: open System Settings → Privacy &amp; Security and choose Open Anyway — or remove the quarantine flag with <code>xattr -dr com.apple.quarantine /Applications/Shoalcheck.app</code>.</p>
       </article>
       <article class="os reveal" data-os="windows">
         <h3><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.1 10.4 4v7.1H3zm0 13.8 7.4 1.1v-7H3zm8.2 1.2L21 21.5V13h-9.8zm0-16.2v7.2H21V2.5z"/></svg>Windows<span class="here-tag" hidden>your system</span></h3>
@@ -498,5 +515,6 @@ will stop, and it cannot promise one will succeed.</span>   <span class="exit ok
 <script type="application/json" id="zone-scene">{"cluster":"acme-pay-prod","lost":"eu-central-1a","zones":[{"z":"eu-central-1a","nodes":[{"n":"ip-10-0-1-a","t":"m6i.xlarge","p":[{"k":"payments/payments-gateway-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c0-a"},{"k":"workers/ledger-reconciler-7f4b9c2-c"},{"k":"payments/payments-ledger-db-0","why":"its volume is pinned to eu-central-1a \u2014 it cannot move at all"},{"k":"workers/debug-shell-ondemand"}]},{"n":"ip-10-0-1-d","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c2-c"},{"k":"default/legacy-cron-runner-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c1-b"}]},{"n":"ip-10-0-1-g","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c2-c"}]},{"n":"ip-10-0-2-a","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c5-f"},{"k":"workers/licensed-etl-0","why":"no surviving node satisfies its placement constraints"}]}]},{"z":"eu-central-1b","nodes":[{"n":"ip-10-0-1-b","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c1-b"},{"k":"workers/ledger-reconciler-7f4b9c3-d"}]},{"n":"ip-10-0-1-e","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c2-c"}]},{"n":"ip-10-0-1-h","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c3-d"}]},{"n":"ip-10-0-2-b","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c2-c"},{"k":"workers/ledger-reconciler-7f4b9c0-a"}]}]},{"z":"eu-central-1c","nodes":[{"n":"ip-10-0-1-c","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c1-b"},{"k":"monitoring/node-exporter-7f4b9c2-c"},{"k":"api/search-indexer-7f4b9c0-a"}]},{"n":"ip-10-0-1-f","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c1-b"}]},{"n":"ip-10-0-1-i","t":"m6i.xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c4-e"}]},{"n":"ip-10-0-2-c","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c3-d"},{"k":"workers/ledger-reconciler-7f4b9c1-b"}]}]}]}</script>
 <script type="application/json" id="agent-prices">{"fetched":"2026-10-18","source":"https://platform.claude.com/docs/en/about-claude/pricing","context":1000000,"charsLo":3,"charsHi":4,"secPerCheck":30,"models":[{"n":"Claude Haiku 5.5","in":0.5,"small":0.1,"tier":100000},{"n":"Claude Sonnet 5.5","in":2},{"n":"Claude Opus 5.5","in":4},{"n":"Claude Fable 5.1","in":10}]}</script>
 <script src="landing.js"></script>
+<script src="nav.js"></script>
 </body>
 </html>
