@@ -1647,6 +1647,12 @@ body { background: var(--bg); }
   .fl-head { display: none; }
   .fl-row { grid-template-columns: minmax(0,1fr) auto; }
   .fl-row .fl-bar { grid-column: 1 / -1; }
+  /* The heads are gone, so each figure carries its own name: "3" and "6" stood alone. */
+  .fl-num[data-k]::before { content: attr(data-k) " "; font-family: var(--sans); font-size: 10px; letter-spacing: .06em;
+                            text-transform: uppercase; color: var(--fg-dim); }
+  /* !important: the spread and mini bars carry an inline display of their own. */
+  .thead .wide, .row .wide { display: none !important; }
+  .drawer { left: 0; width: auto; border-left: 0; }
   .fl-skip, .fl-div { grid-template-columns: minmax(0,1fr); }
 }
 
@@ -4180,16 +4186,18 @@ function wsAct(rows, t) {
   h += panel({
     span: 'c5', title: 'Take the reading elsewhere',
     body: '<div class="exports">' +
-      [['JSON', 'shoalcheck audit -o reading.json', 'The whole reading, schema v1. Every field on this screen came from it.'],
-       ['SARIF 2.1.0', 'shoalcheck audit --sarif reading.sarif', 'For GitHub code scanning and any SARIF viewer. Rule metadata and claim boundaries travel with each result.'],
-       ['HTML report', 'shoalcheck render reading.json -o report.html', 'One self-contained file, print-ready. What you would email.'],
-       ['Evidence pack', 'shoalcheck evidence reading.json -o pack/', 'One file per control with what each rests on and what could not be examined.']]
+      /* The commands as the binary takes them — each run on a kind cluster before it was printed here, and held
+         by TestPrintedCommands_EveryFlagExists. They read the current kube context. */
+      [['JSON', 'shoalcheck audit --output report.html --json reading.json', 'The whole reading, schema v1. Every field on this screen came from it.'],
+       ['SARIF 2.1.0', 'shoalcheck audit --output report.html --export-sarif reading.sarif', 'For GitHub code scanning and any SARIF viewer. Rule metadata and claim boundaries travel with each result.'],
+       ['HTML report', 'shoalcheck render --input reading.json --output report.html', 'One self-contained file, print-ready. What you would email.'],
+       ['Evidence pack', 'shoalcheck evidence --input reading.json --out pack/', 'One file per control with what each rests on and what could not be examined.']]
       .map(function (x) {
         return '<div class="ex"><span class="exn">' + esc(x[0]) + '</span>' +
                '<code class="exc">' + esc(x[1]) + '</code>' +
                '<span class="exd">' + esc(x[2]) + '</span></div>';
       }).join('') + '</div>',
-    basis: 'Each writes a file and exits. Exit <b>0</b> nothing this model checks stops the change · <b>2</b> something blocks it · <b>1</b> the answer is partial and names what was refused.'
+    basis: 'Each writes its file and exits <b>0</b>; <b>4</b> means the licence on this machine does not cover it, and <b>1</b> that it could not finish, with the reason.'
   });
 
   h += panel({
@@ -4203,12 +4211,12 @@ function wsAct(rows, t) {
         '  "mcpServers": {\n' +
         '    "shoalcheck": {\n' +
         '      "command": "shoalcheck-mcp",\n' +
-        '      "args": ["--reading", "' + (D.cluster || 'cluster') + '.json"]\n' +
+        '      "args": ["--cluster", "' + (D.cluster || 'cluster') + '"]\n' +
         '    }\n' +
         '  }\n' +
         '}') + '</pre>' +
       '<button class="mini" data-tk="copycfg">Copy config</button>',
-    basis: 'The server reads a reading you already have on disk. It opens no cluster connection of its own, and a finding it returns carries the same claim boundaries this screen shows.'
+    basis: 'The server serves the newest reading this machine has kept of that cluster — <code>shoalcheck audit --output report.html --save-history</code> keeps one. It opens no cluster connection of its own, and a finding it returns carries the same claim boundaries this screen shows.'
   });
 
   h += panel({
@@ -4230,12 +4238,22 @@ function wsAct(rows, t) {
 /* ── APP DRIVER: rail, facets, drawer, virtualised workbench ─────────────── */
 /* ── the workbench (findings) ─────────────────────────────────────────────── */
 var COLS = {
-  rules:     { g: '16px 1fr 108px 66px 78px 76px', h: ['', 'Rule', 'Spread', 'Findings', 'Namespaces', '$ / mo'], k: [null,'name','sev','count',null,'usd'] },
-  workloads: { g: '16px 1fr 108px 66px 96px 76px', h: ['', 'Workload', 'Severity', 'Findings', 'Owner', '$ / mo'], k: [null,'name','sev','count',null,'usd'] },
+  /* n is the narrow window's template and w the columns it leaves out: on a phone the name column was squeezed to
+     "Right…" between columns that are all in the drawer one tap away. */
+  rules:     { g: '16px 1fr 108px 66px 78px 76px', n: '16px minmax(0,1fr) 66px 76px', w: [2, 4], h: ['', 'Rule', 'Spread', 'Findings', 'Namespaces', '$ / mo'], k: [null,'name','sev','count',null,'usd'] },
+  workloads: { g: '16px 1fr 108px 66px 96px 76px', n: '16px minmax(0,1fr) 66px 76px', w: [2, 4], h: ['', 'Workload', 'Severity', 'Findings', 'Owner', '$ / mo'], k: [null,'name','sev','count',null,'usd'] },
   /* the findings lens gains a pick column; the grouped lenses do not, because a
      group is not a thing you raise a ticket about — its findings are */
-  findings:  { g: '18px 16px 1fr 172px 128px 76px', h: ['', '', 'Finding', 'Workload', 'Rule', '$ / mo'], k: [null,null,'title',null,null,'usd'] }
+  findings:  { g: '18px 16px 1fr 172px 128px 76px', n: '18px 16px minmax(0,1fr) 76px', w: [3, 4], h: ['', '', 'Finding', 'Workload', 'Rule', '$ / mo'], k: [null,null,'title',null,null,'usd'] }
 };
+var NARROW = window.matchMedia ? window.matchMedia('(max-width: 760px)') : null;
+function gtc(c) { return NARROW && NARROW.matches ? c.n : c.g; }
+function wide(c, i) { return c.w.indexOf(i) >= 0 ? ' wide' : ''; }
+/* Crossing the breakpoint redraws the table in the other template, so a rotated phone or a resized window never
+   keeps a row shape its head no longer has. */
+if (NARROW && NARROW.addEventListener) NARROW.addEventListener('change', function () {
+  if (document.getElementById('thead')) { tableHead(); paintRows(); }
+});
 var view = [], ROWH = 30;
 
 function groupBy(rows, keyOf) {
@@ -4295,10 +4313,10 @@ function spread(g) {
 
 function tableHead() {
   var c = COLS[S.lens], t = $('thead');
-  t.style.gridTemplateColumns = c.g;
+  t.style.gridTemplateColumns = gtc(c);
   t.innerHTML = c.h.map(function (lab, i) {
     var isNum = i >= 3, k = c.k[i];
-    var cls = isNum ? ' class="num"' : '';
+    var cls = (isNum || wide(c, i)) ? ' class="' + ((isNum ? 'num' : '') + wide(c, i)).trim() + '"' : '';
     return k ? '<button data-sort="' + k + '"' + cls + '>' + esc(lab) + (S.sort === k ? (S.desc ? ' ↓' : ' ↑') : '') + '</button>'
              : '<span' + cls + '>' + esc(lab) + '</span>';
   }).join('');
@@ -4309,28 +4327,28 @@ function rowHTML(item) {
   if (S.lens === 'findings') {
     var r = item;
     return '<div class="row' + (selHas(r[ID]) ? ' picked' : '') + '" data-id="' + esc(r[ID]) +
-      '" style="grid-template-columns:' + c.g + '"' +
+      '" style="grid-template-columns:' + gtc(c) + '"' +
       (S.sel === r[ID] ? ' aria-selected="true"' : '') + '>' +
       '<span class="edge e' + r[SEV] + '"></span>' +
       '<button class="pick" data-pick="' + esc(r[ID]) + '" role="checkbox" aria-checked="' +
         (selHas(r[ID]) ? 'true' : 'false') + '" aria-label="select this finding"></button>' +
       '<span class="sv sv' + r[SEV] + '" title="' + SEVN[r[SEV]] + '">' + SEVL[r[SEV]] + '</span>' +
       '<span class="t" title="' + esc(r[TITLE]) + '">' + esc(r[TITLE]) + '</span>' +
-      '<span class="t mono dim">' + esc(r[WL] ? wlLabel(wlId(r[WL])) : '—') + '</span>' +
-      '<span class="t mono faint">' + esc(ruleShort(r[RULE])) + '</span>' +
+      '<span class="t mono dim wide">' + esc(r[WL] ? wlLabel(wlId(r[WL])) : '—') + '</span>' +
+      '<span class="t mono faint wide">' + esc(ruleShort(r[RULE])) + '</span>' +
       '<span class="mono num' + (r[USD] ? '' : ' faint') + '">' + usdOrDash(r[USD]) + '</span></div>';
   }
   var g = item;
   var label = S.lens === 'workloads' ? (wlLabel(wlId(g.key)) || g.key) : ruleShort(g.key);
-  return '<div class="row" data-key="' + esc(g.key) + '" style="grid-template-columns:' + c.g + '"' +
+  return '<div class="row" data-key="' + esc(g.key) + '" style="grid-template-columns:' + gtc(c) + '"' +
     (S.sel === g.key ? ' aria-selected="true"' : '') + '>' +
     '<span class="edge e' + g.worst + '"></span>' +
     '<span class="sv sv' + g.worst + '" title="worst: ' + SEVN[g.worst] + '">' + SEVL[g.worst] + '</span>' +
     '<span class="t mono" title="' + esc(g.key) + '">' + esc(label) + '</span>' +
-    (S.lens === 'rules' ? spread(g) : mini(g.sev)) +
+    (S.lens === 'rules' ? spread(g) : mini(g.sev)).replace('<span ', '<span class="wide" ') +
     '<span class="mono num">' + num(g.n) + '</span>' +
-    (S.lens === 'rules' ? '<span class="mono num dim">' + num(g.ns.size) + '</span>'
-                        : '<span class="t mono dim">' + esc([...g.owners][0] || '—') + '</span>') +
+    (S.lens === 'rules' ? '<span class="mono num dim wide">' + num(g.ns.size) + '</span>'
+                        : '<span class="t mono dim wide">' + esc([...g.owners][0] || '—') + '</span>') +
     '<span class="mono num' + (g.usd ? '' : ' faint') + '">' + usdOrDash(g.usd) + '</span></div>';
 }
 

@@ -77,22 +77,28 @@
     <figure class="term reveal" aria-label="A real preflight against a kind test cluster: the drain of assay-e2e-worker is blocked by a PodDisruptionBudget, exit code 2.">
       <div class="term-bar"><span></span><span></span><span></span><b>kind-assay-e2e</b></div>
       <pre class="term-body" data-type><span class="p">$</span> shoalcheck preflight drain assay-e2e-worker
-<span class="bad">✗ assay-e2e-worker cannot be evacuated: 1 thing stops the drain</span>
+<span class="bad">✗ assay-e2e-worker cannot be evacuated:</span>
+<span class="bad">  1 thing stops the drain</span>
 
-1. Drain of assay-e2e-worker is blocked by budget
-   e2e-demo/drain-blocked-pdb
-   Evacuating node assay-e2e-worker requires evicting
-   1 pod(s) covered by PodDisruptionBudget
+1. Drain of assay-e2e-worker is blocked by
+   budget e2e-demo/drain-blocked-pdb
+   Evacuating node assay-e2e-worker requires
+   evicting 1 pod covered by
+   PodDisruptionBudget
    e2e-demo/drain-blocked-pdb.
-   · … reports status.disruptionsAllowed=0 with
-     spec.maxUnavailable=0 … The eviction API would
-     reject each of those 1 evictions, so `kubectl drain
-     assay-e2e-worker` would not complete …
+   · …
+   · … reports status.disruptionsAllowed=0
+     with spec.maxUnavailable=0 … The
+     eviction API would reject that eviction,
+     so `kubectl drain assay-e2e-worker`
+     would not complete …
+   · …
 
-<span class="dim">basis: 12 kind(s) read · 16 request(s), 0 object write(s)</span>
+<span class="dim">basis: 12 kinds read · 16 requests,</span>
+<span class="dim">0 object writes · …</span>
 <span class="p">$</span> echo $?
 <span class="exit">2</span></pre>
-      <figcaption>Real output from our kind test cluster, word for word and wrapped to fit; “…” marks where the evidence runs on. The drain would have stopped here.</figcaption>
+      <figcaption>Real output from our kind test cluster, wrapped to fit. Each “…” marks words cut, from the end of a line to whole lines of evidence: the full answer gives five. The drain would have stopped here.</figcaption>
     </figure>
   </div>
 </section>
@@ -100,7 +106,7 @@
 <!-- ═══ PROOF STRIP ═══ -->
 <section class="strip" aria-label="What it does, in numbers">
   <div class="wrap strip-grid">
-    <div class="stat reveal"><b>87</b><span>rules, each naming the object it rests on</span></div>
+    <div class="stat reveal"><b>102</b><span>rules in every reading, each naming the object it rests on</span></div>
     <div class="stat reveal"><b>47</b><span>resource types read, with get and list</span></div>
     <div class="stat reveal"><b>0</b><span>object writes — counted, not promised</span></div>
     <div class="stat reveal"><b>3</b><span>systems: macOS, Windows, Linux</span></div>
@@ -117,8 +123,8 @@
         <ol class="scene-steps" id="scene-steps">
           <li data-step="0"><b>A real-shaped cluster.</b> Three zones, twelve nodes, thirty-two pods — the sample cluster, acme-pay-prod.</li>
           <li data-step="1"><b>eu-central-1a goes dark.</b> Four nodes and thirteen pods with it.</li>
-          <li data-step="2"><b>Eleven are not stopped.</b> Nothing this model checks — requests, placement rules, volumes — keeps them from the nodes that remain. Where they are drawn is for the picture: the reading names only what has nowhere to go.</li>
-          <li data-step="3"><b>Two have nowhere to go.</b> A database whose volume is pinned to the lost zone, and a job whose placement rules no surviving node satisfies — each named, each with its reason.</li>
+          <li data-step="2"><b>Eleven are not stopped.</b> Nothing this model checks — requests, placement rules, volumes — keeps them from the nodes that remain. Where they are drawn is for the picture: the reading names only what has nowhere to go. One of the eleven is a bare pod, and it fades instead: nothing recreates a pod with no controller, as the reading's own finding says.</li>
+          <li data-step="3"><b>Two have nowhere to go.</b> A database whose volume is pinned to the lost zone, and an ETL worker, one pod of a StatefulSet, whose placement rules no surviving node satisfies — each named, each with its reason.</li>
           <li data-step="4"><b>One command, before the outage.</b> <code>shoalcheck preflight zone eu-central-1a</code> — exit <b>2</b>.</li>
         </ol>
         <p class="scene-note">Illustrative sample: a fictional cluster run through the real engine. The verdict and its reasons are the reading's own.</p>
@@ -144,7 +150,7 @@
     <div class="tabs reveal" role="tablist" aria-label="Preflight questions">
       <button class="tab" role="tab" aria-selected="true" aria-controls="t-drain" id="tab-drain">Will this node drain?</button>
       <button class="tab" role="tab" aria-selected="false" aria-controls="t-zone" id="tab-zone">What if a zone fails?</button>
-      <button class="tab" role="tab" aria-selected="false" aria-controls="t-upgrade" id="tab-upgrade">Is the upgrade safe?</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="t-upgrade" id="tab-upgrade">What stops an upgrade?</button>
       <button class="tab" role="tab" aria-selected="false" aria-controls="t-app" id="tab-app">In the app</button>
     </div>
     <div class="panes">
@@ -153,27 +159,37 @@
 <span class="bad">✗ assay-e2e-worker2 cannot be evacuated: 1 thing stops the drain</span>
 
 1. Drain of assay-e2e-worker2 is blocked by budget e2e-demo/drain-blocked-pdb
-   · PodDisruptionBudget e2e-demo/drain-blocked-pdb reports disruptionsAllowed=0
-   · A PodDisruptionBudget constrains only the voluntary eviction path; it gives
-     no protection against this node failing.
+   Evacuating node assay-e2e-worker2 requires evicting 1 pod covered by PodDisruptionBudget
+   e2e-demo/drain-blocked-pdb.
+   · …
+   · PodDisruptionBudget e2e-demo/drain-blocked-pdb reports status.disruptionsAllowed=0 with
+     spec.maxUnavailable=0, … The eviction API would reject that eviction, so `kubectl drain
+     assay-e2e-worker2` would not complete; finishing it requires force-deletion, which bypasses the
+     budget entirely.
+   · …
+   · A PodDisruptionBudget constrains only the voluntary eviction path. It gives no protection against
+     this node failing, …
+   · …
 
-<span class="dim">basis: 12 kind(s) read · 16 request(s), 0 object write(s)</span>   <span class="exit">exit 2</span></pre>
+<span class="dim">basis: 12 kinds read · 16 requests, 0 object writes · checks: k8s.reliability.node-drain-budget, … · 55ms</span>   <span class="exit">exit 2</span></pre>
       </div>
       <div class="pane-q" role="tabpanel" id="t-zone" aria-labelledby="tab-zone" hidden>
         <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight zone eu-central-1a --context kind-assay-mesh
 <span class="ok">✓ zone eu-central-1a: every pod this model can place has somewhere else to go</span>
 
-<span class="dim">basis: 11 kind(s) read · 15 request(s), 0 object write(s) · checks: k8s.reliability.zone-loss-feasibility, k8s.reliability.zone-pinned-volume
-this model checks a subset of what the scheduler checks: it can say a change will stop, and it cannot promise one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
+<span class="dim">basis: 11 kinds read · 15 requests, 0 object writes · checks: k8s.reliability.zone-loss-feasibility,</span>
+<span class="dim">k8s.reliability.zone-pinned-volume · 53ms</span>
+<span class="dim">this model checks a subset of what the scheduler checks: it can say a change will stop, and it cannot</span>
+<span class="dim">promise one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
       </div>
       <div class="pane-q" role="tabpanel" id="t-upgrade" aria-labelledby="tab-upgrade" hidden>
         <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight upgrade 1.37
 <span class="ok">✓ upgrading to 1.37: nothing this model checks stops it</span>
 
-<span class="dim">basis: 8 kind(s) read · 12 request(s), 0 object write(s) · checks: k8s.upgrade.node-pool-cannot-roll,
-k8s.upgrade.crd-conversion-webhook-unbacked, api-removals@2026-08-30
-this model checks a subset of what the scheduler checks: it can say a change will stop, and it cannot promise
-one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
+<span class="dim">basis: 8 kinds read · 12 requests, 0 object writes · checks: k8s.upgrade.node-pool-cannot-roll,</span>
+<span class="dim">k8s.upgrade.crd-conversion-webhook-unbacked, api-removals@2026-08-30 · 26ms</span>
+<span class="dim">this model checks a subset of what the scheduler checks: it can say a change will stop, and it cannot</span>
+<span class="dim">promise one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
       </div>
       <div class="pane-q" role="tabpanel" id="t-app" aria-labelledby="tab-app" hidden>
         <img class="shot-img" src="assets/app-preflight.png" width="1440" height="900" loading="lazy" alt="The Preflight screen of the Shoalcheck app: the nodes of the kind test cluster, assay-e2e-worker chosen, and the verdict — assay-e2e-worker cannot be evacuated, 16 reads, 0 writes.">
@@ -283,8 +299,9 @@ one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
           <div class="bar"><span class="bn">kind, 24 pods</span><span class="bt"><i style="--w:3.8%"></i></span><span class="bv">72–96 k</span></div>
           <div class="bar"><span class="bn">mesh, 38 pods</span><span class="bt"><i style="--w:9.9%"></i></span><span class="bv">185–247 k</span></div>
           <div class="bar"><span class="bn">1,500 pods</span><span class="bt over"><i style="--w:100%"></i></span><span class="bv" id="r-1500">2.8–5.7 M</span></div>
-          <div class="ctx-line" style="--x:40%"><span>1 M — the largest window of the models priced here</span></div>
+          <div class="ctx-line" style="--x:40%" aria-hidden="true"></div>
         </div>
+        <p class="ctx-key"><i aria-hidden="true"></i>1 M tokens — the largest window of the models priced here</p>
         <figcaption>Objects as <code>kubectl get -o yaml</code> prints them, at 3–4 characters a token. Measured on our two test clusters on 17 October; the 1,500-pod line is the calculator below, set to 1,500 pods. Scale: 2.5 M tokens across. Past the line, an agent can only read a sample — and an audit of a sample is not an audit.</figcaption>
       </figure>
     </div>
@@ -302,9 +319,9 @@ one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
       <div class="calc-out" aria-live="polite">
         <div><b id="r-tokens">—</b><span>tokens an agent reads, just to look once</span></div>
         <div><b id="r-ctx">—</b><span>of a 1 M-token window, per cluster</span></div>
-        <div><b id="r-agent">—</b><span>a month in input tokens alone, at list price</span></div>
-        <div><b id="r-hours">—</b><span>hours by hand for one reading of one cluster, and what they cost at that rate</span></div>
-        <p class="calc-basis">A floor for the agent: no reasoning, no output, nothing read twice — an agent loop re-sends its whole context on every call. The model, from our kind test cluster: about 160 cluster-wide objects plus four per pod; a pod 5.4 KB as kubectl prints it, 9.3 KB with a mesh sidecar, everything else 0.67 KB; 7.3 rule-by-object checks per object. List input prices from platform.claude.com, fetched 2026-10-18. Hours by hand are your seconds and your rate, not a measurement.</p>
+        <div><b id="r-agent">—</b><span>an agent, a month: every reading of every cluster, in input tokens alone, at list price</span></div>
+        <div><b id="r-hours">—</b><span>by hand, a month, at your rate: the same readings, <em id="r-hours-month">—</em> of every check one at a time — <em id="r-hours-one">—</em> for one reading of one cluster</span></div>
+        <p class="calc-basis">A floor for the agent: no reasoning, no output, nothing read twice — an agent loop re-sends its whole context on every call. The model, from our kind test cluster: about 160 cluster-wide objects plus four per pod; a pod 5.4 KB as kubectl prints it, 9.3 KB with a mesh sidecar, everything else 0.67 KB; 7.3 rule-by-object checks per object. List input prices from platform.claude.com, fetched 2026-10-18. Hours by hand are your seconds and your rate, not a measurement; an assessment is sold in days because it samples, and these are every check a reading makes.</p>
       </div>
     </div>
   </div>
@@ -391,7 +408,6 @@ one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
         <div class="cap">100 clusters in any 30 days</div>
         <ul>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Everything in Team</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>100 clusters in any 30 days</li>
         </ul>
         <a class="btn" data-plan-cta href="index.html#pricing">Buy Business</a>
       </article>
@@ -512,7 +528,7 @@ one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
   </div>
 </footer>
 
-<script type="application/json" id="zone-scene">{"cluster":"acme-pay-prod","lost":"eu-central-1a","zones":[{"z":"eu-central-1a","nodes":[{"n":"ip-10-0-1-a","t":"m6i.xlarge","p":[{"k":"payments/payments-gateway-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c0-a"},{"k":"workers/ledger-reconciler-7f4b9c2-c"},{"k":"payments/payments-ledger-db-0","why":"its volume is pinned to eu-central-1a \u2014 it cannot move at all"},{"k":"workers/debug-shell-ondemand"}]},{"n":"ip-10-0-1-d","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c2-c"},{"k":"default/legacy-cron-runner-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c1-b"}]},{"n":"ip-10-0-1-g","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c2-c"}]},{"n":"ip-10-0-2-a","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c5-f"},{"k":"workers/licensed-etl-0","why":"no surviving node satisfies its placement constraints"}]}]},{"z":"eu-central-1b","nodes":[{"n":"ip-10-0-1-b","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c1-b"},{"k":"workers/ledger-reconciler-7f4b9c3-d"}]},{"n":"ip-10-0-1-e","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c2-c"}]},{"n":"ip-10-0-1-h","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c3-d"}]},{"n":"ip-10-0-2-b","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c2-c"},{"k":"workers/ledger-reconciler-7f4b9c0-a"}]}]},{"z":"eu-central-1c","nodes":[{"n":"ip-10-0-1-c","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c1-b"},{"k":"monitoring/node-exporter-7f4b9c2-c"},{"k":"api/search-indexer-7f4b9c0-a"}]},{"n":"ip-10-0-1-f","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c1-b"}]},{"n":"ip-10-0-1-i","t":"m6i.xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c4-e"}]},{"n":"ip-10-0-2-c","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c3-d"},{"k":"workers/ledger-reconciler-7f4b9c1-b"}]}]}]}</script>
+<script type="application/json" id="zone-scene">{"cluster":"acme-pay-prod","lost":"eu-central-1a","zones":[{"z":"eu-central-1a","nodes":[{"n":"ip-10-0-1-a","t":"m6i.xlarge","p":[{"k":"payments/payments-gateway-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c0-a"},{"k":"workers/ledger-reconciler-7f4b9c2-c"},{"k":"payments/payments-ledger-db-0","why":"its volume is pinned to eu-central-1a \u2014 it cannot move at all"},{"k":"workers/debug-shell-ondemand","bare":true}]},{"n":"ip-10-0-1-d","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c2-c"},{"k":"default/legacy-cron-runner-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c1-b"}]},{"n":"ip-10-0-1-g","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c2-c"}]},{"n":"ip-10-0-2-a","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c5-f"},{"k":"workers/licensed-etl-0","why":"no surviving node satisfies its placement constraints"}]}]},{"z":"eu-central-1b","nodes":[{"n":"ip-10-0-1-b","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c1-b"},{"k":"workers/ledger-reconciler-7f4b9c3-d"}]},{"n":"ip-10-0-1-e","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c2-c"}]},{"n":"ip-10-0-1-h","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c3-d"}]},{"n":"ip-10-0-2-b","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c2-c"},{"k":"workers/ledger-reconciler-7f4b9c0-a"}]}]},{"z":"eu-central-1c","nodes":[{"n":"ip-10-0-1-c","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c1-b"},{"k":"monitoring/node-exporter-7f4b9c2-c"},{"k":"api/search-indexer-7f4b9c0-a"}]},{"n":"ip-10-0-1-f","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c1-b"}]},{"n":"ip-10-0-1-i","t":"m6i.xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c4-e"}]},{"n":"ip-10-0-2-c","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c3-d"},{"k":"workers/ledger-reconciler-7f4b9c1-b"}]}]}]}</script>
 <script type="application/json" id="agent-prices">{"fetched":"2026-10-18","source":"https://platform.claude.com/docs/en/about-claude/pricing","context":1000000,"charsLo":3,"charsHi":4,"secPerCheck":30,"models":[{"n":"Claude Haiku 5.5","in":0.5,"small":0.1,"tier":100000},{"n":"Claude Sonnet 5.5","in":2},{"n":"Claude Opus 5.5","in":4},{"n":"Claude Fable 5.1","in":10}]}</script>
 <script src="landing.js"></script>
 <script src="nav.js"></script>

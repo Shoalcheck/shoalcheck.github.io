@@ -110,7 +110,7 @@
         n.p.forEach(function (p, pi) {
           var cx = x + 24 + pi * 15, cy = ny + 38;
           var c = el('circle', { cx: cx, cy: cy, r: 5, 'class': 'pod' }, gPods || (gPods = el('g', {})));
-          var pod = { c: c, cx: cx, cy: cy, key: p.k, why: p.why, lost: lost };
+          var pod = { c: c, cx: cx, cy: cy, key: p.k, why: p.why, bare: !!p.bare, lost: lost };
           pods.push(pod);
           if (lost && p.why) stranded.push(pod);
         });
@@ -123,7 +123,9 @@
     floor.style.opacity = 0;
     // Where the eight that move go: the next free slot on a surviving node, round-robin. The reading says a
     // surviving node satisfies each; it does not say which — so the scene spreads them, and says so.
-    var movers = pods.filter(function (p) { return p.lost && !p.why; }), r = 0;
+    // A BARE POD DOES NOT MOVE: no controller recreates it, so it fades where it was instead of being drawn
+    // somewhere it will never run.
+    var movers = pods.filter(function (p) { return p.lost && !p.why && !p.bare; }), r = 0;
     movers.forEach(function (p) {
       var n = survivors[r++ % survivors.length];
       p.tx = n.x + 14 + n.used * 15 - p.cx + 0; p.ty = n.y + 38 - p.cy;
@@ -151,8 +153,9 @@
         z.nodes.forEach(function (n) { n.node.rect.classList.toggle('dark', n.node.lost && s >= 1); });
       });
       pods.forEach(function (p) {
-        var move = p.lost && !p.why && s >= 2, strand = p.why && s >= 3;
+        var move = p.lost && !p.why && !p.bare && s >= 2, strand = p.why && s >= 3;
         p.c.classList.toggle('moved', move);
+        p.c.classList.toggle('gone', p.bare && p.lost && s >= 2);
         p.c.classList.toggle('stranded', !!strand);
         p.c.style.transform = move ? 'translate(' + p.tx + 'px,' + p.ty + 'px)'
           : strand ? 'translate(' + p.sx + 'px,' + p.sy + 'px)' : '';
@@ -259,8 +262,11 @@
       $('#r-tokens').textContent = tokRange(c.lo, c.hi);
       $('#r-ctx').textContent = Math.round(c.lo / P.context * 100) + '–' + Math.round(c.hi / P.context * 100) + '%';
       $('#r-agent').textContent = fmtUsd(cost(c.lo, m) * perMonth) + '–' + fmtUsd(cost(c.hi, m) * perMonth);
-      var hours = c.checks * sec / 3600;
-      $('#r-hours').textContent = Math.round(hours).toLocaleString('en-US') + ' h · ' + fmtUsd(hours * rate);
+      /* A MONTH BESIDE A MONTH: the agent's figure is every reading of every cluster, so the hours are too. */
+      var one = c.checks * sec / 3600, hours = one * perMonth;
+      $('#r-hours').textContent = fmtUsd(hours * rate);
+      $('#r-hours-month').textContent = Math.round(hours).toLocaleString('en-US') + ' h';
+      $('#r-hours-one').textContent = Math.round(one).toLocaleString('en-US') + ' h';
     };
     ['#i-pods', '#i-clusters', '#i-reads', '#i-model', '#i-sec', '#i-rate'].forEach(function (s) { $(s).addEventListener('input', calc); });
     calc();
@@ -363,7 +369,9 @@
     var x = document.createElement('button');
     x.className = 'zoom-close'; x.type = 'button'; x.textContent = 'Close';
     x.addEventListener('click', close);
-    box.appendChild(big); box.appendChild(x);
+    var hint = document.createElement('p');
+    hint.className = 'zoom-hint'; hint.textContent = 'Drag to move around it';
+    box.appendChild(big); box.appendChild(hint); box.appendChild(x);
     box.addEventListener('click', function (e) { if (e.target === box) close(); });
     document.body.appendChild(box);
     document.documentElement.classList.add('zoomed');

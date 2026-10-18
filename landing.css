@@ -119,6 +119,9 @@ p { margin: 0; }
 .term-body .exit { display: inline-block; padding: 1px 9px; border-radius: 6px; background: var(--bad-soft); color: var(--bad); font-weight: 700; }
 .term-body .exit.ok { background: rgba(71, 205, 137, .14); color: var(--ok); }
 .term figcaption { padding: 0 20px 16px; font-size: 12.5px; color: var(--faint); }
+/* A phone wraps the output instead of hiding its right half behind a sideways scroll: at 390 px the hero read
+   "cannot be evacuated: 1 th" under a caption promising it was wrapped to fit. */
+@media (max-width: 600px) { .term-body { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; padding: 14px; } }
 .cursor { display: inline-block; width: .6em; height: 1.1em; vertical-align: -2px; background: var(--accent); animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
@@ -162,6 +165,7 @@ p { margin: 0; }
 #scene .pod { fill: var(--accent); transition: transform 1s var(--ease), fill .4s, opacity .4s; }
 #scene .pod.moved { fill: var(--accent2); }
 #scene .pod.stranded { fill: var(--bad); }
+#scene .pod.gone { opacity: .15; }
 .tray { display: flex; flex-direction: column; gap: 5px; min-height: 230px; }
 .tray .t-row { display: grid; grid-template-columns: 10px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 6px 10px; border: 1px solid rgba(249, 112, 102, .28); border-radius: 9px; background: rgba(30, 12, 12, .6); font-size: 12px; line-height: 1.45; color: var(--fg2); opacity: 0; transform: translateY(8px); transition: opacity .4s var(--ease), transform .4s var(--ease); }
 .tray .t-row.in { opacity: 1; transform: none; }
@@ -224,9 +228,11 @@ p { margin: 0; }
 .bt.over i { background: linear-gradient(90deg, var(--accent), var(--bad)); }
 .bv { font: 600 13px var(--mono); color: var(--fg); text-align: right; }
 .ctx-line { position: absolute; top: -6px; bottom: -6px; left: calc(124px + (100% - 228px) * .4); width: 0; border-left: 1px dashed var(--warn); }
-.ctx-line span { position: absolute; bottom: -24px; left: 6px; white-space: nowrap; font: 500 11px var(--mono); color: var(--warn); }
-.bars.tokens { margin-bottom: 18px; }
-@media (max-width: 900px) { .ar-grid { grid-template-columns: minmax(0, 1fr); } .bar { grid-template-columns: 92px minmax(0, 1fr) 82px; } .ctx-line { left: calc(104px + (100% - 198px) * .4); } .ctx-line span { left: auto; right: 6px; } }
+/* The line's name sits under the bars in the flow, not beside the line: placed there it ran past the chart's
+   edge and lost "here" at 1440 px, and everything but "of the models priced here" on a phone. */
+.ctx-key { display: flex; align-items: center; gap: 8px; margin: 12px 0 0; font: 500 11px var(--mono); color: var(--warn); }
+.ctx-key i { flex: none; height: 14px; border-left: 1px dashed var(--warn); }
+@media (max-width: 900px) { .ar-grid { grid-template-columns: minmax(0, 1fr); } .bar { grid-template-columns: 92px minmax(0, 1fr) 82px; } .ctx-line { left: calc(104px + (100% - 198px) * .4); } }
 .chart { overflow: hidden; }
 
 .calc { margin-top: 18px; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); border: 1px solid var(--line2); border-radius: var(--r); background: linear-gradient(135deg, rgba(45, 212, 191, .06), transparent 50%), var(--surface); overflow: hidden; }
@@ -239,6 +245,7 @@ p { margin: 0; }
 .calc-out div { display: flex; flex-direction: column; gap: 4px; }
 .calc-out b { font-size: clamp(24px, 3vw, 34px); font-weight: 720; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .calc-out span { font-size: 13px; color: var(--dim); }
+.calc-out em { font: 600 13px var(--mono); font-style: normal; color: var(--fg2); }
 .calc-basis { grid-column: 1 / -1; font-size: 12px; line-height: 1.6; color: var(--faint); }
 @media (max-width: 900px) { .calc { grid-template-columns: minmax(0, 1fr); } .calc-in { border-right: 0; border-bottom: 1px solid var(--line); } }
 
@@ -336,3 +343,15 @@ p { margin: 0; }
 .zoom-close { position: absolute; top: max(12px, env(safe-area-inset-top, 0px)); right: max(12px, env(safe-area-inset-right, 0px));
               min-height: 36px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 9px; background: var(--surface);
               color: var(--fg); font: inherit; font-size: 13.5px; cursor: pointer; }
+.zoom-hint { display: none; }
+/* ON A PHONE, LARGER THAN THE PHONE. Fitted to 358 px, a 1440 px capture was the same size in the box as on the
+   page; it opens at a width its words can be read at, and moves under the finger. */
+@media (max-width: 900px) {
+  /* place-items back to start: a centred block wider than its box overflows to the left, where no scroll reaches. */
+  .zoom { display: block; place-items: start; overflow: auto; overscroll-behavior: contain; padding: 60px 0 24px; }
+  .zoom img { max-width: none; max-height: none; width: 1100px; height: auto; border-radius: 0; border-width: 1px 0; }
+  .zoom-close { position: fixed; }
+  .zoom-hint { display: block; position: fixed; top: max(12px, env(safe-area-inset-top, 0px)); left: 12px; margin: 0;
+               padding: 8px 12px; border: 1px solid var(--line2); border-radius: 9px; background: var(--surface);
+               font-size: 12.5px; color: var(--fg2); }
+}
