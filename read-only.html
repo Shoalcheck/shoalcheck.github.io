@@ -220,10 +220,19 @@ streams  0      <span class="cm">watches and long-lived connections</span></div>
         <p class="b"><em>gate:</em> the browser corpus opens every rendered document offline<br><em>including:</em> both typefaces, embedded</p>
       </div>
       <div class="ro-claim">
-        <p class="c">One outbound address is compiled into the binary, for signed reference-data bundles.
-          No audit path calls it: prices and schedules come from tables that ship with the build, and each
-          reading names which table it used and when that table was generated.</p>
-        <p class="b"><em>source:</em> internal/refdata/fetch.go — a single constant, no interpolation<br><em>gate:</em> TestFetch_ACallerCannotSupplyAURL</p>
+        <p class="c">Beyond your cluster and your Prometheus, a default build makes one request, and no audit
+          makes it: the update check. <code>shoalcheck upgrade</code> — or the desktop app once a day, if you
+          leave that switch on — asks GitHub for the releases of Shoalcheck/shoalcheck. It carries nothing
+          about a cluster, and an update installs only if its manifest verifies under the release key and the
+          download's digest and version match.</p>
+        <p class="b"><em>source:</em> internal/selfupdate/fetch.go — the address is a constant; asset URLs are pinned to the releases repository<br><em>off:</em> the app's daily check has a switch, and <code>SHOALCHECK_NO_UPDATE_CHECK=1</code> forces it off; the CLI asks only when you run <code>upgrade</code></p>
+      </div>
+      <div class="ro-claim">
+        <p class="c">The reference-data fetcher, for signed bundles of prices and schedules, has no address in
+          this build: a bundle source exists only if whoever builds the binary injects one. Prices and
+          schedules come from tables that ship with the build, and each reading names which table it used and
+          when that table was generated.</p>
+        <p class="b"><em>source:</em> internal/refdata/fetch.go — empty by default; a build with no source refuses rather than fetches<br><em>gate:</em> TestFetch_ACallerCannotSupplyAURL</p>
       </div>
       <div class="ro-claim">
         <p class="c">Cloud billing reconciliation, where it is used at all, is a second trust boundary you

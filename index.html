@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Shoalcheck — find what stops the change before you start it</title>
-<meta name="description" content="Shoalcheck reads a Kubernetes cluster read-only from your laptop and tells you which node cannot drain, what has nowhere to go if a zone fails, and what blocks the next upgrade — every claim with the object it rests on.">
-<meta name="theme-color" content="#090d0f" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f5f8f8" media="(prefers-color-scheme: light)">
+<title>Shoalcheck — don't start a change you can't finish</title>
+<meta name="description" content="Shoalcheck reads a Kubernetes cluster read-only from your laptop and tells you which node won't drain, what has nowhere to go if a zone fails, and what blocks the next upgrade — before you start. Every claim names the object it rests on.">
+<meta name="theme-color" content="#06090a">
+<meta property="og:title" content="Shoalcheck — don't start a change you can't finish">
+<meta property="og:description" content="Read-only Kubernetes preflight and audit from your laptop. Which node won't drain, what a lost zone leaves stranded, what blocks the upgrade — before you start.">
 <!-- Where the download buttons look for files: a GitHub repository whose releases carry the archives. -->
 <meta name="shoalcheck:releases" content="shoalcheck/shoalcheck">
 <!-- Where a licence key is bought. EMPTY UNTIL THE PROJECT OWNS AN ADDRESS: the plan buttons then
@@ -15,285 +16,413 @@
 <link rel="icon" href="brand/shoalcheck-icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="landing.css">
+<script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
 
-<header class="top">
+<header class="top" id="top">
   <div class="wrap">
-    <a class="brand" href="./" aria-label="Shoalcheck, home">
+    <a class="brand" href="index.html" aria-label="Shoalcheck, home">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0b1417"/><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g></svg>
       Shoalcheck
     </a>
     <nav class="nav" aria-label="Sections">
-      <a href="#questions">How it works</a>
-      <a href="#reads">What it reads</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#faq">FAQ</a>
+      <a href="index.html#zone">Lose a zone</a>
+      <a href="index.html#reading">The reading</a>
+      <a href="index.html#arithmetic">The arithmetic</a>
+      <a href="index.html#pricing">Pricing</a>
+      <a href="index.html#faq">FAQ</a>
     </nav>
-    <a class="btn btn-sm" href="#download">Download</a>
+    <div class="top-cta">
+      <a class="btn btn-ghost" href="app-demo.html">Live demo</a>
+      <a class="btn btn-primary" href="index.html#download">Download</a>
+    </div>
   </div>
 </header>
 
 <main id="main">
 
+<!-- ═══ HERO ═══ -->
 <section class="hero" aria-labelledby="hero-title">
-  <svg class="chart" viewBox="0 0 1440 720" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <path d="M760 720c40-120 90-210 210-250s250-40 330-140 110-230 140-330"/>
-    <path d="M830 720c30-100 80-170 180-200s210-40 280-120 100-200 130-300"/>
-    <path d="M905 720c25-80 70-130 150-150s170-40 230-100 90-170 120-270"/>
-    <path d="M985 720c20-60 55-95 115-105s130-35 180-80 75-140 110-235"/>
-    <path d="M1070 690c35-30 75-40 120-50s95-40 125-85"/>
-    <path class="shoal" d="M1158 618c18-14 46-16 66-6s24 32 6 44-48 14-66 4-22-28-6-42z"/>
-    <path d="M0 140c160 30 300 10 430-40s240-90 330-100"/>
-    <path d="M0 210c180 30 330 0 470-50s250-90 360-100"/>
-    <g>
-      <text x="60" y="120">42</text><text x="40" y="660">38</text><text x="640" y="110">35</text>
-      <text x="690" y="700">31</text><text x="1380" y="140">29</text><text x="880" y="690">24</text>
-      <text x="1010" y="300">19</text><text x="1080" y="470">14</text><text x="1290" y="420">11</text>
-      <text x="1120" y="560">7</text><text x="1260" y="600">4</text><text x="1190" y="640">2</text>
-      <text x="1370" y="520">9</text><text x="980" y="600">12</text>
-    </g>
-  </svg>
-  <div class="wrap">
-    <div>
+  <div class="glow" aria-hidden="true"></div>
+  <div class="wrap hero-grid">
+    <div class="hero-copy reveal">
       <span class="eyebrow">Read-only Kubernetes preflight</span>
-      <h1 id="hero-title">Find what stops the change before you start it.</h1>
-      <p class="lede">Shoalcheck reads a Kubernetes cluster with get and list, from your machine, and tells you which node cannot be drained, what has nowhere to go if a zone fails, and what blocks the next upgrade — each claim with the object it rests on.</p>
+      <h1 id="hero-title">Don't start a change <span class="hl">you can't finish.</span></h1>
+      <p class="lede">Shoalcheck reads your cluster with <b>get</b> and <b>list</b>, from your laptop, in seconds — and tells you which node won't drain, what has nowhere to go if a zone fails, and what blocks the next upgrade. Every claim names the object it rests on.</p>
       <div class="cta">
-        <a class="btn btn-primary" href="#download" data-os-cta>
+        <a class="btn btn-primary btn-lg" href="index.html#download" data-os-cta>
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 16.5h12"/></svg>
           <span data-os-label>Download</span>
         </a>
-        <a class="btn" href="sample-report.html">Open the sample reading</a>
+        <a class="btn btn-lg" href="app-demo.html">
+          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z"/></svg>
+          Try it in your browser
+        </a>
       </div>
-      <p class="cta-note"><b>Free:</b> preflight in full, and the top five problems of any cluster. No account.</p>
+      <ul class="trust">
+        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>No account</li>
+        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Nothing installed in the cluster</li>
+        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>0 object writes, counted on every run</li>
+      </ul>
     </div>
-    <figure style="margin:0;min-width:0">
-      <div class="term" role="img" aria-label="Terminal output of shoalcheck preflight drain, exiting 2 because a PodDisruptionBudget blocks the drain">
-        <div class="term-bar"><i></i><i></i><i></i><span>~ — zsh</span></div>
-<pre><span class="p">$ </span><span class="c">shoalcheck preflight drain demo-worker</span>
-<span class="x">✗ demo-worker cannot be evacuated: 2 things stop the drain</span>
 
-<span class="h">1. Drain of demo-worker is blocked by budget payments/ledger-api</span>
-<span class="d">   · PodDisruptionBudget payments/ledger-api reports
-     status.disruptionsAllowed=0 with spec.maxUnavailable=0 …
-     The eviction API would reject each of those 2 evictions,
-     so `kubectl drain demo-worker` would not complete</span>
-<span class="e">   ⋯ 4 more lines of evidence</span>
+    <figure class="term reveal" aria-label="A real preflight against a kind test cluster: the drain of assay-e2e-worker is blocked by a PodDisruptionBudget, exit code 2.">
+      <div class="term-bar"><span></span><span></span><span></span><b>kind-assay-e2e</b></div>
+      <pre class="term-body" data-type><span class="p">$</span> shoalcheck preflight drain assay-e2e-worker
+<span class="bad">✗ assay-e2e-worker cannot be evacuated:</span>
+<span class="bad">  1 thing stops the drain</span>
 
-<span class="h">2. Losing node demo-worker leaves 2 pod(s) with no node
-   this model accepts</span>
-<span class="d">   · payments/ledger-api-95f4fc9b8-9wxrk requests 50m cpu and
-     32Mi memory; no surviving node in this reading satisfies
-     the modelled constraints</span>
-<span class="e">   ⋯ what this model checks, and what it does not</span>
+1. Drain of assay-e2e-worker is blocked by budget
+   e2e-demo/drain-blocked-pdb
+   · evicting 1 pod covered by the budget is required
+   · disruptionsAllowed=0, maxUnavailable=0,
+     expectedPods=2
+   · the eviction API would reject it, so
+     `kubectl drain` would not complete
 
-<span class="k">basis: 12 kind(s) read · 16 request(s), 0 object write(s) · 66ms</span><span class="ex">exit <b>2</b> — something this model checks stops the change</span></pre>
-      </div>
-      <figcaption class="caption">Real output from a three-node kind cluster, 17 October 2026. Long lines are shortened (… and ⋯); no word is changed.</figcaption>
+<span class="dim">basis: 12 kinds read · 16 requests, 0 object writes</span>
+<span class="p">$</span> echo $?
+<span class="exit">2</span></pre>
+      <figcaption>Real output from our kind test cluster, shortened where the evidence runs on. The drain would have stopped here.</figcaption>
     </figure>
   </div>
 </section>
 
+<!-- ═══ PROOF STRIP ═══ -->
+<section class="strip" aria-label="What it does, in numbers">
+  <div class="wrap strip-grid">
+    <div class="stat reveal"><b>87</b><span>rules, each naming the object it rests on</span></div>
+    <div class="stat reveal"><b>47</b><span>resource types read, with get and list</span></div>
+    <div class="stat reveal"><b>0</b><span>object writes — counted, not promised</span></div>
+    <div class="stat reveal"><b>3</b><span>systems: macOS, Windows, Linux</span></div>
+  </div>
+</section>
+
+<!-- ═══ THE SCENE: LOSE A ZONE ═══ -->
+<section class="scene" id="zone" aria-labelledby="z-title">
+  <div class="scene-pin">
+    <div class="wrap scene-grid">
+      <div class="scene-copy">
+        <span class="eyebrow">Lose a zone, on paper first</span>
+        <h2 id="z-title">Watch a zone go down before it does.</h2>
+        <ol class="scene-steps" id="scene-steps">
+          <li data-step="0"><b>A real-shaped cluster.</b> Three zones, twelve nodes, thirty-two pods — the sample cluster, acme-pay-prod.</li>
+          <li data-step="1"><b>eu-central-1a goes dark.</b> Four nodes and thirteen pods with it.</li>
+          <li data-step="2"><b>Eleven find room.</b> Their requests and placement rules still fit on the nodes that remain.</li>
+          <li data-step="3"><b>Two have nowhere to go.</b> A database whose volume is pinned to the lost zone, and a job whose placement rules no surviving node satisfies — each named, each with its reason.</li>
+          <li data-step="4"><b>One command, before the outage.</b> <code>shoalcheck preflight zone eu-central-1a</code> — exit <b>2</b>.</li>
+        </ol>
+        <p class="scene-note">Illustrative sample: a fictional cluster run through the real engine. The verdict and its reasons are the reading's own.</p>
+      </div>
+      <div class="scene-art">
+        <svg id="scene" viewBox="0 0 640 520" role="img" aria-labelledby="scene-desc">
+          <desc id="scene-desc">Three availability zones of the sample cluster. When eu-central-1a is lost, eleven of its thirteen pods are re-placed on surviving nodes and two are stranded, each with the reason the reading gives.</desc>
+        </svg>
+        <div class="tray" id="tray" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ THREE QUESTIONS ═══ -->
 <section class="band" id="questions" aria-labelledby="q-title">
   <div class="wrap">
-    <div class="band-head">
-      <span class="eyebrow">Before the change</span>
-      <h2 id="q-title">Three questions, asked at the moment you type the change.</h2>
-      <p>A preflight reads only the kinds its question needs, in seconds, and its exit code is the answer — so it goes into a runbook or a pipeline as it is.</p>
+    <div class="band-head reveal">
+      <span class="eyebrow">Preflight — free on every plan</span>
+      <h2 id="q-title">Three questions, answered before you touch anything.</h2>
+      <p>Each one reads only the kinds it needs and answers with an exit code a pipeline can act on: <b>0</b> nothing stops it, <b>2</b> something does, <b>1</b> the answer is partial and says what was refused.</p>
     </div>
-    <div class="questions">
-      <article class="q">
-        <h3>Can these nodes be evacuated?</h3>
-        <code>shoalcheck preflight drain node-1</code>
-        <ul>
-          <li>Disruption budgets that allow zero evictions</li>
-          <li>Volumes pinned to the node or its zone</li>
-          <li>Pods with no other node that fits their requests, selectors, affinity and taints</li>
-        </ul>
-        <div class="exit"><span><b>0</b> nothing stops it</span><span><b>2</b> something does</span><span><b>1</b> partial — an input was not read</span></div>
-      </article>
-      <article class="q">
-        <h3>What has nowhere to go if a zone is lost?</h3>
-        <code>shoalcheck preflight zone eu-west-1a</code>
-        <ul>
-          <li>Workloads whose every replica sits in that zone</li>
-          <li>Zonal volumes that cannot follow their pods</li>
-          <li>Pods the surviving zones have no room for</li>
-        </ul>
-        <div class="exit"><span><b>0</b> nothing stops it</span><span><b>2</b> something does</span><span><b>1</b> partial — an input was not read</span></div>
-      </article>
-      <article class="q">
-        <h3>What stops the way to that version?</h3>
-        <code>shoalcheck preflight upgrade 1.34</code>
-        <ul>
-          <li>Served APIs the release removes</li>
-          <li>Admission webhooks with nothing behind them</li>
-          <li>Node pools that cannot roll, and where the version sits in its support window</li>
-        </ul>
-        <div class="exit"><span><b>0</b> nothing stops it</span><span><b>2</b> something does</span><span><b>1</b> partial — an input was not read</span></div>
-      </article>
+    <div class="tabs reveal" role="tablist" aria-label="Preflight questions">
+      <button class="tab" role="tab" aria-selected="true" aria-controls="t-drain" id="tab-drain">Will this node drain?</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="t-upgrade" id="tab-upgrade">Is the upgrade safe?</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="t-app" id="tab-app">In the app</button>
     </div>
+    <div class="panes">
+      <div class="pane-q" role="tabpanel" id="t-drain" aria-labelledby="tab-drain">
+        <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight drain assay-e2e-worker2
+<span class="bad">✗ assay-e2e-worker2 cannot be evacuated: 1 thing stops the drain</span>
 
-    <div class="reading">
-      <div>
-        <span class="eyebrow">And the full reading</span>
-        <h3 style="margin-top:12px">One self-contained reading, every figure with its basis.</h3>
-        <p><code class="mono">shoalcheck audit</code> reads the whole cluster — reliability, security, cost and topology — and writes one self-contained report: every finding with the object it rests on, every dollar with its rate, and what could not be read named as such, never counted as clean.</p>
-        <p>The desktop app runs the same reading with one button and opens it as a workbench you can filter, inspect and hand off from.</p>
-        <div class="figs">
-          <div class="fig"><b>87</b><span>rules, each naming the object it rests on</span></div>
-          <div class="fig"><b>47</b><span>resource types read, with get and list</span></div>
-          <div class="fig"><b>0</b><span>object writes, counted on every run</span></div>
-        </div>
-        <a class="btn" href="sample-report.html">Open the sample reading</a>
+1. Drain of assay-e2e-worker2 is blocked by budget e2e-demo/drain-blocked-pdb
+   · PodDisruptionBudget e2e-demo/drain-blocked-pdb reports disruptionsAllowed=0
+   · A PodDisruptionBudget constrains only the voluntary eviction path; it gives
+     no protection against this node failing.
+
+<span class="dim">basis: 12 kind(s) read · 16 request(s), 0 object write(s)</span>   <span class="exit">exit 2</span></pre>
       </div>
-      <figure class="shot">
-        <img src="assets/shot-reading.png" width="1440" height="900" loading="lazy" alt="The overview of the sample reading of acme-pay-prod, a fictional EKS cluster, labelled Illustrative sample: 137 findings, 12 critical or high, $1,647 a month identified, the four claims it leads with — four nodes cannot be evacuated, one dated obligation inside 90 days, nine references point at nothing, $1,647 a month identified — a severity by category grid and findings by namespace.">
-        <figcaption>The sample reading: the real engine run over a synthetic snapshot of a fictional cluster, so every figure in it is the fixture’s. Open it — every panel, filter and finding works.</figcaption>
+      <div class="pane-q" role="tabpanel" id="t-upgrade" aria-labelledby="tab-upgrade" hidden>
+        <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight upgrade 1.37
+<span class="ok">✓ upgrading to 1.37: nothing this model checks stops it</span>
+
+<span class="dim">basis: 8 kind(s) read · 12 request(s), 0 object write(s)
+checks: node-pool-cannot-roll, crd-conversion-webhook-unbacked, api-removals@2026-08-30
+this model checks a subset of what the scheduler checks: it can say a change
+will stop, and it cannot promise one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
+      </div>
+      <div class="pane-q" role="tabpanel" id="t-app" aria-labelledby="tab-app" hidden>
+        <img class="shot-img" src="assets/app-preflight.png" width="1440" height="900" loading="lazy" alt="The Preflight screen of the Shoalcheck app: the nodes of the kind test cluster, assay-e2e-worker chosen, and the verdict — assay-e2e-worker cannot be evacuated, 16 reads, 0 writes.">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ THE READING ═══ -->
+<section class="band band-alt" id="reading" aria-labelledby="r-title">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <span class="eyebrow">And the whole cluster</span>
+      <h2 id="r-title">A reading you can work in, not a PDF you scroll.</h2>
+      <p><code>shoalcheck audit</code> reads reliability, security, cost and topology and writes one self-contained file: every finding with the object it rests on, every dollar with its rate, and what could not be read named as such — never counted as clean. Filter it, slice it, open any finding, hand it off.</p>
+    </div>
+    <div class="gallery">
+      <figure class="g-main reveal">
+        <img src="assets/shot-reading.png" width="1440" height="900" loading="lazy" alt="The overview of the sample reading of acme-pay-prod, labelled Illustrative sample: 136 findings, 10 critical or high, $1,647 a month identified, the four claims it leads with, a severity by category grid and findings by namespace.">
+        <figcaption><b>Overview.</b> What it found first, how bad and of what kind, where — 136 findings on the sample cluster.</figcaption>
+      </figure>
+      <figure class="reveal">
+        <img src="assets/reading-blast.png" width="1440" height="900" loading="lazy" alt="The Blast radius workspace of the sample reading: the cluster by failure domain, three zones of four nodes each, the nodes named by a feasibility finding marked, what has nowhere to go and what one lost zone takes.">
+        <figcaption><b>Blast radius.</b> The cluster by failure domain, and what has nowhere to go.</figcaption>
+      </figure>
+      <figure class="reveal">
+        <img src="assets/reading-another.png" width="1440" height="900" loading="lazy" alt="The Method workspace of the sample reading: what it would take another way — the objects read, their size as kubectl prints them, the rule by object checks, the tokens an AI agent needs just to read them once, each model's price, and the hours by hand.">
+        <figcaption><b>What it would take another way.</b> Tokens for an AI agent, hours by hand — every figure a floor.</figcaption>
+      </figure>
+    </div>
+    <div class="reading-cta reveal">
+      <a class="btn btn-primary" href="sample-report.html">Open the sample reading</a>
+      <span class="note">A fictional cluster run through the real engine — every panel, filter and finding works. Labelled as a sample on every screen.</span>
+    </div>
+    <div class="compare reveal">
+      <figure>
+        <img src="assets/reading-compare.png" width="1440" height="900" loading="lazy" alt="The Since last workspace of a real reading of the kind test cluster: 12 findings more than the reading before it, 12 new, none gone, and the twelve new findings listed — a single replica without a disruption budget, no health probes, privilege escalation, a mutable image tag — every one on shop/checkout.">
+      </figure>
+      <div class="compare-copy">
+        <span class="eyebrow">Read it again</span>
+        <h3>The second reading says what changed since the first.</h3>
+        <p>Two real readings of our own kind test cluster, two seconds apart, around one deliberate bad deploy: <code>shop/checkout</code> on <code>nginx:latest</code>, one replica, no probes. The second names the twelve findings the first did not have, and each one opens to what it rests on.</p>
+        <p class="note">A finding that goes missing is counted as missing, never as dealt with: the object may have been deleted, or a rule may not have run. History stays on your machine.</p>
+        <a class="btn" href="sample-compare.html#v=eyJ3cyI6InRyZW5kIn0">Open the comparison</a>
+      </div>
+    </div>
+    <div class="compare compare-flip reveal">
+      <div class="compare-copy">
+        <span class="eyebrow">Read them all</span>
+        <h3>A fleet is one file: every cluster, and what they declare differently.</h3>
+        <p>Our two kind test clusters, read together. Each name opens that cluster's full reading. The totals add only what could be priced — <code>kind-assay-mesh</code> carries made-up cloud labels, so the price table has something to price; <code>kind-assay-e2e</code> is plain kind and says unpriced.</p>
+        <p class="note">What the clusters declare differently is listed side by side, and no value is marked as the right one. A context that could not be read is named, never counted as a cluster with no problems.</p>
+        <a class="btn" href="sample-fleet.html">Open the fleet</a>
+      </div>
+      <figure>
+        <img src="assets/reading-fleet.png" width="1440" height="900" loading="lazy" alt="The fleet overview of our two kind test clusters: kind-assay-e2e, 56 findings, unpriced; kind-assay-mesh, 151 findings, $42 a month identified; 207 findings across the fleet; every context read; and what they declare differently — the operators installed, and seven namespaces present in one cluster and not the other.">
       </figure>
     </div>
   </div>
 </section>
 
-<section class="band" id="reads" aria-labelledby="r-title">
-  <div class="wrap">
-    <div class="band-head">
-      <span class="eyebrow">Read-only, and checkable</span>
-      <h2 id="r-title">What it reads. What it never touches.</h2>
-      <p>Each line below is something the product states about its own run, on every surface, with the count beside it.</p>
-    </div>
-    <div class="ledger">
-      <div>
-        <h3><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>It reads</h3>
-        <dl>
-          <div><dt>Cluster objects, with get and list</dt><dd>Nodes, pods, workloads, budgets, RBAC, network policies, volumes and more. <code>shoalcheck audit --show-permissions</code> prints the exact list before it connects.</dd></div>
-          <div><dt>Prometheus, when one is reachable</dt><dd>Usage, for rightsizing. The report names the endpoint it read and the window it covered.</dd></div>
-          <div><dt>Price tables bundled in the binary</dt><dd>List prices for EKS, AKS and GKE, refreshed only when you run <code>shoalcheck update</code>.</dd></div>
-        </dl>
+<!-- ═══ THE APP ═══ -->
+<section class="band" id="app" aria-labelledby="a-title">
+  <div class="wrap app-grid">
+    <div class="band-head reveal">
+      <span class="eyebrow">The desktop app</span>
+      <h2 id="a-title">A full application, not a script.</h2>
+      <p>Pick a cluster, ask a question, read the answer. Home with the three jobs, Preflight over your real nodes and zones, every reading kept and comparable, ⌘K to anything — and it tells you when a new version is out.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="app-demo.html"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z"/></svg>Try the interactive demo</a>
+        <a class="btn" href="index.html#download">Download</a>
       </div>
-      <div>
-        <h3><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M4.7 15.3 15.3 4.7"/></svg>It never touches</h3>
-        <dl>
-          <div><dt>Secret and ConfigMap values, environment variables</dt><dd>Never requested. The run lists what it did not read.</dd></div>
-          <div><dt>Any write</dt><dd>Creates, updates, patches and deletes are counted on every run and printed beside the reading: 0 object writes.</dd></div>
-          <div><dt>Anything installed</dt><dd>No agent, operator, CRD or webhook. It runs wherever your kubeconfig already works.</dd></div>
-          <div><dt>A server of ours</dt><dd>No telemetry and no account. A licence is verified offline.</dd></div>
-        </dl>
-      </div>
+      <p class="note">The demo is the real window replaying a session recorded against our kind test cluster. Nothing in it talks to a cluster.</p>
     </div>
-    <div class="ledger-foot"><span>audit of demo: 32 reads · 0 object writes</span><span>drain preflight: 16 requests · 66ms</span></div>
+    <figure class="app-video reveal">
+      <video id="app-video" muted loop playsinline preload="none" width="1280" height="800" poster="assets/app-session-poster.jpg"
+        aria-label="The interactive demo, recorded: the app reads the kind test cluster — the four named steps, the kinds it read, findings arriving, every request it issued — writes the reading, which says unpriced because kind has no list price, opens it, then asks on the Preflight screen whether assay-e2e-worker can be drained and answers that it cannot: one thing stops the drain.">
+        <source src="assets/app-session.webm" type="video/webm">
+        <source src="assets/app-session.mp4" type="video/mp4">
+      </video>
+      <figcaption>The interactive demo, recorded: read the cluster, open the reading, ask whether a node can be drained. 24 seconds of the real window replaying a real session; the banner on every frame says so.</figcaption>
+    </figure>
   </div>
 </section>
 
-<section class="band" id="pricing" aria-labelledby="p-title">
+<!-- ═══ THE ARITHMETIC ═══ -->
+<section class="band band-alt" id="arithmetic" aria-labelledby="ar-title">
   <div class="wrap">
-    <div class="band-head">
+    <div class="band-head reveal">
+      <span class="eyebrow">The arithmetic</span>
+      <h2 id="ar-title">What one reading replaces.</h2>
+      <p>Every figure here is measured or a floor, with its basis underneath — never a saving we ask you to take on trust.</p>
+    </div>
+    <div class="ar-grid">
+      <figure class="chart reveal" aria-labelledby="c1-t">
+        <h3 id="c1-t">Hours to a reading</h3>
+        <div class="bars" id="bars-hours">
+          <div class="bar"><span class="bn">Shoalcheck</span><span class="bt"><i style="--w:1%"></i></span><span class="bv">0.1 s</span></div>
+          <div class="bar"><span class="bn">By hand</span><span class="bt"><i style="--w:40%"></i></span><span class="bv">≈16 h</span></div>
+          <div class="bar"><span class="bn">An assessment</span><span class="bt"><i style="--w:100%" class="range"></i></span><span class="bv">1–5 days</span></div>
+        </div>
+        <figcaption>Shoalcheck: measured on our kind test cluster (259 objects). By hand: its 1,894 rule-by-object checks at an assumed 30 s each. An assessment: single-cluster engagements are sold as 1–5 business days (AWS Marketplace, Jetstack, Kinect listings). Log scale.</figcaption>
+      </figure>
+      <figure class="chart reveal" aria-labelledby="c2-t">
+        <h3 id="c2-t">Tokens an AI agent needs just to read the cluster once</h3>
+        <div class="bars tokens" id="bars-tokens">
+          <div class="bar"><span class="bn">kind, 24 pods</span><span class="bt"><i style="--w:3.8%"></i></span><span class="bv">72–96 k</span></div>
+          <div class="bar"><span class="bn">mesh, 38 pods</span><span class="bt"><i style="--w:9.9%"></i></span><span class="bv">185–247 k</span></div>
+          <div class="bar"><span class="bn">1,500 pods</span><span class="bt over"><i style="--w:100%"></i></span><span class="bv">2.5–5.7 M</span></div>
+          <div class="ctx-line" style="--x:40%"><span>1 M — the largest context window</span></div>
+        </div>
+        <figcaption>Objects as <code>kubectl get -o yaml</code> prints them, at 3–4 characters a token. Measured on our two test clusters; the 1,500-pod line uses the same per-object sizes. Scale: 2.5 M tokens across. Past the line, an agent can only read a sample — and an audit of a sample is not an audit.</figcaption>
+      </figure>
+    </div>
+
+    <div class="calc reveal" id="calc">
+      <div class="calc-in">
+        <h3>Your cluster, your numbers</h3>
+        <label>Pods <output id="o-pods">600</output><input type="range" id="i-pods" min="20" max="5000" step="20" value="600"></label>
+        <label>Clusters <output id="o-clusters">3</output><input type="range" id="i-clusters" min="1" max="50" step="1" value="3"></label>
+        <label>Readings a month, per cluster <output id="o-reads">8</output><input type="range" id="i-reads" min="1" max="60" step="1" value="8"></label>
+        <label>Model <select id="i-model"></select></label>
+      </div>
+      <div class="calc-out" aria-live="polite">
+        <div><b id="r-tokens">—</b><span>tokens an agent reads, just to look once</span></div>
+        <div><b id="r-ctx">—</b><span>of the largest context window, per cluster</span></div>
+        <div><b id="r-agent">—</b><span>a month in input tokens alone, at list price</span></div>
+        <div><b id="r-hours">—</b><span>hours by hand for one reading, at 30 s a check</span></div>
+        <p class="calc-basis">A floor for the agent: no reasoning, no output, nothing read twice — an agent loop re-sends its whole context on every call. Per-object sizes measured on our test clusters (pods 5.4–9.3 KB, everything else about 1 KB). List input prices from platform.claude.com, fetched 2026-10-18.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ READ-ONLY ═══ -->
+<section class="band" id="readonly" aria-labelledby="ro-title">
+  <div class="wrap ro-grid">
+    <div class="band-head reveal">
+      <span class="eyebrow">Read-only, provably</span>
+      <h2 id="ro-title">It cannot change your cluster — and it counts every request to show it.</h2>
+      <p>The audit path issues <b>get</b> and <b>list</b>. A recorder wraps the only transport the binary has and counts every request it makes; the figure you see is that count. Secret and ConfigMap values, environment variables, logs and node shells are never read at all.</p>
+      <a class="btn" href="read-only.html">What it reads, line by line</a>
+    </div>
+    <div class="counter reveal" aria-label="Object writes across a reading: zero">
+      <span class="c-num">0</span>
+      <span class="c-lbl">object writes</span>
+      <span class="c-sub">16 requests to drain-check a node · 32 to read a whole cluster · all of them reads</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRICING ═══ -->
+<section class="band band-alt" id="pricing" aria-labelledby="p-title">
+  <div class="wrap">
+    <div class="band-head center reveal">
       <span class="eyebrow">Pricing</span>
-      <h2 id="p-title">Priced by the clusters you read, not by the nodes in them.</h2>
-      <p>Nothing runs in your cluster, so there is no per-node meter. A plan covers a number of distinct clusters read in any 30 days, counted on your machine. Reading the same cluster again costs nothing.</p>
+      <h2 id="p-title">Preflight is free. The full reading is the product.</h2>
+      <p>Priced by the clusters you read in any 30 days — never by node, never by seat. A licence is checked offline.</p>
+      <div class="bill" role="group" aria-label="Billing period">
+        <button class="bill-b" data-bill="year" aria-pressed="true">Yearly <span class="save-tag">2 months free</span></button>
+        <button class="bill-b" data-bill="month" aria-pressed="false">Monthly</button>
+      </div>
     </div>
     <div class="plans">
-      <article class="plan">
+      <article class="plan reveal">
         <h3>Free</h3>
-        <p class="for">To see what it finds.</p>
+        <p class="for">For a first look at any cluster.</p>
         <div class="price"><b>$0</b></div>
-        <div class="annual">&nbsp;</div>
-        <div class="cap">any cluster · nothing kept</div>
+        <div class="billing-line">no account, nothing to pay</div>
         <ul>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Preflight: drain, zone, upgrade</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>An audit's opening and its top 5 problems, in the terminal</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>The size of any reading: problems by severity and kind, and what they cost</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>The desktop app's live run</li>
         </ul>
-        <a class="btn" href="#download">Download</a>
+        <a class="btn" href="index.html#download">Download</a>
       </article>
-      <article class="plan">
+      <article class="plan reveal" data-monthly="59" data-yearly="590">
         <h3>Pro</h3>
         <p class="for">For an engineer with a few clusters.</p>
-        <div class="price"><b>$59</b><span>/ month</span></div>
-        <div class="annual">or $590 a year</div>
+        <div class="price"><b data-price>$49</b><span>/ month</span></div>
+        <div class="billing-line"><span data-line>$590 billed yearly</span><span class="save" data-save>save $118</span></div>
         <div class="cap">3 clusters in any 30 days</div>
         <ul>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Every finding, with its evidence</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>The full reading as HTML and JSON</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Every finding, with its evidence and fix</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>The HTML report and JSON</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>History, diff and comparisons</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Markdown, CSV and SARIF exports</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>The desktop app's workspace</li>
         </ul>
-        <a class="btn" data-plan-cta href="#pricing">Buy Pro</a>
+        <a class="btn" data-plan-cta href="index.html#pricing">Buy Pro</a>
       </article>
-      <article class="plan lead">
+      <article class="plan lead reveal" data-monthly="299" data-yearly="2990">
         <span class="tag">TEAMS</span>
         <h3>Team</h3>
         <p class="for">For a platform team and its pipeline.</p>
-        <div class="price"><b>$299</b><span>/ month</span></div>
-        <div class="annual">or $2,990 a year</div>
+        <div class="price"><b data-price>$249</b><span>/ month</span></div>
+        <div class="billing-line"><span data-line>$2,990 billed yearly</span><span class="save" data-save>save $598</span></div>
         <div class="cap">20 clusters in any 30 days</div>
         <ul>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Everything in Pro</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Fleet: many clusters, one document</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>A gate in CI against a baseline</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Scheduled readings</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Fleet: many clusters in one reading</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>The gate in CI and scheduled readings</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Jira and Linear tickets</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>The MCP server, for an assistant</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>The MCP server for an assistant</li>
         </ul>
-        <a class="btn btn-primary" data-plan-cta href="#pricing">Buy Team</a>
+        <a class="btn btn-primary" data-plan-cta href="index.html#pricing">Buy Team</a>
       </article>
-      <article class="plan">
+      <article class="plan reveal" data-monthly="899" data-yearly="8990">
         <h3>Business</h3>
-        <p class="for">For an organisation's whole estate.</p>
-        <div class="price"><b>$899</b><span>/ month</span></div>
-        <div class="annual">or $8,990 a year</div>
+        <p class="for">For an organisation running many clusters.</p>
+        <div class="price"><b data-price>$749</b><span>/ month</span></div>
+        <div class="billing-line"><span data-line>$8,990 billed yearly</span><span class="save" data-save>save $1,798</span></div>
         <div class="cap">100 clusters in any 30 days</div>
         <ul>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Everything in Team</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>100 clusters in any 30 days</li>
         </ul>
-        <a class="btn" data-plan-cta href="#pricing">Buy Business</a>
+        <a class="btn" data-plan-cta href="index.html#pricing">Buy Business</a>
       </article>
     </div>
+    <p class="plans-note">A licence is a signed key the binary checks offline — no phoning home. Reading the same cluster again costs nothing, and preflight is never counted.</p>
   </div>
 </section>
 
+<!-- ═══ DOWNLOAD ═══ -->
 <section class="band" id="download" aria-labelledby="d-title">
   <div class="wrap">
-    <div class="band-head">
+    <div class="band-head reveal">
       <span class="eyebrow">Download</span>
       <h2 id="d-title">macOS, Windows and Linux.</h2>
       <p>The command line and the desktop app read the same way and accept the same licence key. Nothing goes into your cluster; the binary needs only the kubeconfig you already use.</p>
     </div>
     <div class="dl">
-      <article class="os" data-os="mac">
+      <article class="os reveal" data-os="mac">
         <h3><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.6 1.3 10.1.8 1.2 1.8 2.6 3.1 2.5 1.3-.1 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.4-.9-2.4-4.1zM14 5.2c.7-.8 1.1-1.9 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg>macOS<span class="here-tag" hidden>your system</span></h3>
         <ul class="files">
-          <li><a data-asset="^Shoalcheck_.*_macos_universal\.dmg$" href="#download"><span>The app — Apple silicon and Intel</span><small>.dmg</small></a></li>
-          <li><a data-asset="^shoalcheck_.*_darwin_arm64\.tar\.gz$" href="#download"><span>Command line — Apple silicon</span><small>.tar.gz</small></a></li>
-          <li><a data-asset="^shoalcheck_.*_darwin_amd64\.tar\.gz$" href="#download"><span>Command line — Intel</span><small>.tar.gz</small></a></li>
+          <li><a data-asset="^Shoalcheck_.*_macos_universal\.dmg$" href="index.html#download"><span>The app — Apple silicon and Intel</span><small>.dmg</small></a></li>
+          <li><a data-asset="^shoalcheck_.*_darwin_arm64\.tar\.gz$" href="index.html#download"><span>Command line — Apple silicon</span><small>.tar.gz</small></a></li>
+          <li><a data-asset="^shoalcheck_.*_darwin_amd64\.tar\.gz$" href="index.html#download"><span>Command line — Intel</span><small>.tar.gz</small></a></li>
         </ul>
         <p class="note">Not notarized by Apple yet: the first time, Control-click the app and choose Open.</p>
       </article>
-      <article class="os" data-os="windows">
+      <article class="os reveal" data-os="windows">
         <h3><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.1 10.4 4v7.1H3zm0 13.8 7.4 1.1v-7H3zm8.2 1.2L21 21.5V13h-9.8zm0-16.2v7.2H21V2.5z"/></svg>Windows<span class="here-tag" hidden>your system</span></h3>
         <ul class="files">
-          <li><a data-asset="^shoalcheck-app_.*_windows_amd64\.zip$" href="#download"><span>The app — x64</span><small>.zip</small></a></li>
-          <li><a data-asset="^shoalcheck_.*_windows_amd64\.zip$" href="#download"><span>Command line — x64</span><small>.zip</small></a></li>
-          <li><a data-asset="^shoalcheck-app_.*_windows_arm64\.zip$" href="#download"><span>The app — Arm</span><small>.zip</small></a></li>
-          <li><a data-asset="^shoalcheck_.*_windows_arm64\.zip$" href="#download"><span>Command line — Arm</span><small>.zip</small></a></li>
+          <li><a data-asset="^shoalcheck-app_.*_windows_amd64\.zip$" href="index.html#download"><span>The app — x64</span><small>.zip</small></a></li>
+          <li><a data-asset="^shoalcheck_.*_windows_amd64\.zip$" href="index.html#download"><span>Command line — x64</span><small>.zip</small></a></li>
+          <li><a data-asset="^shoalcheck-app_.*_windows_arm64\.zip$" href="index.html#download"><span>The app — Arm</span><small>.zip</small></a></li>
+          <li><a data-asset="^shoalcheck_.*_windows_arm64\.zip$" href="index.html#download"><span>Command line — Arm</span><small>.zip</small></a></li>
         </ul>
         <p class="note">Not code-signed yet: SmartScreen asks once — More info, then Run anyway. The app opens in your browser.</p>
       </article>
-      <article class="os" data-os="linux">
+      <article class="os reveal" data-os="linux">
         <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m7 10 3 2.5L7 15M12.5 15H17"/></svg>Linux<span class="here-tag" hidden>your system</span></h3>
         <ul class="files">
-          <li><a data-asset="^shoalcheck_.*_linux_amd64\.tar\.gz$" href="#download"><span>Command line — x86-64</span><small>.tar.gz</small></a></li>
-          <li><a data-asset="^shoalcheck_.*_linux_arm64\.tar\.gz$" href="#download"><span>Command line — arm64</span><small>.tar.gz</small></a></li>
-          <li><a data-asset="^shoalcheck-app_.*_linux_amd64\.tar\.gz$" href="#download"><span>The app — x86-64</span><small>.tar.gz</small></a></li>
-          <li><a data-asset="^shoalcheck-app_.*_linux_arm64\.tar\.gz$" href="#download"><span>The app — arm64</span><small>.tar.gz</small></a></li>
+          <li><a data-asset="^shoalcheck_.*_linux_amd64\.tar\.gz$" href="index.html#download"><span>Command line — x86-64</span><small>.tar.gz</small></a></li>
+          <li><a data-asset="^shoalcheck_.*_linux_arm64\.tar\.gz$" href="index.html#download"><span>Command line — arm64</span><small>.tar.gz</small></a></li>
+          <li><a data-asset="^shoalcheck-app_.*_linux_amd64\.tar\.gz$" href="index.html#download"><span>The app — x86-64</span><small>.tar.gz</small></a></li>
+          <li><a data-asset="^shoalcheck-app_.*_linux_arm64\.tar\.gz$" href="index.html#download"><span>The app — arm64</span><small>.tar.gz</small></a></li>
         </ul>
         <p class="note">Static binaries, no system libraries required. The app opens in your browser.</p>
       </article>
     </div>
-    <div class="more-ways">
+    <div class="more-ways reveal">
       <div>
         <h3>Homebrew</h3>
         <code>brew install shoalcheck/tap/shoalcheck</code>
@@ -304,14 +433,20 @@
         <code>kubectl shoalcheck preflight drain node-1</code>
         <p>Put <span class="mono">kubectl-shoalcheck</span> from the release on your PATH; kubectl finds it by its name.</p>
       </div>
+      <div>
+        <h3>Staying current</h3>
+        <code>shoalcheck upgrade</code>
+        <p>The app tells you when a new version is out and installs it after checking its signature; Homebrew and krew copies upgrade through them.</p>
+      </div>
     </div>
     <p class="release-line" data-release-line>Every release publishes SHA-256 sums, signed with cosign.</p>
   </div>
 </section>
 
-<section class="band" id="faq" aria-labelledby="f-title">
+<!-- ═══ FAQ ═══ -->
+<section class="band band-alt" id="faq" aria-labelledby="f-title">
   <div class="wrap">
-    <div class="band-head">
+    <div class="band-head reveal">
       <span class="eyebrow">Questions</span>
       <h2 id="f-title">What people ask before they run it on production.</h2>
     </div>
@@ -319,106 +454,49 @@
       <div>
         <details><summary>Does it install anything in my cluster?</summary><p>No. It is a binary on your machine that talks to the Kubernetes API with your kubeconfig, issuing get and list. There is no agent, operator, CRD or webhook, and nothing to uninstall.</p></details>
         <details><summary>What access does it need?</summary><p>Read access to the kinds it lists — <code>shoalcheck audit --show-permissions</code> prints them before it connects. With less, it still runs, and says which kinds it could not read and why. A refused read is never reported as a clean one.</p></details>
-        <details><summary>Does any data leave my machine?</summary><p>No. The binary sends nothing to us or to anyone else, and the report is a file you keep. It talks to your API server and, when one is reachable, to Prometheus — and to nothing else unless you run <code>shoalcheck update</code>, which fetches signed reference data.</p></details>
+        <details><summary>Does any data leave my machine?</summary><p>Nothing about your clusters. The binary talks to your API server and, when one is reachable, to Prometheus. The only other request is the update check — <code>shoalcheck upgrade</code>, or the desktop app once a day if you leave that switch on — which asks github.com for the newest release and carries nothing about a cluster.</p></details>
         <details><summary>Which clusters does it work with?</summary><p>Any conformant Kubernetes cluster it can reach. Costs are priced from bundled list prices for EKS, AKS and GKE; on any other cluster a figure says “unpriced” rather than inventing a rate.</p></details>
       </div>
       <div>
         <details><summary>What counts as a cluster on my plan?</summary><p>A distinct cluster, by its kube-system UID, read with a licence in any 30 days — counted on your machine. Reading the same cluster again costs nothing, and preflight is never counted.</p></details>
-        <details><summary>How is the licence checked?</summary><p>Offline. A key is a signed document naming your plan, its expiry and its cluster cap, and the binary verifies the signature without phoning home. Paste it into the app, or run <code>shoalcheck licence install</code>.</p></details>
-        <details><summary>What does the free plan include?</summary><p>Preflight in full, and <code>shoalcheck audit</code> without a key: the reading's opening and its five largest problems in the terminal, with how many more there are. Nothing is saved, written or exported.</p></details>
+        <details><summary>How is the licence checked?</summary><p>Offline. A key is a signed document naming your plan, its expiry and its cluster cap, and the binary verifies the signature without phoning home. Paste it into the app under Plan &amp; licence, or run <code>shoalcheck licence install</code>.</p></details>
+        <details><summary>What does the free plan include?</summary><p>Preflight in full, and the size of any reading: how many problems, how serious, of what kind, what they would cost, and the five most serious kinds. Which objects, the evidence and the fix for each are what a licence adds. Nothing is saved, written or exported.</p></details>
         <details><summary>Why does my computer warn me when I open it?</summary><p>The first releases are not yet notarized by Apple or code-signed for Windows. Each release publishes the archives' SHA-256 sums, signed with cosign, so you can check what you downloaded with <code>cosign verify-blob</code> and the public key beside the releases.</p></details>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ═══ FINAL CTA ═══ -->
+<section class="final" aria-labelledby="fin-title">
+  <div class="wrap final-in reveal">
+    <h2 id="fin-title">Know before you drain.</h2>
+    <p>Free preflight, no account, nothing installed. Two minutes from download to your first answer.</p>
+    <div class="cta">
+      <a class="btn btn-primary btn-lg" href="index.html#download">Download</a>
+      <a class="btn btn-lg" href="app-demo.html">Try it in your browser</a>
+    </div>
+  </div>
+</section>
+
 </main>
 
-<footer>
-  <div class="wrap">
-    <div>
-      <a class="brand" href="./" aria-label="Shoalcheck, home">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0b1417"/><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g></svg>
-        Shoalcheck
-      </a>
-      <p>Read-only readings of Kubernetes clusters. Every figure carries what it rests on.</p>
-      <p>© 2026 Shoalcheck. Prices in US dollars, excluding VAT. This page sets no cookies; its download buttons ask GitHub for the latest release.</p>
-    </div>
-    <div>
-      <h4>Product</h4>
-      <ul>
-        <li><a href="#questions">How it works</a></li>
-        <li><a href="#pricing">Pricing</a></li>
-        <li><a href="#download">Download</a></li>
-        <li><a href="#faq">Questions</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4>Read more</h4>
-      <ul>
-        <li><a href="read-only.html">What read-only means here</a></li>
-        <li><a href="sample-report.html">The sample reading</a></li>
-      </ul>
-    </div>
+<footer class="foot">
+  <div class="wrap foot-in">
+    <span class="brand small"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0b1417"/><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g></svg>Shoalcheck</span>
+    <ul>
+      <li><a href="sample-report.html">The sample reading</a></li>
+      <li><a href="sample-compare.html">A real comparison</a></li>
+      <li><a href="sample-fleet.html">A real fleet</a></li>
+      <li><a href="app-demo.html">The interactive demo</a></li>
+      <li><a href="read-only.html">What it reads</a></li>
+      <li><a href="https://github.com/shoalcheck/shoalcheck/releases">Releases</a></li>
+    </ul>
   </div>
 </footer>
 
-<script>
-/* Two jobs, both optional: name the visitor's system on the main button, and point every download row at the
-   matching file of the latest release. Without this script the page is complete — every row links to this
-   section and the releases page is one click away. */
-(function () {
-  var meta = function (n) { var m = document.querySelector('meta[name="' + n + '"]'); return m ? m.content.trim() : ''; };
-  var repo = meta('shoalcheck:releases'), contact = meta('shoalcheck:contact');
-  var ua = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || '';
-  var os = /mac/i.test(ua) ? 'mac' : /win/i.test(ua) ? 'windows' : /linux|x11/i.test(ua) ? 'linux' : '';
-  var names = { mac: 'macOS', windows: 'Windows', linux: 'Linux' };
-  if (os) {
-    var label = document.querySelector('[data-os-label]');
-    if (label) label.textContent = 'Download for ' + names[os];
-    var card = document.querySelector('.os[data-os="' + os + '"]');
-    if (card) { card.classList.add('here'); var t = card.querySelector('.here-tag'); if (t) t.hidden = false; }
-  }
-
-  /* Plan buttons: a contact sells and issues keys. Without one, nothing is on sale yet, and the page says so
-     instead of sending anyone to an address nobody reads. */
-  document.querySelectorAll('[data-plan-cta]').forEach(function (a) {
-    if (contact) {
-      a.href = /^https?:/.test(contact) ? contact : 'mailto:' + contact + '?subject=' + encodeURIComponent('Shoalcheck ' + a.textContent.trim());
-      return;
-    }
-    var p = document.createElement('div');
-    p.className = 'pending';
-    p.textContent = 'Licence keys are not on sale yet.';
-    a.replaceWith(p);
-  });
-
-  if (!repo || !window.fetch) return;
-  var releases = 'https://github.com/' + repo + '/releases';
-  document.querySelectorAll('[data-asset]').forEach(function (a) { a.href = releases; });
-  /* The newest published release, prereleases included: GitHub's /releases/latest skips a release candidate,
-     so a page that asked it would find nothing while the only releases are candidates. */
-  fetch('https://api.github.com/repos/' + repo + '/releases?per_page=10', { headers: { Accept: 'application/vnd.github+json' } })
-    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(function (list) {
-      var rel = (list || []).filter(function (x) { return !x.draft; })[0];
-      if (!rel) return;
-      var assets = rel.assets || [];
-      document.querySelectorAll('[data-asset]').forEach(function (a) {
-        var re = new RegExp(a.getAttribute('data-asset'));
-        var hit = assets.filter(function (x) { return re.test(x.name); })[0];
-        if (hit) { a.href = hit.browser_download_url; a.title = hit.name; }
-      });
-      var line = document.querySelector('[data-release-line]');
-      if (line && rel.tag_name) {
-        line.textContent = (rel.prerelease ? 'Release candidate ' : 'Latest release ') + rel.tag_name +
-          (rel.published_at ? ', ' + rel.published_at.slice(0, 10) : '') + ' · SHA-256 sums, signed · ';
-        var all = document.createElement('a'); all.href = rel.html_url || releases; all.textContent = 'all files';
-        line.appendChild(all);
-      }
-    })
-    .catch(function () { /* the rows already point at the releases page */ });
-})();
-</script>
+<script type="application/json" id="zone-scene">{"cluster":"acme-pay-prod","lost":"eu-central-1a","zones":[{"z":"eu-central-1a","nodes":[{"n":"ip-10-0-1-a","t":"m6i.xlarge","p":[{"k":"payments/payments-gateway-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c0-a"},{"k":"workers/ledger-reconciler-7f4b9c2-c"},{"k":"payments/payments-ledger-db-0","why":"its volume is pinned to eu-central-1a \u2014 it cannot move at all"},{"k":"workers/debug-shell-ondemand"}]},{"n":"ip-10-0-1-d","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c2-c"},{"k":"default/legacy-cron-runner-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c1-b"}]},{"n":"ip-10-0-1-g","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c2-c"}]},{"n":"ip-10-0-2-a","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c5-f"},{"k":"workers/licensed-etl-0","why":"no surviving node satisfies its placement constraints"}]}]},{"z":"eu-central-1b","nodes":[{"n":"ip-10-0-1-b","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c1-b"},{"k":"workers/ledger-reconciler-7f4b9c3-d"}]},{"n":"ip-10-0-1-e","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c2-c"}]},{"n":"ip-10-0-1-h","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c3-d"}]},{"n":"ip-10-0-2-b","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c2-c"},{"k":"workers/ledger-reconciler-7f4b9c0-a"}]}]},{"z":"eu-central-1c","nodes":[{"n":"ip-10-0-1-c","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c1-b"},{"k":"monitoring/node-exporter-7f4b9c2-c"},{"k":"api/search-indexer-7f4b9c0-a"}]},{"n":"ip-10-0-1-f","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c1-b"}]},{"n":"ip-10-0-1-i","t":"m6i.xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c4-e"}]},{"n":"ip-10-0-2-c","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c3-d"},{"k":"workers/ledger-reconciler-7f4b9c1-b"}]}]}]}</script>
+<script type="application/json" id="agent-prices">{"fetched":"2026-10-18","source":"https://platform.claude.com/docs/en/about-claude/pricing","context":1000000,"charsLo":3,"charsHi":4,"secPerCheck":30,"models":[{"n":"Claude Haiku 5.5","in":0.5,"small":0.1,"tier":100000},{"n":"Claude Sonnet 5.5","in":2},{"n":"Claude Opus 5.5","in":4},{"n":"Claude Fable 5.1","in":10}]}</script>
+<script src="landing.js"></script>
 </body>
 </html>
