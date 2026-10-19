@@ -392,8 +392,8 @@
     <div class="calc deadline reveal" id="dl-calc">
       <div class="calc-in">
         <h3>Your clusters</h3>
-        <label>Provider <select id="dl-provider"></select></label>
-        <label>Kubernetes version <select id="dl-minor"></select></label>
+        <fieldset class="calc-f"><legend>Provider</legend><div class="seg-set" id="dl-provider"></div></fieldset>
+        <label>Kubernetes version <output id="o-dl-minor">—</output><input type="range" id="dl-minor" min="0" max="0" step="1" value="0"></label>
         <label>Clusters on that version <output id="o-dl-n">5</output><input type="range" id="dl-n" min="1" max="100" step="1" value="5"></label>
       </div>
       <div class="calc-out" aria-live="polite">
@@ -443,7 +443,7 @@
         <label>Pods <output id="o-pods">600</output><input type="range" id="i-pods" min="20" max="5000" step="20" value="600"></label>
         <label>Clusters <output id="o-clusters">3</output><input type="range" id="i-clusters" min="1" max="50" step="1" value="3"></label>
         <label>Readings a month, per cluster <output id="o-reads">8</output><input type="range" id="i-reads" min="1" max="60" step="1" value="8"></label>
-        <label>Model <select id="i-model"></select></label>
+        <fieldset class="calc-f"><legend>Model <span class="calc-unit">· list price, per million input tokens</span></legend><div class="seg-set" id="i-model"></div></fieldset>
         <label>Seconds a check takes by hand <output id="o-sec">30</output><input type="range" id="i-sec" min="5" max="120" step="5" value="30"></label>
         <label>An engineer's hour <output id="o-rate">$90</output><input type="range" id="i-rate" min="30" max="250" step="10" value="90"></label>
       </div>

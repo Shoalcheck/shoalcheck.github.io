@@ -15,6 +15,8 @@
   --accent2: #7fe7d9;
   --accent-ink: #032420;
   --accent-soft: rgba(45, 212, 191, .12);
+  --ring: rgba(45, 212, 191, .3);
+  --track: rgba(220, 245, 240, .1);
   --bad: #f97066;
   --bad-soft: rgba(249, 112, 102, .14);
   --ok: #47cd89;
@@ -330,8 +332,12 @@ html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not
 .st-z { min-height: 32px; padding: 0 10px; border: 1px solid var(--line2); border-radius: 8px; background: var(--bg2);
         color: var(--fg); font: 500 12px var(--mono); cursor: pointer; }
 .st-z[aria-pressed="true"] { border-color: var(--accent); color: var(--accent2); }
-#st-node { min-height: 32px; padding: 0 8px; border: 1px solid var(--line2); border-radius: 8px; background: var(--bg2);
-           color: var(--fg); font: 500 12px var(--mono); }
+#st-node { -webkit-appearance: none; appearance: none; height: 32px; padding: 0 34px 0 12px; border: 1px solid var(--line2);
+           border-radius: 9px; color: var(--fg); font: 500 12.5px var(--mono); cursor: pointer;
+           background: linear-gradient(45deg, transparent 50%, var(--dim) 50%) calc(100% - 17px) 50% / 5px 5px no-repeat,
+                       linear-gradient(135deg, var(--dim) 50%, transparent 50%) calc(100% - 12px) 50% / 5px 5px no-repeat, var(--bg2);
+           transition: border-color .15s var(--ease); }
+#st-node:hover { border-color: var(--dim); }
 .st-verdict { margin: 0; font-size: 13.5px; line-height: 1.55; }
 .st-verdict b.bad { color: var(--bad); } .st-verdict b.ok { color: var(--ok); }
 .st-verdict code { font: 12px var(--mono); color: var(--dim); }
@@ -405,10 +411,46 @@ html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not
 
 .calc { margin-top: 18px; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); border: 1px solid var(--line2); border-radius: var(--r); background: linear-gradient(135deg, rgba(45, 212, 191, .06), transparent 50%), var(--surface); overflow: hidden; }
 .calc-in { display: flex; flex-direction: column; gap: 18px; padding: 28px; border-right: 1px solid var(--line); }
-.calc-in label { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; font-size: 14px; color: var(--fg2); }
-.calc-in output { font: 600 14px var(--mono); color: var(--accent2); }
-.calc-in input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); }
-.calc-in select { grid-column: 1 / -1; min-height: 38px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--line2); background: var(--bg2); color: var(--fg); font: 500 14px var(--sans); }
+.calc-in > label { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 8px; font-size: 14px; color: var(--fg2); }
+.calc-in output { font: 600 15px var(--mono); color: var(--fg); font-variant-numeric: tabular-nums; }
+.calc-in input[type=range] { grid-column: 1 / -1; }
+.calc-f { margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.calc-f legend { padding: 0; margin-bottom: 8px; font-size: 14px; color: var(--fg2); }
+.calc-unit { color: var(--faint); font-size: 13px; }
+
+/* THE PAGE'S OWN CONTROLS. A slider fills its track to the thumb (--p, set by landing.js from the value) and is tall
+   enough to take a finger; a choice shows every option at once, the chosen one outlined. */
+input[type=range] { -webkit-appearance: none; appearance: none; --p: 50%; width: 100%; height: 30px; margin: 0;
+                    background: transparent; cursor: pointer; touch-action: pan-y; }
+input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent) 0, var(--accent2) var(--p), var(--track) var(--p)); }
+input[type=range]::-moz-range-track { height: 6px; border-radius: 999px; background: var(--track); }
+input[type=range]::-moz-range-progress { height: 6px; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; margin-top: -7px;
+  border: 0; border-radius: 50%; background: var(--fg); box-shadow: 0 0 0 5px var(--ring), 0 2px 10px rgba(0, 0, 0, .5);
+  transition: box-shadow .15s var(--ease), transform .15s var(--ease); }
+input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border: 0; border-radius: 50%; background: var(--fg);
+  box-shadow: 0 0 0 5px var(--ring), 0 2px 10px rgba(0, 0, 0, .5); transition: box-shadow .15s var(--ease), transform .15s var(--ease); }
+input[type=range]:hover::-webkit-slider-thumb { box-shadow: 0 0 0 8px var(--ring), 0 2px 10px rgba(0, 0, 0, .5); }
+input[type=range]:hover::-moz-range-thumb { box-shadow: 0 0 0 8px var(--ring), 0 2px 10px rgba(0, 0, 0, .5); }
+input[type=range]:active::-webkit-slider-thumb { transform: scale(1.1); }
+input[type=range]:active::-moz-range-thumb { transform: scale(1.1); }
+input[type=range]:focus-visible { outline: none; }
+input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--accent); }
+input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--accent); }
+@media (pointer: coarse) { input[type=range] { height: 44px; } }
+.seg-set { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 4px; padding: 4px;
+           border: 1px solid var(--line); border-radius: 12px; background: var(--bg2); }
+.seg { position: relative; display: flex; flex-direction: column; gap: 1px; min-height: 48px; padding: 8px 12px; border-radius: 9px;
+       cursor: pointer; transition: background .15s var(--ease), box-shadow .15s var(--ease); }
+.seg input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.seg:hover { background: var(--surface); }
+.seg:has(input:checked) { background: var(--surface2); box-shadow: inset 0 0 0 1px var(--accent), 0 1px 8px rgba(0, 0, 0, .35); }
+.seg:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg-t { font: 600 13.5px/1.3 var(--sans); color: var(--fg2); }
+.seg:has(input:checked) .seg-t { color: var(--fg); }
+.seg-s { font: 500 11.5px/1.3 var(--mono); color: var(--faint); font-variant-numeric: tabular-nums; }
+.seg:has(input:checked) .seg-s { color: var(--accent2); }
 .calc-out { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 26px; padding: 28px; align-content: center; }
 .calc-out div { display: flex; flex-direction: column; gap: 4px; }
 .calc-out b { font-size: clamp(24px, 3vw, 34px); font-weight: 720; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }

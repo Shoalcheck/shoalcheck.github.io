@@ -636,17 +636,40 @@
   }
   [].forEach.call(document.querySelectorAll('.loop video'), playWhileSeen);
 
+  /* ── the page's own controls ──────────────────────────────────────────────
+     A SLIDER SAYS HOW FAR IT IS SET: its track fills to the thumb, and --p is the one number the stylesheet needs.
+     A CHOICE SHOWS EVERY OPTION: four models or four providers fit on a line, so each is a button that says what
+     it is, instead of a native select that hides them behind a click in the browser's own look. */
+  var fillRange = function (el) {
+    var span = el.max - el.min;
+    el.style.setProperty('--p', (span > 0 ? (el.value - el.min) / span * 100 : 0) + '%');
+  };
+  $$('input[type=range]').forEach(function (el) {
+    fillRange(el);
+    el.addEventListener('input', function () { fillRange(el); });
+  });
+  var choices = function (box, name, items, chosen) {
+    box.setAttribute('role', 'radiogroup');
+    box.innerHTML = '';
+    items.forEach(function (it) {
+      var l = document.createElement('label'), r = document.createElement('input'), t = document.createElement('span');
+      l.className = 'seg'; r.type = 'radio'; r.name = name; r.value = it.v; r.checked = it.v === chosen;
+      t.className = 'seg-t'; t.textContent = it.t;
+      l.appendChild(r); l.appendChild(t);
+      if (it.s) { var u = document.createElement('span'); u.className = 'seg-s'; u.textContent = it.s; l.appendChild(u); }
+      box.appendChild(l);
+    });
+  };
+  var chosen = function (box) { var r = box.querySelector('input:checked'); return r ? r.value : ''; };
+
   /* ── the arithmetic ───────────────────────────────────────────────────── */
   var priceEl = $('#agent-prices');
   if (priceEl && $('#calc')) {
     var P = JSON.parse(priceEl.textContent);
     var sel = $('#i-model');
-    P.models.forEach(function (m, k) {
-      var o = document.createElement('option');
-      o.value = String(k); o.textContent = m.n.replace(/^Claude /, '') + ' — $' + m['in'] + ' per million input tokens';
-      if (k === 1) o.selected = true;
-      sel.appendChild(o);
-    });
+    choices(sel, 'model', P.models.map(function (m, k) {
+      return { v: String(k), t: m.n.replace(/^Claude /, ''), s: '$' + m['in'] + ' / M' };
+    }), '1');
     var cost = function (tokens, m) {
       var rate = m.tier ? (tokens > m.tier ? m['in'] : m.small) : m['in'];
       return tokens * rate / 1e6;
@@ -692,7 +715,7 @@
     var calc = function () {
       var pods = Number($('#i-pods').value), clusters = Number($('#i-clusters').value), reads = Number($('#i-reads').value);
       var sec = Number($('#i-sec').value), rate = Number($('#i-rate').value);
-      var m = P.models[Number(sel.value)], c = model(pods);
+      var m = P.models[Number(chosen(sel))], c = model(pods);
       $('#o-pods').textContent = pods.toLocaleString('en-US');
       $('#o-clusters').textContent = clusters; $('#o-reads').textContent = reads;
       $('#o-sec').textContent = sec; $('#o-rate').textContent = '$' + rate;
@@ -708,7 +731,8 @@
       $('#r-hours-month').textContent = fmtHours(hours, dp);
       $('#r-hours-one').textContent = fmtHours(one, dp);
     };
-    ['#i-pods', '#i-clusters', '#i-reads', '#i-model', '#i-sec', '#i-rate'].forEach(function (s) { $(s).addEventListener('input', calc); });
+    ['#i-pods', '#i-clusters', '#i-reads', '#i-sec', '#i-rate'].forEach(function (s) { $(s).addEventListener('input', calc); });
+    sel.addEventListener('change', calc);
     calc();
   }
 
@@ -719,11 +743,10 @@
   if (supEl && $('#dl-calc')) {
     var T = JSON.parse(supEl.textContent || '{}');
     var NAMES = { aws: 'Amazon EKS', azure: 'Azure AKS', gcp: 'Google GKE', upstream: 'Kubernetes upstream' };
-    var pSel = $('#dl-provider'), mSel = $('#dl-minor'), nIn = $('#dl-n');
-    ['aws', 'azure', 'gcp', 'upstream'].forEach(function (p) {
-      if (!T.windows || !T.windows[p]) return;
-      var o = document.createElement('option'); o.value = p; o.textContent = NAMES[p]; pSel.appendChild(o);
-    });
+    var SHORT = { aws: ['EKS', 'Amazon'], azure: ['AKS', 'Azure'], gcp: ['GKE', 'Google'], upstream: ['Upstream', 'Kubernetes'] };
+    var pSel = $('#dl-provider'), mIn = $('#dl-minor'), nIn = $('#dl-n');
+    choices(pSel, 'provider', ['aws', 'azure', 'gcp', 'upstream'].filter(function (p) { return T.windows && T.windows[p]; })
+      .map(function (p) { return { v: p, t: SHORT[p][0], s: SHORT[p][1] }; }), 'aws');
     var today = new Date(); today.setHours(0, 0, 0, 0);
     var day = function (s) { return s ? new Date(s + 'T00:00:00') : null; };
     var gap = function (d) { return Math.round((d - today) / 86400000); };
@@ -734,20 +757,22 @@
       return subject + (n < 0 ? ' ended ' + k + ' ago' : n === 0 ? ' ends today' : ' ends in ' + k);
     };
     var usd0 = function (x) { return '$' + Math.round(x).toLocaleString('en-US'); };
+    /* The version is a slider over the provider's own list, oldest to newest: twenty versions do not fit on a
+       line as buttons, and one hidden behind a select is what the founder called terrible. */
     var fillMinors = function () {
-      var rows = T.windows[pSel.value] || [];
-      mSel.innerHTML = '';
-      rows.slice().reverse().forEach(function (w) {
-        var o = document.createElement('option'); o.value = w[0]; o.textContent = w[0]; mSel.appendChild(o);
-      });
+      var rows = T.windows[chosen(pSel)] || [];
+      mIn.max = String(Math.max(rows.length - 1, 0));
       /* The first version shown is the newest one already past ordinary support: the case that costs money. */
       var past = rows.filter(function (w) { return w[2] && gap(day(w[2])) < 0; });
-      mSel.value = (past.length ? past[past.length - 1] : rows[rows.length - 1] || [''])[0];
+      var first = past.length ? past[past.length - 1] : rows[rows.length - 1];
+      mIn.value = String(Math.max(rows.indexOf(first), 0));
+      fillRange(mIn);
     };
     var dl = function () {
-      var p = pSel.value, rows = T.windows[p] || [], n = Number(nIn.value);
-      var i = rows.findIndex(function (w) { return w[0] === mSel.value; }), w = rows[i];
+      var p = chosen(pSel), rows = T.windows[p] || [], n = Number(nIn.value);
+      var i = Number(mIn.value), w = rows[i];
       $('#o-dl-n').textContent = n;
+      $('#o-dl-minor').textContent = w ? w[0] : '—';
       if (!w) return;
       var name = NAMES[p], next = rows[i + 1] ? rows[i + 1][0] : '';
       $('#dl-std').textContent = w[2] ? long(w[2]) : 'unpublished';
@@ -780,8 +805,8 @@
         T.rateAsOf + '; 730 hours to a month. These are the tables a reading uses to place your cluster\'s version' +
         (next ? ' — shoalcheck preflight upgrade ' + next + ' says what stops the move.' : '.');
     };
-    pSel.addEventListener('input', function () { fillMinors(); dl(); });
-    mSel.addEventListener('input', dl);
+    pSel.addEventListener('change', function () { fillMinors(); dl(); });
+    mIn.addEventListener('input', dl);
     nIn.addEventListener('input', dl);
     fillMinors(); dl();
   }
