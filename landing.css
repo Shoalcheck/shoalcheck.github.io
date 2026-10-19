@@ -142,13 +142,13 @@ p { margin: 0; }
 .cs-edge.r-critical { stroke: var(--bad); } .cs-edge.r-high { stroke: var(--warn); } .cs-edge.r-medium, .cs-edge.r-low { stroke: var(--faint); }
 .cs-zones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .cs-zone { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.cs-zn { font: 9.5px var(--mono); color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cs-zn { font: 9.5px var(--mono); color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .cs-node { font: 10px/1.2 var(--mono); padding: 4px 6px; border-radius: 5px; background: rgba(220, 245, 240, .05); color: var(--dim); transition: background .3s, color .3s; }
 .cs-node.stops.on { background: rgba(249, 112, 102, .18); color: var(--bad); }
 .cs-node.stops.on::after { content: "  stops"; font-size: 9px; }
 .cs-bars { display: flex; flex-direction: column; gap: 6px; }
 .cs-bar { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto; gap: 8px; align-items: center; font: 10px var(--mono); color: var(--dim); }
-.cs-bl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cs-bl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .cs-bt { height: 6px; border-radius: 3px; background: rgba(220, 245, 240, .06); overflow: hidden; }
 .cs-bt i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .6s var(--ease); }
 .cs-bt i.on { width: var(--w); }
@@ -168,13 +168,21 @@ p { margin: 0; }
 .cs-term span.on { opacity: 1; }
 .cs-term .p { color: var(--accent); } .cs-term .bad { color: var(--bad); font-weight: 600; } .cs-term .dim { color: var(--faint); }
 .cs-term .exit { color: var(--bad); font-weight: 700; }
+.cs-fh-wrap { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.cs-hist { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.cs-hist ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.cs-hist li { font: 10px/1.45 var(--mono); color: var(--fg2); opacity: 0; transform: translateX(-6px); transition: opacity .3s, transform .3s var(--ease); }
+.cs-hist li.on { opacity: 1; transform: none; }
+.cs-hist li.new { color: var(--accent2); }
+.cs-hist li.gone.on { opacity: .55; }
+@media (max-width: 640px) { .cs-fh-wrap { grid-template-columns: minmax(0, 1fr); } }
 .cs-fleet { display: grid; gap: 3px 10px; font: 9.5px/1.35 var(--mono); align-items: center; }
 .cs-fh { color: var(--faint); text-transform: uppercase; font-size: 8.5px; letter-spacing: .06em; }
-.cs-fd { color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cs-fv { opacity: 0; color: var(--fg2); transition: opacity .25s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cs-fd { color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.cs-fv { opacity: 0; color: var(--fg2); transition: opacity .25s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .cs-fv.on { opacity: 1; } .cs-fv.none { color: var(--faint); }
 @media (prefers-reduced-motion: reduce) {
-  .cs-edge, .cs-node, .cs-bt i, .cs-flow, .cs-c, .cs-term span, .cs-fv { transition: none; }
+  .cs-edge, .cs-node, .cs-bt i, .cs-flow, .cs-c, .cs-term span, .cs-fv, .cs-hist li { transition: none; }
   .cs-flow.on { animation: none; }
 }
 @media (max-width: 980px) { .caps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -200,7 +208,7 @@ p { margin: 0; }
 .rd-sum { margin: 8px 0 0; font: 11px/1.45 var(--mono); color: var(--faint); min-height: 1.45em; }
 .rd-grid { display: grid; grid-template-columns: minmax(0, 76px) repeat(5, minmax(0, 1fr)); gap: 3px; align-items: center; }
 .rd-h { font: 600 9.5px var(--mono); text-transform: uppercase; color: var(--faint); text-align: center; }
-.rd-c { font: 11px var(--mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rd-c { font: 11px var(--mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .rd-n { height: 26px; border-radius: 5px; background: rgba(220, 245, 240, .035); display: grid; place-items: center; font: 600 11.5px var(--mono); color: var(--fg); transition: background .25s; }
 .rd-n.on.sv0 { background: rgba(249, 112, 102, .85); color: #2a0b08; }
 .rd-n.on.sv1 { background: rgba(253, 176, 34, .78); color: #2b1a00; }

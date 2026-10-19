@@ -264,13 +264,25 @@
                 mk('span', { 'class': 'dim' }, pre, '  ' + cut(P.why, 92) + '\n'), mk('span', { 'class': 'exit' }, pre, 'exit ' + P.exit)];
       },
       fleet: function (box) {
-        var F = C.fleet, tbl = mk('div', { 'class': 'cs-fleet', style: 'grid-template-columns: minmax(0,1.3fr) repeat(' + F.clusters.length + ', minmax(0,1fr))' }, box), parts = [];
+        var F = C.fleet, wrap = mk('div', { 'class': 'cs-fh-wrap' }, box);
+        var tbl = mk('div', { 'class': 'cs-fleet', style: 'grid-template-columns: minmax(0,1.3fr) repeat(' + F.clusters.length + ', minmax(0,1fr))' }, wrap), parts = [];
         mk('span', { 'class': 'cs-fh' }, tbl, 'what they declare');
         F.clusters.forEach(function (c) { mk('span', { 'class': 'cs-fh' }, tbl, c.replace(/^acme-pay-/, '')); });
         F.rows.forEach(function (r) {
           mk('span', { 'class': 'cs-fd' }, tbl, r[0] + ' · ' + r[1]);
           r[2].forEach(function (v) { parts.push(mk('span', { 'class': 'cs-fv' + (v === '(not declared)' ? ' none' : '') }, tbl, v === '(not declared)' ? '—' : v)); });
         });
+        /* and the history: what the sample reading's comparison with the one before says — the new by title, the
+           ones no longer in the set by count, never named and never called dealt with */
+        var H = C.history;
+        if (H) {
+          var hist = mk('div', { 'class': 'cs-hist' }, wrap);
+          mk('span', { 'class': 'cs-fh' }, hist, 'since ' + (H.since || 'the reading before'));
+          var ol = mk('ol', {}, hist);
+          (H.new || []).forEach(function (t) { parts.push(mk('li', { 'class': 'new' }, ol, '+ new · ' + t)); });
+          if (H.gone) parts.push(mk('li', { 'class': 'gone' }, ol, '− ' + H.gone + ' no longer in the set'));
+          if (H.notCompared) parts.push(mk('li', { 'class': 'nc' }, ol, H.notCompared + ' could not be compared'));
+        }
         return parts;
       }
     };
