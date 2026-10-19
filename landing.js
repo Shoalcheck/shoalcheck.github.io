@@ -46,6 +46,250 @@
   };
   typeOut($('[data-type]'), 500);
 
+  /* ── the opening: the sample reading being taken ──────────────────────────
+     The product is the reading, so the page opens on one being taken — the kinds it read, the checks it ran, the
+     findings arriving by severity and category, the money with its basis, the claims it leads with — every figure
+     the sample's own (#hero-reading, written from testdata/golden/sample-history.json by make site-data and held
+     to it by a gate). What is drawn at a moment is a function of the moment alone, so a replay, a reduced-motion
+     visit and the gate that reads the end state all see the same reading. */
+  /* Its own scope: this file is one function, and a `var play` or `var T` further down (the scene's, the
+     deadlines') would silently replace this block's. */
+  (function () {
+  var rdEl = $('#hero-rd'), rdData = $('#hero-reading');
+  if (rdEl && rdData && rdData.textContent.trim()) {
+    var RD = JSON.parse(rdData.textContent);
+    var SEVS = ['critical', 'high', 'medium', 'low', 'info'];
+    var T = { read: 2300, judge: 5200, price: 6600, end: 8900 };
+    var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
+    var ease = function (p) { p = Math.max(0, Math.min(1, p)); return 1 - Math.pow(1 - p, 3); };
+    var word = function (n, one, many) { return fmt(n) + ' ' + (Math.round(n) === 1 ? one : many); };
+    rdEl.querySelector('.rd-cl').textContent = RD.cluster;
+    rdEl.querySelector('.rd-where').textContent = RD.where;
+    var kindsEl = rdEl.querySelector('.rd-kinds'), gridEl = rdEl.querySelector('.rd-grid');
+    var readSum = $('#rd-read-sum'), foundSum = $('#rd-found-sum'), usd = $('#rd-usd'), basis = $('#rd-basis');
+    var claimsEl = $('#rd-claims'), stepEl = $('#rd-step'), replay = $('#rd-replay');
+    /* The grid is built once: a head of severities, a row per category, a cell per pair. */
+    var cells = [];
+    var SHORT = ['crit', 'high', 'med', 'low', 'info'];
+    gridEl.innerHTML = '<span class="rd-h" role="columnheader"></span>' + SHORT.map(function (s, i) {
+      return '<span class="rd-h" role="columnheader" title="' + SEVS[i] + '">' + s + '</span>';
+    }).join('');
+    RD.cats.forEach(function (c, ci) {
+      var row = document.createElement('span');
+      row.className = 'rd-c'; row.setAttribute('role', 'rowheader'); row.textContent = c;
+      gridEl.appendChild(row);
+      cells[ci] = SEVS.map(function (s, si) {
+        var cell = document.createElement('span');
+        cell.className = 'rd-n sv' + si; cell.setAttribute('role', 'cell');
+        cell.title = RD.grid[ci][si] + ' ' + s + ' · ' + c;
+        gridEl.appendChild(cell);
+        return cell;
+      });
+    });
+    RD.claims.forEach(function (c) {
+      var li = document.createElement('li');
+      li.innerHTML = '<b></b><span></span>';
+      li.querySelector('b').textContent = c[0];
+      li.querySelector('span').textContent = c[1];
+      claimsEl.appendChild(li);
+    });
+    var claimEls = [].slice.call(claimsEl.children);
+    var paintAt = function (ms) {
+      /* reading: one kind every few dozen milliseconds, newest at the bottom, the last nine in view */
+      var nKinds = Math.min(RD.kinds.length, Math.floor(ms / (T.read / RD.kinds.length)) + (ms > 0 ? 1 : 0));
+      var shown = RD.kinds.slice(0, nKinds), objs = 0;
+      shown.forEach(function (k) { objs += k[1]; });
+      /* while reading, the newest nine; once read, the nine it read most of */
+      var view = nKinds < RD.kinds.length ? shown.slice(-9)
+        : RD.kinds.slice().sort(function (a, b) { return b[1] - a[1]; }).slice(0, 9);
+      kindsEl.classList.toggle('read', nKinds === RD.kinds.length);
+      kindsEl.textContent = '';
+      view.forEach(function (k) {
+        var li = document.createElement('li'), name = document.createElement('span'), n = document.createElement('b');
+        name.textContent = k[0]; n.textContent = fmt(k[1]);
+        li.appendChild(name); li.appendChild(n); kindsEl.appendChild(li);
+      });
+      readSum.textContent = word(objs, 'object', 'objects') + ' · ' + word(nKinds, 'kind', 'kinds') +
+        (nKinds === RD.kinds.length ? ' · ' + fmt(RD.kb) + ' KB' : '');
+      /* judging: every cell counts up together, and the checks with them */
+      var pj = ease((ms - T.read) / (T.judge - T.read)), total = 0;
+      RD.grid.forEach(function (row, ci) {
+        row.forEach(function (n, si) {
+          var v = Math.round(n * pj); total += v;
+          cells[ci][si].textContent = v ? v : '';
+          cells[ci][si].classList.toggle('on', v > 0);
+        });
+      });
+      foundSum.textContent = ms < T.read ? '' : word(total, 'finding', 'findings') + ' · ' +
+        fmt(RD.checks * pj) + ' of ' + fmt(RD.checks) + ' checks · ' + RD.rules + ' rules';
+      /* pricing */
+      var pp = ease((ms - T.judge) / (T.price - T.judge));
+      usd.textContent = ms < T.judge ? '—' : '$' + fmt(RD.dollars * pp);
+      basis.textContent = pp > 0.35 ? RD.money : '';
+      /* what it found first: one claim after another */
+      var nClaims = ms < T.price ? 0 : Math.min(claimEls.length, Math.floor((ms - T.price) / ((T.end - T.price) / claimEls.length)) + 1);
+      claimEls.forEach(function (li, i) { li.classList.toggle('in', i < nClaims); });
+      stepEl.textContent = ms < T.read ? 'reading the cluster' : ms < T.judge ? 'judging what it read'
+        : ms < T.price ? 'pricing what it read' : ms < T.end ? 'what it found first' : 'the reading, written';
+      rdEl.classList.toggle('done', ms >= T.end);
+    };
+    var t0 = 0, raf = 0;
+    var frame = function (now) {
+      var ms = now - t0;
+      paintAt(Math.min(ms, T.end));
+      if (ms < T.end) raf = requestAnimationFrame(frame);
+      else replay.hidden = false;
+    };
+    var play = function () {
+      cancelAnimationFrame(raf); replay.hidden = true;
+      t0 = performance.now(); raf = requestAnimationFrame(frame);
+    };
+    replay.addEventListener('click', play);
+    if (reduce || !('IntersectionObserver' in window)) {
+      paintAt(T.end);
+    } else {
+      paintAt(0);
+      var started = false;
+      new IntersectionObserver(function (es) {
+        if (started || !es[0].isIntersecting) return;
+        started = true; setTimeout(play, 350);
+      }, { threshold: 0.3 }).observe(rdEl);
+    }
+  }
+  })();
+
+  /* ── what one reading finds: a small scene in every tile ───────────────────
+     Each capability tile draws one thing the sample holds — its grants, its nodes, its money by rule, its observed
+     flows, its controls, a drain answer, its fleet — from #caps-data (written from the goldens by make site-data,
+     held by a gate). A scene plays once when its tile comes into view; with reduced motion it is drawn finished.
+     Text goes in through textContent: the data is ours, and still never markup. */
+  (function () {
+    var dataEl = $('#caps-data');
+    if (!dataEl || !dataEl.textContent.trim()) return;
+    var C = JSON.parse(dataEl.textContent);
+    var NS = 'http://www.w3.org/2000/svg';
+    var mk = function (tag, attrs, parent, text) {
+      var n = /^(svg|g|rect|line|path|text|circle)$/.test(tag) ? document.createElementNS(NS, tag) : document.createElement(tag);
+      for (var k in attrs || {}) n.setAttribute(k, attrs[k]);
+      if (text != null) n.textContent = text;
+      if (parent) parent.appendChild(n);
+      return n;
+    };
+    var cut = function (s, n) { s = String(s); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
+    var usd = function (n) { return '$' + Math.round(n).toLocaleString('en-US'); };
+    /* in: the scene's parts, in the order they arrive; each gets .on after its delay */
+    var builders = {
+      security: function (box) {
+        var chains = C.security.chains, subs = [], roles = [];
+        chains.forEach(function (c) { if (subs.indexOf(c[0]) < 0) subs.push(c[0]); if (roles.indexOf(c[2]) < 0) roles.push(c[2]); });
+        var W = 360, rowH = 17, H = Math.max(subs.length, roles.length) * rowH + 8;
+        var svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, 'class': 'cs-svg', role: 'img',
+          'aria-label': chains.length + ' grants from ' + subs.length + ' subjects to ' + roles.length + ' roles' }, box);
+        var y = function (i, n) { return 4 + (i + 0.5) * ((H - 8) / n); };
+        var parts = [];
+        chains.slice().sort(function (a, b) { return (a[3] === 'critical') - (b[3] === 'critical'); }).forEach(function (c) {
+          var y1 = y(subs.indexOf(c[0]), subs.length), y2 = y(roles.indexOf(c[2]), roles.length);
+          parts.push(mk('path', { d: 'M150 ' + y1 + ' C 195 ' + y1 + ', 195 ' + y2 + ', 240 ' + y2, 'class': 'cs-edge r-' + c[3], pathLength: 1 }, svg));
+        });
+        subs.forEach(function (s, i) { mk('text', { x: 146, y: y(i, subs.length) + 3, 'text-anchor': 'end', 'class': 'cs-lab' }, svg, cut(s, 24)); });
+        roles.forEach(function (r, i) {
+          mk('text', { x: 244, y: y(i, roles.length) + 3, 'class': 'cs-lab' + (r === 'cluster-admin' ? ' cs-hot' : '') }, svg, cut(r, 19));
+        });
+        return parts;
+      },
+      reliability: function (box) {
+        var wrap = mk('div', { 'class': 'cs-zones' }, box), parts = [];
+        C.reliability.zones.forEach(function (z) {
+          var col = mk('div', { 'class': 'cs-zone' }, wrap);
+          mk('span', { 'class': 'cs-zn' }, col, z[0]);
+          z[1].forEach(function (n) {
+            var cell = mk('span', { 'class': 'cs-node' + (n[1] ? ' stops' : ''), title: n[0] + (n[1] ? ' — a drain stops here' : '') }, col, n[0].replace(/^ip-10-0-/, ''));
+            if (n[1]) parts.push(cell);
+          });
+        });
+        return parts;
+      },
+      money: function (box) {
+        var rules = C.money.rules, max = rules.reduce(function (m, r) { return Math.max(m, r[1]); }, 1), parts = [], sum = 0;
+        var list = mk('div', { 'class': 'cs-bars' }, box);
+        rules.forEach(function (r) {
+          sum += r[1];
+          var row = mk('div', { 'class': 'cs-bar' }, list);
+          mk('span', { 'class': 'cs-bl' }, row, r[0]);
+          var track = mk('span', { 'class': 'cs-bt' }, row);
+          var fill = mk('i', { style: '--w:' + (r[1] / max * 100).toFixed(1) + '%' }, track);
+          mk('b', {}, row, usd(r[1]));
+          parts.push(fill);
+        });
+        /* each figure rounded on its own, as in the reading: when the rows do not come to the total, say so */
+        mk('div', { 'class': 'cs-note' }, box, usd(C.money.total) + ' a month' +
+          (sum !== C.money.total ? ' · each rounded on its own; the rows come to ' + usd(sum) : ''));
+        return parts;
+      },
+      topology: function (box) {
+        var nodes = C.topology.nodes, edges = C.topology.edges, cols = 0, rows = 0, at = {};
+        nodes.forEach(function (n) { cols = Math.max(cols, n[1] + 1); rows = Math.max(rows, n[2] + 1); });
+        var W = 360, H = rows * 26 + 6, cw = W / cols;
+        var svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, 'class': 'cs-svg', role: 'img',
+          'aria-label': edges.length + ' observed flows between ' + nodes.length + ' workloads' }, box);
+        nodes.forEach(function (n) { at[n[0]] = { x: n[1] * cw + 6, y: n[2] * 26 + 4 }; });
+        var parts = [];
+        edges.forEach(function (e) {
+          var a = at[e[0]], b = at[e[1]];
+          if (!a || !b) return;
+          var x1 = a.x + cw - 18, y1 = a.y + 10, x2 = b.x, y2 = b.y + 10, mx = (x1 + x2) / 2;
+          parts.push(mk('path', { d: 'M' + x1 + ' ' + y1 + ' C ' + mx + ' ' + y1 + ', ' + mx + ' ' + y2 + ', ' + x2 + ' ' + y2,
+            'class': 'cs-flow' + (e[3] > 0 ? ' dropped' : ''), pathLength: 1 }, svg));
+        });
+        nodes.forEach(function (n) {
+          var p = at[n[0]];
+          mk('rect', { x: p.x, y: p.y, width: cw - 24, height: 20, rx: 4, 'class': 'cs-wl' }, svg);
+          mk('text', { x: p.x + 5, y: p.y + 13.5, 'class': 'cs-lab' }, svg, cut(n[0], Math.floor((cw - 30) / 5.4)));
+        });
+        return parts;
+      },
+      compliance: function (box) {
+        var grid = mk('div', { 'class': 'cs-ctl' }, box), parts = [], tally = {};
+        C.compliance.controls.forEach(function (c) {
+          tally[c[1]] = (tally[c[1]] || 0) + 1;
+          parts.push(mk('span', { 'class': 'cs-c s-' + c[1].toLowerCase(), title: c[0] + ' · ' + c[1] }, grid));
+        });
+        mk('div', { 'class': 'cs-note' }, box, [['FAIL', 'fail'], ['PASS', 'pass'], ['MANUAL', 'for a person'], ['NA', 'not assessable read-only']]
+          .filter(function (k) { return tally[k[0]]; }).map(function (k) { return tally[k[0]] + ' ' + k[1]; }).join(' · '));
+        return parts;
+      },
+      preflight: function (box) {
+        var P = C.preflight, pre = mk('pre', { 'class': 'cs-term' }, box);
+        return [mk('span', { 'class': 'p' }, pre, '$ ' + P.cmd + '\n'), mk('span', { 'class': 'bad' }, pre, P.head + '\n'),
+                mk('span', { 'class': 'dim' }, pre, '  ' + cut(P.why, 92) + '\n'), mk('span', { 'class': 'exit' }, pre, 'exit ' + P.exit)];
+      },
+      fleet: function (box) {
+        var F = C.fleet, tbl = mk('div', { 'class': 'cs-fleet', style: 'grid-template-columns: minmax(0,1.3fr) repeat(' + F.clusters.length + ', minmax(0,1fr))' }, box), parts = [];
+        mk('span', { 'class': 'cs-fh' }, tbl, 'what they declare');
+        F.clusters.forEach(function (c) { mk('span', { 'class': 'cs-fh' }, tbl, c.replace(/^acme-pay-/, '')); });
+        F.rows.forEach(function (r) {
+          mk('span', { 'class': 'cs-fd' }, tbl, r[0] + ' · ' + r[1]);
+          r[2].forEach(function (v) { parts.push(mk('span', { 'class': 'cs-fv' + (v === '(not declared)' ? ' none' : '') }, tbl, v === '(not declared)' ? '—' : v)); });
+        });
+        return parts;
+      }
+    };
+    $$('.cap-scene[data-scene]').forEach(function (box) {
+      var make = builders[box.getAttribute('data-scene')];
+      if (!make) return;
+      var parts = make(box) || [];
+      var finish = function () { box.classList.add('played'); parts.forEach(function (p) { p.classList.add('on'); }); };
+      if (reduce || !('IntersectionObserver' in window)) { finish(); return; }
+      var step = Math.min(220, 2400 / Math.max(1, parts.length));
+      new IntersectionObserver(function (es, io) {
+        if (!es[0].isIntersecting) return;
+        io.disconnect();
+        box.classList.add('played');
+        parts.forEach(function (p, i) { setTimeout(function () { p.classList.add('on'); }, 200 + i * step); });
+      }, { threshold: 0.45 }).observe(box);
+    });
+  })();
+
   /* ── tabs ─────────────────────────────────────────────────────────────── */
   var tabs = $$('.tab');
   var select = function (t) {
@@ -110,7 +354,7 @@
         if (!lost) survivors.push(node);
         n.p.forEach(function (p, pi) {
           var cx = x + 24 + pi * 15, cy = ny + 38;
-          var c = el('circle', { cx: cx, cy: cy, r: 5, 'class': 'pod' }, gPods || (gPods = el('g', {})));
+          var c = el('circle', { cx: cx, cy: cy, r: 5, 'class': 'pod', 'data-k': p.k }, gPods || (gPods = el('g', {})));
           var pod = { c: c, cx: cx, cy: cy, key: p.k, why: p.why, bare: !!p.bare, lost: lost, node: node };
           pods.push(pod);
           if (lost && p.why) stranded.push(pod);
@@ -159,6 +403,9 @@
         p.c.classList.toggle('moved', move);
         p.c.classList.toggle('gone', p.bare && p.lost && s >= 2);
         p.c.classList.toggle('stranded', !!strand);
+        /* THE ZONE GOES DARK WITH ITS PODS. Its nodes dimmed and its pods stayed bright, as if nothing on them had
+           been lost; each now dims with its node until the story says where it goes — moved, gone or stranded. */
+        p.c.classList.toggle('dark', p.lost && s >= 1 && !move && !strand && !(p.bare && s >= 2));
         p.c.style.transform = move ? 'translate(' + p.tx + 'px,' + p.ty + 'px)'
           : strand ? 'translate(' + p.sx + 'px,' + p.sy + 'px)' : '';
         if (p.row) p.row.classList.toggle('in', !!strand);
@@ -274,6 +521,7 @@
           p.c.classList.toggle('stranded', cls === 'stranded');
           p.c.classList.toggle('held', cls === 'held');
           p.c.classList.toggle('gone', cls === 'gone');
+          p.c.classList.remove('dark');
           p.c.style.transform = tf;
         });
         floor.style.opacity = floorK ? 1 : 0;

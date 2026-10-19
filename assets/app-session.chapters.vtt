@@ -1,21 +1,21 @@
 WEBVTT
 
-NOTE written by record-video.mjs from the recording's own step clock; 32.2 s at 25 fps
+NOTE written by record-video.mjs from the recording's own step clock; 32.3 s at 25 fps
 
-00:00:00.001 --> 00:00:01.608
+00:00:00.001 --> 00:00:01.607
 Home
 
-00:00:01.608 --> 00:00:11.858
+00:00:01.607 --> 00:00:11.895
 Read a cluster
 
-00:00:11.858 --> 00:00:17.074
+00:00:11.895 --> 00:00:17.106
 The reading
 
-00:00:17.074 --> 00:00:21.712
+00:00:17.106 --> 00:00:21.723
 Open the reading
 
-00:00:21.712 --> 00:00:27.326
+00:00:21.723 --> 00:00:27.343
 Drain a node
 
-00:00:27.326 --> 00:00:32.240
+00:00:27.343 --> 00:00:32.280
 Lose a zone

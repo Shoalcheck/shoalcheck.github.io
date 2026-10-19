@@ -349,6 +349,13 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .top .state { flex: none; }
   .top .ghost { font-size: 0; gap: 0; }
   .top .ghost .kbd { display: none; }
+  /* A PANEL KEEPS ITS TITLE. Beside a long aside the title shrank to its first letter — "W" for "What talks to
+     what" — so on a phone the aside takes the line under the title. */
+  .panel > header { flex-wrap: wrap; row-gap: 2px; }
+  .panel > header .aside { margin-left: 0; white-space: normal; flex-basis: 100%; }
+  /* A GRAPH KEEPS ITS SCALE. Drawn 1,300 units wide into 350 pixels it was a picture of a graph; it keeps a width
+     its labels can be read at and scrolls sideways inside its panel (.gwrap). */
+  .gwrap .graph { min-width: 720px; }
 }
 
 /* ── the canvas ────────────────────────────────────────────────────────── */
@@ -746,6 +753,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .graph.focused .gnode.off { opacity: .17; }
 .graph.focused .edges path { opacity: .12; }
 .graph.focused .edges path.on { opacity: 1; stroke: var(--accent); stroke-width: 1.9; }
+/* The observed map: a dropped edge is red and dashed, a failing one red, and every edge carries its rate in words
+   haloed against the panel so a crossing line does not cut through them. */
+.graph .edges path.dropped { stroke: var(--sev-0); stroke-dasharray: 4 3; }
+.graph .edges path.erring { stroke: var(--sev-0); }
+.graph .elab { font-family: var(--mono); font-size: 11px; fill: var(--fg-dim); paint-order: stroke;
+               stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; transition: opacity .14s ease-out; }
+.graph .elab.dropped, .graph .elab.erring { fill: var(--sev-0); }
+.graph.focused .edges .elab { opacity: .15; }
+.graph.focused .edges .elab.on { opacity: 1; }
 .graph.focused .gnode.on rect:first-of-type { stroke: var(--accent); stroke-width: 1.6; }
 .graph.searching .gnode { opacity: .2; }
 .graph.searching .gnode.hit { opacity: 1; }
@@ -2088,6 +2104,18 @@ function treemap(entries, W, H) {
 
    The suffix comes from a counter rather than from the graph's label: a label is customer data, it can be
    absent, and two graphs can share one. A counter is injective by construction. */
+/* The point on a cubic Bézier curve whose x is nearest the one given: where an edge crosses the gap its label
+   belongs in. Sampled, because a label needs a place, not a root. */
+function bezierAtX(x0, y0, x1, y1, x2, y2, x3, y3, x) {
+  var best = Infinity, bx = 0, by = 0;
+  for (var i = 0; i <= 100; i++) {
+    var t = i / 100, u = 1 - t;
+    var px = u * u * u * x0 + 3 * u * u * t * x1 + 3 * u * t * t * x2 + t * t * t * x3;
+    var py = u * u * u * y0 + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * y3;
+    if (Math.abs(px - x) < best) { best = Math.abs(px - x); bx = px; by = py; }
+  }
+  return [bx, by];
+}
 var GRAPH_SEQ = 0;
 function nextGraphUID() { return 'g' + (++GRAPH_SEQ); }
 function arrowDefs(uid) {
@@ -2109,7 +2137,9 @@ function drawLayered(cols, edges, o) {
     (inbound[e[1]] = inbound[e[1]] || []).push(e[0]);
   });
 
-  cols[0].sort(function (a, b) {
+  /* o.fixed: the caller has already ordered every column (the observed map's rows come from Go, so the classic
+     report and the instrument draw one layout) — keep that order and stack each column from the top. */
+  if (!o.fixed) cols[0].sort(function (a, b) {
     var da = (outbound[a.id] || []).length, db = (outbound[b.id] || []).length;
     return (db - da) || String(a.label).localeCompare(String(b.label));
   });
@@ -2128,7 +2158,7 @@ function drawLayered(cols, edges, o) {
     });
     col.forEach(function (n, k) { n.rank = k; });
   }
-  for (i = 1; i < cols.length; i++) order(cols[i]);
+  if (!o.fixed) for (i = 1; i < cols.length; i++) order(cols[i]);
 
   var tallest = Math.max.apply(null, cols.map(function (c) { return c.length; }).concat([1]));
   var H = PADY * 2 + tallest * (NH + GAP) - GAP;
@@ -2137,7 +2167,8 @@ function drawLayered(cols, edges, o) {
 
   var last = cols.length - 1;
   cols[last].forEach(function (n, k) { n.x = colX[last]; n.y = PADY + k * (NH + GAP); });
-  for (i = last - 1; i >= 0; i--) {
+  if (o.fixed) cols.forEach(function (col, ci) { col.forEach(function (n, k) { n.x = colX[ci]; n.y = PADY + k * (NH + GAP); }); });
+  else for (i = last - 1; i >= 0; i--) {
     (function (col, ci) {
       col.forEach(function (n) {
         var outs = outbound[n.id] || [], acc = 0, c = 0;
@@ -2156,18 +2187,34 @@ function drawLayered(cols, edges, o) {
 
   var uid = nextGraphUID();
   var svg = '<svg class="graph" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMin meet"' +
-            ' role="img" data-ah="' + uid + '-ah" data-ah-on="' + uid + '-ah-on"' +
+            ' role="img" data-ah="' + uid + '-ah" data-ah-on="' + uid + '-ah-on"' + (o.observed ? ' data-observed=""' : '') +
             ' aria-label="' + esc(o.label || 'graph') + '">';
   svg += arrowDefs(uid);
   svg += '<g class="edges">';
+  /* An edge may carry [from, to, {cls, label}]: a class for its treatment and the words written on it. A label
+     sits in the gap right after the caller, where no node is drawn — or, if one is already there, at the next
+     free place along the same edge in that gap. */
+  var labels = '', placed = [];
   edges.forEach(function (e) {
     var a = nodes[e[0]], b = nodes[e[1]];
     if (!a || !b) return;
+    var x = e[2] || {};
     var x1 = a.x + NW, y1 = a.y + NH / 2, x2 = b.x - 8, y2 = b.y + NH / 2, mx = (x1 + x2) / 2;
-    svg += '<path data-a="' + esc(e[0]) + '" data-b="' + esc(e[1]) + '" marker-end="url(#' + uid + '-ah)" ' +
+    svg += '<path' + (x.cls ? ' class="' + esc(x.cls) + '"' : '') + ' data-a="' + esc(e[0]) + '" data-b="' + esc(e[1]) + '" marker-end="url(#' + uid + '-ah)" ' +
            'd="M' + x1 + ' ' + y1 + ' C' + mx + ' ' + y1 + ', ' + mx + ' ' + y2 + ', ' + x2 + ' ' + y2 + '"/>';
+    if (x.label) {
+      var lw = String(x.label).length * 5.7 + 10, lx = mx, ly = (y1 + y2) / 2;
+      [0.5, 0.3, 0.7, 0.2, 0.8].some(function (f) {
+        var p = bezierAtX(x1, y1, mx, y1, mx, y2, x2, y2, x1 + COLGAP * f);
+        lx = p[0]; ly = p[1];
+        return !placed.some(function (q) { return Math.abs(q[0] - lx) < (q[2] + lw) / 2 && Math.abs(q[1] - ly) < 13; });
+      });
+      placed.push([lx, ly, lw]);
+      labels += '<text class="elab' + (x.cls ? ' ' + esc(x.cls) : '') + '" data-a="' + esc(e[0]) + '" data-b="' + esc(e[1]) + '"' +
+                ' x="' + lx.toFixed(1) + '" y="' + (ly - 4).toFixed(1) + '" text-anchor="middle">' + esc(x.label) + '</text>';
+    }
   });
-  svg += '</g>';
+  svg += labels + '</g>';
 
   cols.forEach(function (col, ci) {
     var hy = col.length ? Math.min.apply(null, col.map(function (n) { return n.y; })) - 8 : PADY;
@@ -2464,6 +2511,64 @@ function reachGraph(rows) {
   return svg + detached;
 }
 
+/* ── the traffic a reading saw ────────────────────────────────────────────────
+   Drawn only when the reading had telemetry to see it with (D.observed), and laid out as the classic report lays
+   it out — view.ObservedLayers and ObservedRows: a node's column is the longest chain of callers in front of it —
+   so the two surfaces draw one map. Every edge carries its rate; an edge the cluster's network policy dropped is
+   red and dashed and says how much of it. What is drawn is what moved in the window, not what could: a quiet path
+   is absent, which is not the same as no path. Follows the cut like the reachability graph: an edge stays while
+   either end is in a namespace the cut keeps. */
+function observedGraph(rows) {
+  var O = D.observed;
+  if (!O || !O.e || !O.e.length) return '';
+  var byId = {};
+  (D.topo || []).forEach(function (t) { (t.w || []).forEach(function (w) { byId[w.id] = { ns: t.ns, w: w }; }); });
+  var narrowed = rows.length !== R.length, keepNs = {};
+  if (narrowed) rows.forEach(function (r) { keepNs[r[NS] || ''] = 1; });
+  var inCut = function (id) { var h = byId[id]; return !narrowed || !!(h && keepNs[h.ns]); };
+  var edges = O.e.filter(function (e) { return inCut(e.a) || inCut(e.b); });
+  if (!edges.length) return '';
+  var used = {};
+  edges.forEach(function (e) { used[e.a] = used[e.b] = 1; });
+  var wlN = {};
+  rows.forEach(function (r) { if (r[WL]) { var k = wlId(r[WL]); wlN[k] = (wlN[k] || 0) + 1; } });
+  var byLayer = {};
+  (O.n || []).forEach(function (n) {
+    if (!used[n.id]) return;
+    var h = byId[n.id], kind = n.id.split('/')[0], name = n.id.slice(kind.length + 1);
+    var node = {
+      id: n.id, row: n.r, label: h ? h.w.n : name, sev: h ? h.w.s : null,
+      sub: h ? h.ns + ' · ' + h.w.k
+             : kind === 'external' ? 'outside the cluster' : kind === 'unknown' ? 'not resolved to a workload' : kind
+    };
+    if (h) {
+      node.f = 'q'; node.v = h.w.n;
+      var c = wlN[wlIdOf(h.ns, h.w.n)];
+      if (c) node.badge = num(c);
+    }
+    (byLayer[n.l] = byLayer[n.l] || []).push(node);
+  });
+  var cols = Object.keys(byLayer).map(Number).sort(function (a, b) { return a - b; }).map(function (l) {
+    return byLayer[l].sort(function (a, b) { return a.row - b.row; });
+  });
+  var unit = O.unit === 'flows' ? 'flows/s' : 'req/s';
+  var rate = function (r) {
+    return (r >= 10 ? Math.round(r) : r >= 1 ? Math.round(r * 10) / 10 : Math.round(r * 100) / 100) + ' ' + unit;
+  };
+  var share = function (p) { return p < 0.1 ? '<0.1%' : p < 1 ? p.toFixed(1) + '%' : Math.round(p) + '%'; };
+  var es = edges.map(function (e) {
+    var x = { label: rate(e.r) };
+    if (e.drop > 0) { x.label += ' · ' + share(e.drop) + ' dropped'; x.cls = 'dropped'; }
+    else if (O.unit !== 'flows' && e.err > 0) { x.label += ' · ' + share(e.err) + ' failed'; if (e.err >= 5) x.cls = 'erring'; }
+    return [e.a, e.b, x];
+  });
+  return drawLayered(cols, es, {
+    fixed: true, observed: true, nw: 204, nh: 40, colgap: 220,
+    label: 'Observed traffic: ' + plural(es.length, 'edge', 'edges') + ' between ' +
+           plural(Object.keys(used).length, 'endpoint', 'endpoints')
+  });
+}
+
 /* ── graph interaction ────────────────────────────────────────────────────────
    The one interaction a node-link diagram genuinely needs: hovering a node lifts
    it and everything it touches, and pushes the rest back. On a 19-node graph a
@@ -2473,8 +2578,11 @@ function reachGraph(rows) {
    Focus is applied by class on the <svg>, not by restyling each element, so the
    cost of a hover is one class write and the CSS does the rest. */
 function wireGraph(root) {
-  var svg = (root || document).querySelector('svg.graph');
-  if (!svg) return;
+  /* EVERY GRAPH, not the first: Topology draws the declared reachability and the observed traffic one above the
+     other, and the second was a picture nobody could trace. */
+  [].forEach.call((root || document).querySelectorAll('svg.graph'), wireOneGraph);
+}
+function wireOneGraph(svg) {
 
   var down = {}, up = {}, paths = [].slice.call(svg.querySelectorAll('.edges path'));
   paths.forEach(function (p) {
@@ -2500,6 +2608,7 @@ function wireGraph(root) {
     return out;
   }
   var nodes = [].slice.call(svg.querySelectorAll('.gnode'));
+  var elabs = [].slice.call(svg.querySelectorAll('.edges .elab'));
   var pinned = null;
   /* The arrowhead ids are the GRAPH's, not this file's: two graphs on one page each carry their own, so a
      hard-coded `url(#ah)` would repaint the other graph's marker on this graph's edges. When the attributes
@@ -2520,6 +2629,7 @@ function wireGraph(root) {
       svg.classList.remove('focused');
       nodes.forEach(function (n) { n.classList.remove('on', 'off', 'pin'); });
       paths.forEach(function (p) { p.classList.remove('on'); setMarker(p, false); });
+      elabs.forEach(function (l) { l.classList.remove('on'); });
       return;
     }
     svg.classList.add('focused');
@@ -2535,6 +2645,7 @@ function wireGraph(root) {
       p.classList.toggle('on', lit);
       setMarker(p, lit);
     });
+    elabs.forEach(function (l) { l.classList.toggle('on', !!(near[l.getAttribute('data-a')] && near[l.getAttribute('data-b')])); });
   }
   function focus(id) { if (!pinned) apply(id); }
 
@@ -3330,13 +3441,37 @@ function wsTopology(rows, t) {
     basis: 'Replica counts are the declared spec, not a live count. A workload appears once, under the namespace of the resource its finding is keyed on.'
   });
 
+  var ghint = '<div class="ghint"><span><b>hover</b> to trace</span><span><b>click</b> to pin</span><span><b>scroll</b> to zoom</span><span><b>drag</b> to pan</span><span><b>double-click</b> to reset</span></div>';
     h += panel({
     span: 'c12', title: 'What is reachable from outside',
     aside: 'a node is drawn once, however many paths run through it',
-    body: '<div class="gwrap">' + reachGraph(rows) + '</div>' + '<div class="ghint"><span><b>hover</b> to trace</span><span><b>click</b> to pin</span><span><b>scroll</b> to zoom</span><span><b>drag</b> to pan</span><span><b>double-click</b> to reset</span></div>',
+    body: '<div class="gwrap">' + reachGraph(rows) + '</div>' + ghint,
     basis: 'Derived from Ingress and Service objects — <b>declared wiring, not observed traffic</b>. ' +
            'A dashed node has no inbound path in this reading, which is weaker than having none.'
   });
+
+  if (D.observed) {
+    var O = D.observed;
+    var srcName = { 'hubble-l4': 'Cilium\'s Hubble', 'hubble-l7': 'Cilium\'s Hubble', istio: 'Istio', linkerd: 'Linkerd' }[O.src] || O.src;
+    var win = String(O.win || '').replace(/^(\d+)m$/, function (_, n) { return plural(+n, 'minute', 'minutes'); })
+                                  .replace(/^(\d+)h$/, function (_, n) { return plural(+n, 'hour', 'hours'); });
+    var og = observedGraph(rows);
+    h += panel({
+      span: 'c12', title: 'What talks to what',
+      aside: 'observed by ' + srcName + ' over ' + win + ' · ' + (O.unit === 'flows' ? 'flows' : 'requests') + ' a second',
+      body: og ? '<div class="gwrap">' + og + '</div>' + ghint
+        : '<p class="note">' + esc(O.e && O.e.length ? 'None of the observed traffic touches the namespaces in this cut.'
+            : (O.note || 'The telemetry was there and counted no traffic between workloads in the window.')) + '</p>',
+      basis: O.unit === 'flows'
+        ? '<b>Measured, not declared</b>: ' + esc(srcName) + ' counted the network-level flows between workloads over the ' +
+          esc(win) + ' before this reading. A flow is a connection, not a request, so no error rate, latency or ' +
+          'encryption is claimed here. A path that was quiet in the window is not drawn, which is not the same as no ' +
+          'path. <b>Red, dashed</b>: flows the cluster\'s own network policy dropped.'
+        : '<b>Measured, not declared</b>: ' + esc(srcName) + ' counted requests between workloads over the ' + esc(win) +
+          ' before this reading, at the destination. A path that was quiet in the window is not drawn, which is not ' +
+          'the same as no path. <b>Red</b>: 5% of requests or more failed.'
+    });
+  }
 
   var nsm = {}; rows.forEach(function (r) {
     var k = r[NS] || '(cluster)'; (nsm[k] = nsm[k] || {})[r[CAT]] = ((nsm[k] || {})[r[CAT]] || 0) + 1; });

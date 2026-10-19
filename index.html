@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Shoalcheck — don't start a change you can't finish</title>
-<meta name="description" content="Shoalcheck reads a Kubernetes cluster read-only from your laptop and tells you which node won't drain, what has nowhere to go if a zone fails, and what blocks the next upgrade — before you start. Every claim names the object it rests on.">
+<title>Shoalcheck — every finding in your cluster, with what it rests on</title>
+<meta name="description" content="Shoalcheck reads a Kubernetes cluster read-only from your laptop: reliability, security, cost, topology and compliance in one reading you can work in — and, before a change, which node won't drain and what a lost zone leaves stranded. Every finding names what it rests on.">
 <meta name="theme-color" content="#06090a">
-<meta property="og:title" content="Shoalcheck — don't start a change you can't finish">
-<meta property="og:description" content="Read-only Kubernetes preflight and audit from your laptop. Which node won't drain, what a lost zone leaves stranded, what blocks the upgrade — before you start.">
+<meta property="og:title" content="Shoalcheck — every finding in your cluster, with what it rests on">
+<meta property="og:description" content="A read-only Kubernetes audit from your laptop: reliability, security, cost, topology and compliance in one reading, every finding with the objects it rests on — and preflight for drains, zones and upgrades.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://shoalcheck.github.io/">
 <meta property="og:image" content="https://shoalcheck.github.io/assets/og-card.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Shoalcheck — don't start a change you can't finish. Beside it, the real output of shoalcheck preflight drain on a kind test cluster: assay-e2e-worker cannot be evacuated, 1 thing stops the drain, exit 2.">
+<meta property="og:image:alt" content="Shoalcheck — every finding in your cluster, with what it rests on. Beside it, the sample reading of acme-pay-prod, labelled Illustrative sample: 141 findings by severity and category, $1,659 a month identified, 5 nodes cannot be evacuated, 1 dated obligation inside 90 days.">
 <meta name="twitter:image" content="https://shoalcheck.github.io/assets/og-card.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <!-- Where the download buttons look for files: a GitHub repository whose releases carry the archives. -->
@@ -37,8 +37,9 @@
     </a>
     <button class="menu" aria-expanded="false" aria-controls="site-nav">Menu</button>
     <nav class="nav" id="site-nav" aria-label="Sections">
-      <a href="index.html#zone">Lose a zone</a>
+      <a href="index.html#finds">What it finds</a>
       <a href="index.html#reading">The reading</a>
+      <a href="index.html#zone">Before a change</a>
       <a href="index.html#arithmetic">The arithmetic</a>
       <a href="index.html#pricing">Pricing</a>
       <a href="index.html#faq">FAQ</a>
@@ -59,22 +60,22 @@
   <div class="glow" aria-hidden="true"></div>
   <div class="wrap hero-grid">
     <div class="hero-copy reveal">
-      <span class="eyebrow">Read-only Kubernetes preflight</span>
-      <h1 id="hero-title">Don't start a change <span class="hl">you can't finish.</span></h1>
-      <p class="lede">Shoalcheck reads your cluster with <b>get</b> and <b>list</b>, from your laptop, in seconds — and tells you which node won't drain, what has nowhere to go if a zone fails, and what blocks the next upgrade. Every claim names the object it rests on.</p>
+      <span class="eyebrow">Read-only Kubernetes audit</span>
+      <h1 id="hero-title">Every finding in your cluster, <span class="hl">with what it rests on.</span></h1>
+      <p class="lede">Shoalcheck reads your cluster with <b>get</b> and <b>list</b>, from your laptop, in seconds: reliability, security, cost, topology and compliance in one reading you can work in — and, before a change, which node won't drain and what a lost zone leaves stranded. Every finding names the objects it rests on, every dollar its rate.</p>
       <div class="cta">
         <a class="btn btn-primary btn-lg" href="index.html#download" data-os-cta>
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 16.5h12"/></svg>
           <span data-os-label>Download</span>
         </a>
-        <a class="btn btn-lg" href="app-demo.html">
+        <a class="btn btn-lg" href="sample-report.html">
           <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z"/></svg>
-          Try it in your browser
+          Open the sample reading
         </a>
       </div>
       <button class="ov-open" id="ov-open" type="button" aria-haspopup="dialog">
         <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z"/></svg>
-        Watch the overview <span class="ov-len">53 s, with subtitles</span>
+        Watch the overview <span class="ov-len">56 s, with subtitles</span>
       </button>
       <ul class="trust">
         <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>No account</li>
@@ -83,31 +84,18 @@
       </ul>
     </div>
 
-    <figure class="term reveal" aria-label="A real preflight against a kind test cluster: the drain of assay-e2e-worker is blocked by a PodDisruptionBudget, exit code 2.">
-      <div class="term-bar"><span></span><span></span><span></span><b>kind-assay-e2e</b></div>
-      <pre class="term-body" data-type><span class="p">$</span> shoalcheck preflight drain assay-e2e-worker
-<span class="bad">✗ assay-e2e-worker cannot be evacuated:</span>
-<span class="bad">  1 thing stops the drain</span>
-
-1. Drain of assay-e2e-worker is blocked by
-   budget e2e-demo/drain-blocked-pdb
-   Evacuating node assay-e2e-worker requires
-   evicting 1 pod covered by
-   PodDisruptionBudget
-   e2e-demo/drain-blocked-pdb.
-   · …
-   · … reports status.disruptionsAllowed=0
-     with spec.maxUnavailable=0 … The
-     eviction API would reject that eviction,
-     so `kubectl drain assay-e2e-worker`
-     would not complete …
-   · …
-
-<span class="dim">basis: 12 kinds read · 16 requests,</span>
-<span class="dim">0 object writes · …</span>
-<span class="p">$</span> echo $?
-<span class="exit">2</span></pre>
-      <figcaption>Real output from our kind test cluster, wrapped to fit. Each “…” marks words cut, from the end of a line to whole lines of evidence: the full answer gives five. The drain would have stopped here.</figcaption>
+    <!-- The sample reading being taken, drawn from its own figures (#hero-reading, written by make site-data). -->
+    <figure class="rd reveal" id="hero-rd" aria-labelledby="rd-cap">
+      <div class="rd-bar"><b class="rd-cl"></b><span class="rd-where"></span><span class="rd-chip">Illustrative sample</span></div>
+      <div class="rd-body">
+        <section class="rd-col rd-read" aria-label="What it read"><h3>What it read</h3><ol class="rd-kinds"></ol><p class="rd-sum" id="rd-read-sum"></p></section>
+        <section class="rd-col rd-found" aria-label="What it found"><h3>What it found</h3><div class="rd-grid" role="table"></div><p class="rd-sum" id="rd-found-sum"></p></section>
+        <section class="rd-col rd-cost" aria-label="What it identified"><h3>What it identified</h3><b class="rd-usd" id="rd-usd"></b><span class="rd-per">a month, at list price</span><p class="rd-basis" id="rd-basis"></p></section>
+      </div>
+      <div class="rd-first"><h3>What it found first</h3><ol class="rd-claims" id="rd-claims"></ol></div>
+      <div class="rd-foot"><span class="rd-step" id="rd-step"></span><button class="rd-replay" id="rd-replay" type="button" hidden>Replay</button><a class="rd-open" href="sample-report.html">Open the whole reading</a></div>
+      <noscript><img src="assets/shot-reading.png" width="1440" height="900" alt="The overview of the sample reading of acme-pay-prod."></noscript>
+      <figcaption id="rd-cap">The sample reading being taken — acme-pay-prod, a fictional cluster run through the real engine. Every figure here is that reading's own.</figcaption>
     </figure>
   </div>
 </section>
@@ -122,12 +110,191 @@
   </div>
 </section>
 
+<!-- ═══ WHAT A READING FINDS ═══ -->
+<section class="band" id="finds" aria-labelledby="c-title">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <span class="eyebrow">One reading, every angle</span>
+      <h2 id="c-title">What one reading finds.</h2>
+      <p>The same read of your cluster answers seven questions at once. Each figure below is the sample reading's own — a fictional cluster through the real engine — and each opens the part of it that says why.</p>
+    </div>
+    <div class="caps">
+      <a class="cap-card reveal" href="sample-report.html#v=eyJ3cyI6ImFjY2VzcyJ9">
+        <div class="cap-scene" data-scene="security"></div>
+        <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 4 5v4.6c0 3.7 2.6 6.6 6 7.9 3.4-1.3 6-4.2 6-7.9V5z"/><path d="m7.5 10 1.8 1.8L12.8 8"/></svg></span><h3>Security &amp; access</h3></div>
+        <b class="cap-fig" data-cap="security">3 critical grants · 2 reach cluster-admin</b>
+        <p>Who can reach what: every binding traced from its subject to the role it grants, rated by what that role can do.</p>
+        <span class="cap-go">Trace it in the sample</span>
+      </a>
+      <a class="cap-card reveal" href="sample-report.html#v=eyJ3cyI6ImJsYXN0In0">
+        <div class="cap-scene" data-scene="reliability"></div>
+        <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 10h3l2-5 3 10 2-5h5"/></svg></span><h3>Reliability</h3></div>
+        <b class="cap-fig" data-cap="reliability">5 nodes cannot be evacuated</b>
+        <p>Budgets at zero, pods no controller manages, volumes pinned to one zone — each node named with the pod that stops it.</p>
+        <span class="cap-go">See the blast radius</span>
+      </a>
+      <a class="cap-card reveal" href="sample-report.html#v=eyJ3cyI6ImNvc3QifQ">
+        <div class="cap-scene" data-scene="money"></div>
+        <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="M12.4 7.4c-.4-.8-1.3-1.3-2.4-1.3-1.5 0-2.5.8-2.5 1.9 0 2.6 5 1.4 5 4 0 1.1-1 1.9-2.5 1.9-1.1 0-2.1-.5-2.5-1.3M10 4.6v1.5M10 13.9v1.5"/></svg></span><h3>Money</h3></div>
+        <b class="cap-fig" data-cap="money">$1,659 a month identified</b>
+        <p>Rightsizing from a week of the cluster's own usage, idle load balancers, old instance generations — every dollar with its rate.</p>
+        <span class="cap-go">Follow the money</span>
+      </a>
+      <a class="cap-card reveal" href="sample-report.html#v=eyJ3cyI6InRvcG9sb2d5In0">
+        <div class="cap-scene" data-scene="topology"></div>
+        <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="4.5" cy="10" r="2"/><circle cx="15.5" cy="4.5" r="2"/><circle cx="15.5" cy="15.5" r="2"/><path d="m6.3 9.1 7.4-3.7M6.3 10.9l7.4 3.7"/></svg></span><h3>Topology</h3></div>
+        <b class="cap-fig" data-cap="topology">6 observed flows · 9 references point at nothing</b>
+        <p>What is reachable from outside, what talks to what as the telemetry saw it, and the Services that publish no ready address.</p>
+        <span class="cap-go">Open the map</span>
+      </a>
+      <a class="cap-card reveal" href="sample-report.html#v=eyJ3cyI6ImNvbXBsaWFuY2UifQ">
+        <div class="cap-scene" data-scene="compliance"></div>
+        <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="12" height="15" rx="2"/><path d="M7.5 3V2h5v1"/><path d="m7 11 2 2 4-4"/></svg></span><h3>Compliance</h3></div>
+        <b class="cap-fig" data-cap="compliance">26 of 28 checkable CIS controls fail</b>
+        <p>The CIS Kubernetes Benchmark 5.x controls the reading can check, each with its findings; every control it cannot is said so, and the evidence pack goes to your auditor.</p>
+        <span class="cap-go">Open the controls</span>
+      </a>
+      <a class="cap-card reveal" href="index.html#questions">
+        <div class="cap-scene" data-scene="preflight"></div>
+        <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15.5 17 10 3 4.5 5.5 10z"/><path d="M5.5 10H11"/></svg></span><h3>Before a change</h3></div>
+        <b class="cap-fig" data-cap="preflight">12 nodes and 3 zones, each answered</b>
+        <p>Free on every plan: which node will not drain, what a lost zone leaves stranded, what blocks the next version — with an exit code a pipeline can act on.</p>
+        <span class="cap-go">Ask the three questions</span>
+      </a>
+      <a class="cap-card cap-wide reveal" href="sample-fleet.html">
+        <div class="cap-scene" data-scene="fleet"></div>
+        <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m10 2.5 7.5 4-7.5 4-7.5-4z"/><path d="m2.5 10 7.5 4 7.5-4"/><path d="m2.5 13.5 7.5 4 7.5-4"/></svg></span><h3>Fleets and history</h3></div>
+        <b class="cap-fig" data-cap="fleet">3 clusters · 7 things they declare differently</b>
+        <p>Every cluster in one file with what they declare differently, and each reading compared with the one before — a finding that goes missing is counted as missing, never as dealt with.</p>
+        <span class="cap-go">Open the sample fleet</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ THE READING ═══ -->
+<section class="band band-alt" id="reading" aria-labelledby="r-title">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <span class="eyebrow">Work in it</span>
+      <h2 id="r-title">A reading you can work in, not a PDF you scroll.</h2>
+      <p><code>shoalcheck audit</code> reads reliability, security, cost and topology and writes one self-contained file: every finding with the object it rests on, every dollar with its rate, and what could not be read named as such — never counted as clean. Filter it, slice it, open any finding, hand it off.</p>
+    </div>
+    <div class="gallery">
+      <figure class="g-main reveal">
+        <div class="live-frame" id="live-frame">
+          <img class="live-poster" src="assets/shot-reading.png" width="1440" height="900" loading="lazy" alt="The overview of the sample reading of acme-pay-prod, labelled Illustrative sample: 141 findings, 11 critical or high, $1,659 a month identified, the four claims it leads with, a severity by category grid and findings by namespace.">
+          <iframe data-src="sample-report.html" title="The sample reading, live" tabindex="-1" aria-hidden="true"></iframe>
+          <a class="live-open" href="sample-report.html">Open it — the whole reading</a>
+        </div>
+        <figcaption><b>Overview.</b> What it found first, how bad and of what kind, where — 141 findings on the sample cluster.</figcaption>
+      </figure>
+      <figure class="reveal">
+        <img src="assets/reading-blast.png" width="1440" height="900" loading="lazy" alt="The Blast radius workspace of the sample reading: the cluster by failure domain, three zones of four nodes each, the nodes named by a feasibility finding marked, what has nowhere to go and what one lost zone takes.">
+        <figcaption><b>Blast radius.</b> The cluster by failure domain, and what has nowhere to go.</figcaption>
+      </figure>
+      <figure class="reveal">
+        <img src="assets/reading-another.png" width="1440" height="900" loading="lazy" alt="The Method workspace of the sample reading: what it would take another way — the objects read, their size as kubectl prints them, the rule by object checks, the tokens an AI agent needs just to read them once, each model's price, and the hours by hand.">
+        <figcaption><b>What it would take another way.</b> Tokens for an AI agent, hours by hand — every figure a floor.</figcaption>
+      </figure>
+    </div>
+    <div class="loops reveal">
+      <figure class="loop">
+        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-narrow.jpg"
+          aria-label="Recorded on the sample reading: the Findings workspace, narrowed to the high findings and to one rule, then one finding opened — what it is, why it matters, the object it rests on, its evidence.">
+          <source src="assets/loop-narrow.webm" type="video/webm">
+          <source src="assets/loop-narrow.mp4" type="video/mp4">
+        </video>
+        <figcaption><b>Narrow it, open one.</b> Keep the high findings, open one, read what it rests on.</figcaption>
+      </figure>
+      <figure class="loop">
+        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-ask.jpg"
+          aria-label="Recorded on the sample reading: the search palette, payments-gateway typed in, and the whole reading cut to the four findings about that workload, twelve dollars a month of it identified.">
+          <source src="assets/loop-ask.webm" type="video/webm">
+          <source src="assets/loop-ask.mp4" type="video/mp4">
+        </video>
+        <figcaption><b>Ask by name.</b> Type a workload; every workspace keeps only what is about it.</figcaption>
+      </figure>
+      <figure class="loop">
+        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-money.jpg"
+          aria-label="Recorded on the sample reading: the Cost workspace, then the largest rule's figure followed to the ten findings behind it, $777 of $1,659 a month identified.">
+          <source src="assets/loop-money.webm" type="video/webm">
+          <source src="assets/loop-money.mp4" type="video/mp4">
+        </video>
+        <figcaption><b>Follow the money.</b> From the largest figure in Cost to the findings behind it.</figcaption>
+      </figure>
+      <figure class="loop">
+        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-trace.jpg"
+          aria-label="Recorded on the sample reading: the Access graph, the ServiceAccount workers/cicd-deployer pinned, and its two bindings lit through to the roles they reach, cluster-admin among them.">
+          <source src="assets/loop-trace.webm" type="video/webm">
+          <source src="assets/loop-trace.mp4" type="video/mp4">
+        </video>
+        <figcaption><b>Trace a grant.</b> Pin a ServiceAccount; the graph lights every binding and the role it reaches.</figcaption>
+      </figure>
+    </div>
+    <div class="reading-cta reveal">
+      <a class="btn btn-primary" href="sample-report.html">Open the sample reading</a>
+      <span class="note">A fictional cluster run through the real engine — every panel, filter and finding works. Labelled as a sample on every screen.</span>
+    </div>
+    <div class="compare reveal">
+      <figure>
+        <img src="assets/reading-compare.png" width="1440" height="900" loading="lazy" alt="The Since last workspace of a real reading of the kind test cluster: 12 findings more than the reading before it, 12 new, none gone, and the twelve new findings listed — a single replica without a disruption budget, no health probes, privilege escalation, a mutable image tag — every one on shop/checkout.">
+      </figure>
+      <div class="compare-copy">
+        <span class="eyebrow">Read it again</span>
+        <h3>The second reading says what changed since the first.</h3>
+        <p>Two real readings of our own kind test cluster, two seconds apart, around one deliberate bad deploy: <code>shop/checkout</code> on <code>nginx:latest</code>, one replica, no probes. The second names the twelve findings the first did not have, and each one opens to what it rests on.</p>
+        <p class="note">A finding that goes missing is counted as missing, never as dealt with: the object may have been deleted, or a rule may not have run. History stays on your machine.</p>
+        <a class="btn" href="sample-compare.html#v=eyJ3cyI6InRyZW5kIn0">Open the comparison</a>
+      </div>
+    </div>
+    <div class="compare compare-flip reveal">
+      <div class="compare-copy">
+        <span class="eyebrow">Read them all</span>
+        <h3>A fleet is one file: every cluster, and what they declare differently.</h3>
+        <p>The sample company's three clusters — production, staging and disaster recovery — each read by the engine and put together the way <code>shoalcheck fleet</code> does. Each name opens that cluster's full reading. Staging declares Pod Security levels, a NetworkPolicy and a quota that production does not yet; the recovery cluster runs without monitoring and serves Velero's API. So the evidence differs too, and each reading says which it had: production and staging read a week of usage from their own Prometheus and the traffic Hubble saw, where staging's policy drops a call production lets through; the recovery cluster has one moment of metrics.k8s.io and no traffic at all.</p>
+        <p class="note">What the clusters declare differently is listed side by side, and no value is marked as the right one. A context that could not be read is named, never counted as a cluster with no problems. Like the sample reading, it is labelled as a sample on every screen.</p>
+        <a class="btn" href="sample-fleet.html">Open the sample fleet</a>
+      </div>
+      <figure>
+        <img src="assets/reading-fleet.png" width="1440" height="900" loading="lazy" alt="The fleet overview of the sample company's three clusters, labelled Illustrative sample: acme-pay-prod 141 findings, acme-pay-staging 137, acme-pay-dr 122; $1,659 a month identified on prod and staging, read from their own Prometheus, and $1,647 on acme-pay-dr, read from a metrics.k8s.io snapshot; 400 findings and $4,965 a month across the fleet; every context read; and what they declare differently — Pod Security levels on api and payments, a NetworkPolicy, a ResourceQuota and a LimitRange in payments, Velero's API group on acme-pay-dr, and the monitoring namespace on two of the three.">
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ THE APP ═══ -->
+<section class="band" id="app" aria-labelledby="a-title">
+  <div class="wrap app-grid">
+    <div class="band-head reveal">
+      <span class="eyebrow">The desktop app</span>
+      <h2 id="a-title">A full application, not a script.</h2>
+      <p>Pick a cluster, ask a question, read the answer. Home with the three jobs, Preflight over your real nodes and zones, every reading kept and comparable, ⌘K to anything — and it tells you when a new version is out.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="app-demo.html"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z"/></svg>Try the interactive demo</a>
+        <a class="btn" href="index.html#download">Download</a>
+      </div>
+      <p class="note">The demo is the real window replaying a session recorded against our kind test cluster. Nothing in it talks to a cluster.</p>
+    </div>
+    <figure class="app-video reveal">
+      <video id="app-video" muted loop playsinline controls preload="none" width="1280" height="800" poster="assets/app-session-poster.jpg"
+        aria-label="The interactive demo, recorded: the app reads the kind test cluster — its four named steps in turn, the kinds it read, findings arriving, every request it issued, and a Stop button while it runs — writes the reading, which says unpriced because kind has no list price, and names the most severe finding its first three left out and why; opens the reading; then asks on the Preflight screen whether assay-e2e-worker can be drained, and what losing zone eu-central-1a would do to the mesh test cluster.">
+        <source src="assets/app-session.webm" type="video/webm">
+        <source src="assets/app-session.mp4" type="video/mp4">
+        <track kind="captions" src="assets/app-session.captions.vtt" srclang="en" label="What is on screen" default>
+        <track kind="chapters" src="assets/app-session.chapters.vtt" srclang="en" label="Chapters">
+      </video>
+      <figcaption>The interactive demo, recorded: read the cluster, open the reading, ask whether a node can be drained and what losing a zone would do. 32 seconds of the real window replaying a real session, at 25 frames a second; the banner on every frame says so.</figcaption>
+    </figure>
+  </div>
+</section>
+
 <!-- ═══ THE SCENE: LOSE A ZONE ═══ -->
 <section class="scene" id="zone" aria-labelledby="z-title">
   <div class="scene-pin">
     <div class="wrap scene-grid">
       <div class="scene-copy">
-        <span class="eyebrow">Lose a zone, on paper first</span>
+        <span class="eyebrow">Before a change — lose a zone on paper first</span>
         <h2 id="z-title">Watch a zone go down before it does.</h2>
         <ol class="scene-steps" id="scene-steps">
           <li data-step="0"><b>A real-shaped cluster.</b> <span class="sd"><span>Three zones, twelve nodes, thirty-two pods — the sample cluster, acme-pay-prod.</span></span></li>
@@ -236,123 +403,6 @@
         <p class="calc-basis" id="dl-basis"></p>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ═══ THE READING ═══ -->
-<section class="band band-alt" id="reading" aria-labelledby="r-title">
-  <div class="wrap">
-    <div class="band-head reveal">
-      <span class="eyebrow">And the whole cluster</span>
-      <h2 id="r-title">A reading you can work in, not a PDF you scroll.</h2>
-      <p><code>shoalcheck audit</code> reads reliability, security, cost and topology and writes one self-contained file: every finding with the object it rests on, every dollar with its rate, and what could not be read named as such — never counted as clean. Filter it, slice it, open any finding, hand it off.</p>
-    </div>
-    <div class="gallery">
-      <figure class="g-main reveal">
-        <div class="live-frame" id="live-frame">
-          <img class="live-poster" src="assets/shot-reading.png" width="1440" height="900" loading="lazy" alt="The overview of the sample reading of acme-pay-prod, labelled Illustrative sample: 137 findings, 10 critical or high, $1,647 a month identified, the four claims it leads with, a severity by category grid and findings by namespace.">
-          <iframe data-src="sample-report.html" title="The sample reading, live" tabindex="-1" aria-hidden="true"></iframe>
-          <a class="live-open" href="sample-report.html">Open it — the whole reading</a>
-        </div>
-        <figcaption><b>Overview.</b> What it found first, how bad and of what kind, where — 137 findings on the sample cluster.</figcaption>
-      </figure>
-      <figure class="reveal">
-        <img src="assets/reading-blast.png" width="1440" height="900" loading="lazy" alt="The Blast radius workspace of the sample reading: the cluster by failure domain, three zones of four nodes each, the nodes named by a feasibility finding marked, what has nowhere to go and what one lost zone takes.">
-        <figcaption><b>Blast radius.</b> The cluster by failure domain, and what has nowhere to go.</figcaption>
-      </figure>
-      <figure class="reveal">
-        <img src="assets/reading-another.png" width="1440" height="900" loading="lazy" alt="The Method workspace of the sample reading: what it would take another way — the objects read, their size as kubectl prints them, the rule by object checks, the tokens an AI agent needs just to read them once, each model's price, and the hours by hand.">
-        <figcaption><b>What it would take another way.</b> Tokens for an AI agent, hours by hand — every figure a floor.</figcaption>
-      </figure>
-    </div>
-    <div class="loops reveal">
-      <figure class="loop">
-        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-narrow.jpg"
-          aria-label="Recorded on the sample reading: the Findings workspace, narrowed to the high findings and to one rule, then one finding opened — what it is, why it matters, the object it rests on, its evidence.">
-          <source src="assets/loop-narrow.webm" type="video/webm">
-          <source src="assets/loop-narrow.mp4" type="video/mp4">
-        </video>
-        <figcaption><b>Narrow it, open one.</b> Keep the high findings, open one, read what it rests on.</figcaption>
-      </figure>
-      <figure class="loop">
-        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-ask.jpg"
-          aria-label="Recorded on the sample reading: the search palette, payments-gateway typed in, and the whole reading cut to the four findings about that workload, twelve dollars a month of it identified.">
-          <source src="assets/loop-ask.webm" type="video/webm">
-          <source src="assets/loop-ask.mp4" type="video/mp4">
-        </video>
-        <figcaption><b>Ask by name.</b> Type a workload; every workspace keeps only what is about it.</figcaption>
-      </figure>
-      <figure class="loop">
-        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-money.jpg"
-          aria-label="Recorded on the sample reading: the Cost workspace, then the largest rule's figure followed to the nine findings behind it, $765 of $1,647 a month identified.">
-          <source src="assets/loop-money.webm" type="video/webm">
-          <source src="assets/loop-money.mp4" type="video/mp4">
-        </video>
-        <figcaption><b>Follow the money.</b> From the largest figure in Cost to the findings behind it.</figcaption>
-      </figure>
-      <figure class="loop">
-        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-trace.jpg"
-          aria-label="Recorded on the sample reading: the Access graph, the ServiceAccount workers/cicd-deployer pinned, and its two bindings lit through to the roles they reach, cluster-admin among them.">
-          <source src="assets/loop-trace.webm" type="video/webm">
-          <source src="assets/loop-trace.mp4" type="video/mp4">
-        </video>
-        <figcaption><b>Trace a grant.</b> Pin a ServiceAccount; the graph lights every binding and the role it reaches.</figcaption>
-      </figure>
-    </div>
-    <div class="reading-cta reveal">
-      <a class="btn btn-primary" href="sample-report.html">Open the sample reading</a>
-      <span class="note">A fictional cluster run through the real engine — every panel, filter and finding works. Labelled as a sample on every screen.</span>
-    </div>
-    <div class="compare reveal">
-      <figure>
-        <img src="assets/reading-compare.png" width="1440" height="900" loading="lazy" alt="The Since last workspace of a real reading of the kind test cluster: 12 findings more than the reading before it, 12 new, none gone, and the twelve new findings listed — a single replica without a disruption budget, no health probes, privilege escalation, a mutable image tag — every one on shop/checkout.">
-      </figure>
-      <div class="compare-copy">
-        <span class="eyebrow">Read it again</span>
-        <h3>The second reading says what changed since the first.</h3>
-        <p>Two real readings of our own kind test cluster, two seconds apart, around one deliberate bad deploy: <code>shop/checkout</code> on <code>nginx:latest</code>, one replica, no probes. The second names the twelve findings the first did not have, and each one opens to what it rests on.</p>
-        <p class="note">A finding that goes missing is counted as missing, never as dealt with: the object may have been deleted, or a rule may not have run. History stays on your machine.</p>
-        <a class="btn" href="sample-compare.html#v=eyJ3cyI6InRyZW5kIn0">Open the comparison</a>
-      </div>
-    </div>
-    <div class="compare compare-flip reveal">
-      <div class="compare-copy">
-        <span class="eyebrow">Read them all</span>
-        <h3>A fleet is one file: every cluster, and what they declare differently.</h3>
-        <p>The sample company's three clusters — production, staging and disaster recovery — each read by the engine and put together the way <code>shoalcheck fleet</code> does. Each name opens that cluster's full reading. Staging declares Pod Security levels, a NetworkPolicy and a quota that production does not yet; the recovery cluster runs without monitoring and serves Velero's API.</p>
-        <p class="note">What the clusters declare differently is listed side by side, and no value is marked as the right one. A context that could not be read is named, never counted as a cluster with no problems. Like the sample reading, it is labelled as a sample on every screen.</p>
-        <a class="btn" href="sample-fleet.html">Open the sample fleet</a>
-      </div>
-      <figure>
-        <img src="assets/reading-fleet.png" width="1440" height="900" loading="lazy" alt="The fleet overview of the sample company's three clusters, labelled Illustrative sample: acme-pay-prod 137 findings, acme-pay-staging 133, acme-pay-dr 122, $1,647 a month identified on each; 392 findings and $4,941 a month across the fleet; every context read; and what they declare differently — Pod Security levels on api and payments, a NetworkPolicy, a ResourceQuota and a LimitRange in payments, Velero's API group on acme-pay-dr, and the monitoring namespace on two of the three.">
-      </figure>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ THE APP ═══ -->
-<section class="band" id="app" aria-labelledby="a-title">
-  <div class="wrap app-grid">
-    <div class="band-head reveal">
-      <span class="eyebrow">The desktop app</span>
-      <h2 id="a-title">A full application, not a script.</h2>
-      <p>Pick a cluster, ask a question, read the answer. Home with the three jobs, Preflight over your real nodes and zones, every reading kept and comparable, ⌘K to anything — and it tells you when a new version is out.</p>
-      <div class="cta">
-        <a class="btn btn-primary" href="app-demo.html"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z"/></svg>Try the interactive demo</a>
-        <a class="btn" href="index.html#download">Download</a>
-      </div>
-      <p class="note">The demo is the real window replaying a session recorded against our kind test cluster. Nothing in it talks to a cluster.</p>
-    </div>
-    <figure class="app-video reveal">
-      <video id="app-video" muted loop playsinline controls preload="none" width="1280" height="800" poster="assets/app-session-poster.jpg"
-        aria-label="The interactive demo, recorded: the app reads the kind test cluster — its four named steps in turn, the kinds it read, findings arriving, every request it issued, and a Stop button while it runs — writes the reading, which says unpriced because kind has no list price, and names the most severe finding its first three left out and why; opens the reading; then asks on the Preflight screen whether assay-e2e-worker can be drained, and what losing zone eu-central-1a would do to the mesh test cluster.">
-        <source src="assets/app-session.webm" type="video/webm">
-        <source src="assets/app-session.mp4" type="video/mp4">
-        <track kind="captions" src="assets/app-session.captions.vtt" srclang="en" label="What is on screen" default>
-        <track kind="chapters" src="assets/app-session.chapters.vtt" srclang="en" label="Chapters">
-      </video>
-      <figcaption>The interactive demo, recorded: read the cluster, open the reading, ask whether a node can be drained and what losing a zone would do. 32 seconds of the real window replaying a real session, at 25 frames a second; the banner on every frame says so.</figcaption>
-    </figure>
   </div>
 </section>
 
@@ -584,15 +634,15 @@
 <!-- ═══ FINAL CTA ═══ -->
 <section class="final" aria-labelledby="fin-title">
   <div class="wrap final-in reveal">
-    <h2 id="fin-title">Know before you drain.</h2>
-    <p>Free preflight, no account, nothing installed. Two minutes from download to your first answer.</p>
+    <h2 id="fin-title">Read your own cluster next.</h2>
+    <p>No account, nothing installed in the cluster. Two minutes from download to the size of your first reading and its five most serious kinds — free, as preflight is; the whole reading on a licence.</p>
     <div class="cta">
       <a class="btn btn-primary btn-lg" href="index.html#download">Download</a>
       <a class="btn btn-lg" href="app-demo.html">Try it in your browser</a>
       <button class="btn btn-lg just-switch" type="button" data-just-output aria-pressed="false">Just the output</button>
     </div>
-    <p class="just-note">"Just the output" hides our sentences and keeps what the product printed — the terminals, the scene,
-      the calculators, the video and the readings — with every caption that says what each rests on.</p>
+    <p class="just-note">"Just the output" hides our sentences and keeps what the product printed — the reading being taken,
+      the terminals, the scene, the calculators, the video and the readings — with every caption that says what each rests on.</p>
   </div>
 </section>
 
@@ -600,7 +650,7 @@
 
 <dialog class="overview" id="overview" aria-labelledby="ov-title">
   <div class="ov-head">
-    <h2 id="ov-title">Shoalcheck in 53 seconds</h2>
+    <h2 id="ov-title">Shoalcheck in 56 seconds</h2>
     <button class="ov-close" id="ov-close" type="button">Close</button>
   </div>
   <video id="ov-video" muted controls playsinline preload="none" width="1280" height="800" poster="assets/overview-poster.jpg"
@@ -628,6 +678,8 @@
   </div>
 </footer>
 
+<script type="application/json" id="caps-data">{"security":{"chains":[["api/api-operator","acme-api-operator","acme-api-operator","critical"],["Group/system:masters","acme-break-glass","cluster-admin","critical"],["workers/cicd-deployer","acme-deployer-cluster-admin","cluster-admin","critical"],["Group/system:authenticated","acme-everyone-can-read","acme-secret-sync","high"],["workers/acme-migrator-retired","acme-legacy-migrator","acme-secret-sync","high"],["payments/secret-sync","acme-secret-sync","acme-secret-sync","high"],["workers/cicd-deployer","acme-legacy-reporting","acme-reporting-reader","medium"]]},"reliability":{"zones":[["eu-central-1a",[["ip-10-0-1-a",true],["ip-10-0-1-d",true],["ip-10-0-1-g",false],["ip-10-0-2-a",true]]],["eu-central-1b",[["ip-10-0-1-b",true],["ip-10-0-1-e",false],["ip-10-0-1-h",false],["ip-10-0-2-b",false]]],["eu-central-1c",[["ip-10-0-1-c",true],["ip-10-0-1-f",false],["ip-10-0-1-i",false],["ip-10-0-2-c",false]]]]},"money":{"rules":[["requests above use",777,10],["older instance generations",417,2],["extended support",365,1],["idle load balancers",59,3],["gp2 where gp3 is cheaper",40,1]],"total":1659},"topology":{"edges":[["api-gateway","auth-service",121,0],["api-gateway","payments-gateway",35,0],["api-gateway","search-indexer",18,0],["ledger-reconciler","payments-gateway",2.2,0],["payments-gateway","payments-orchestrator",34,0],["payments-orchestrator","webhook-dispatcher",12,0]],"nodes":[["api-gateway",0,0],["ledger-reconciler",0,1],["auth-service",1,0],["search-indexer",1,1],["payments-gateway",1,2],["payments-orchestrator",2,0],["webhook-dispatcher",3,0]],"unit":"flows"},"compliance":{"controls":[["1.1.1","NA"],["1.2.1","NA"],["2.1","NA"],["3.2.1","NA"],["4.2.1","NA"],["5.1.1","FAIL"],["5.1.10","FAIL"],["5.1.11","FAIL"],["5.1.12","FAIL"],["5.1.13","FAIL"],["5.1.2","FAIL"],["5.1.3","MANUAL"],["5.1.4","FAIL"],["5.1.5","FAIL"],["5.1.6","FAIL"],["5.1.7","MANUAL"],["5.1.8","FAIL"],["5.1.9","FAIL"],["5.2.1","FAIL"],["5.2.10","FAIL"],["5.2.11","MANUAL"],["5.2.12","FAIL"],["5.2.13","FAIL"],["5.2.2","FAIL"],["5.2.3","FAIL"],["5.2.4","FAIL"],["5.2.5","FAIL"],["5.2.6","FAIL"],["5.2.7","FAIL"],["5.2.8","PASS"],["5.2.9","PASS"],["5.3.2","FAIL"],["5.4.1","FAIL"],["5.5.1","FAIL"],["5.7.2","MANUAL"],["5.7.3","FAIL"],["5.7.4","FAIL"]],"inScope":32,"checkable":28},"preflight":{"cmd":"shoalcheck preflight drain ip-10-0-1-a","head":"✗ ip-10-0-1-a cannot be evacuated: 1 thing stops the drain","why":"workers/debug-shell-ondemand — kubectl drain refuses to evict the pod on node ip-10-0-1-a unless it is given --force, and with --force deletes it: nothing recreates a pod no controller manages.","exit":2},"fleet":{"clusters":["acme-pay-prod","acme-pay-staging","acme-pay-dr"],"rows":[["api","pod-security.enforce",["(not declared)","baseline","(not declared)"]],["api","pod-security.warn",["(not declared)","restricted","(not declared)"]],["cluster","operators.installed",["(not declared)","(not declared)","velero.io"]],["payments","limitrange.present",["none declared","none declared","declared"]],["payments","networkpolicy.present",["none declared","declared","none declared"]],["payments","pod-security.enforce",["(not declared)","restricted","baseline"]],["payments","resourcequota.present",["none declared","declared","none declared"]]]}}</script>
+<script type="application/json" id="hero-reading">{"cluster":"acme-pay-prod","where":"eks · eu-central-1 · k8s 1.31.2-eks-1a2b3c4","kinds":[["pods",33],["nodes",12],["deployments",10],["statefulsets",3],["daemonsets",2],["services",5],["clusterrolebindings",5],["cronjobs",1],["persistentvolumes",3],["jobs",2],["persistentvolumeclaims",2],["poddisruptionbudgets",2],["horizontalpodautoscalers",2],["rolebindings",2],["endpointslices",1],["namespaces",6],["serviceaccounts",5],["clusterroles",2],["ingresses",1],["storageclasses",2],["roles",1],["ingressclasses",1],["priorityclasses",1]],"objects":104,"kb":75,"rules":103,"checks":1915,"total":141,"cats":["security","reliability","config","cost"],"grid":[[1,3,28,22,0],[0,7,22,11,0],[0,0,16,9,1],[0,0,14,5,2]],"dollars":1659,"money":"prometheus over 7d · list price · upper bound if consolidated","claims":[["5 nodes cannot be evacuated","drain feasibility · workers/licensed-etl-0 requests 250m cpu and 512Mi memory"],["1 dated obligation inside 90 days","2026-11-26 · dataset kubeversions 2026-08-31 · embedded"],["9 references point at nothing","a Service publishes no ready address · Service api/api-gateway — a reference, not an opinion"],["$1,659/mo identified","prometheus over 7d · list price · upper bound if consolidated"]]}</script>
 <script type="application/json" id="zone-scene">{"cluster":"acme-pay-prod","lost":"eu-central-1a","zones":[{"z":"eu-central-1a","nodes":[{"n":"ip-10-0-1-a","t":"m6i.xlarge","p":[{"k":"payments/payments-gateway-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c0-a"},{"k":"workers/ledger-reconciler-7f4b9c2-c"},{"k":"payments/payments-ledger-db-0","why":"its volume is pinned to eu-central-1a \u2014 it cannot move at all"},{"k":"workers/debug-shell-ondemand","bare":true}]},{"n":"ip-10-0-1-d","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c2-c"},{"k":"default/legacy-cron-runner-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c1-b"}]},{"n":"ip-10-0-1-g","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c2-c"}]},{"n":"ip-10-0-2-a","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c5-f"},{"k":"workers/licensed-etl-0","why":"no surviving node satisfies its placement constraints"}]}]},{"z":"eu-central-1b","nodes":[{"n":"ip-10-0-1-b","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c1-b"},{"k":"workers/ledger-reconciler-7f4b9c3-d"}]},{"n":"ip-10-0-1-e","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c2-c"}]},{"n":"ip-10-0-1-h","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c3-d"}]},{"n":"ip-10-0-2-b","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c2-c"},{"k":"workers/ledger-reconciler-7f4b9c0-a"}]}]},{"z":"eu-central-1c","nodes":[{"n":"ip-10-0-1-c","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c1-b"},{"k":"monitoring/node-exporter-7f4b9c2-c"},{"k":"api/search-indexer-7f4b9c0-a"}]},{"n":"ip-10-0-1-f","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c1-b"}]},{"n":"ip-10-0-1-i","t":"m6i.xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c4-e"}]},{"n":"ip-10-0-2-c","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c3-d"},{"k":"workers/ledger-reconciler-7f4b9c1-b"}]}]}]}</script>
 <script type="application/json" id="scene-verdicts">{"cluster":"acme-pay-prod","zones":[{"target":"eu-central-1a","headline":"✗ losing zone eu-central-1a leaves work with nowhere to go: 2 things","exit":2,"stranded":[{"pod":"payments/payments-ledger-db-0","why":"holds PersistentVolume pvc-ledger-db-0, which names the lost failure domain — it could not move at all"},{"pod":"workers/licensed-etl-0","why":"requests 250m cpu and 512Mi memory; no surviving node in this reading satisfies the modelled constraints"}]},{"target":"eu-central-1b","headline":"✓ zone eu-central-1b: every pod this model can place has somewhere else to go","exit":0},{"target":"eu-central-1c","headline":"✓ zone eu-central-1c: every pod this model can place has somewhere else to go","exit":0}],"nodes":[{"target":"ip-10-0-1-a","headline":"✗ ip-10-0-1-a cannot be evacuated: 1 thing stops the drain","exit":2,"blocked":[{"pod":"workers/debug-shell-ondemand","why":"kubectl drain refuses to evict the pod on node ip-10-0-1-a unless it is given --force, and with --force deletes it: nothing recreates a pod no controller manages."}]},{"target":"ip-10-0-1-b","headline":"✗ ip-10-0-1-b cannot be evacuated: 1 thing stops the drain","exit":2,"blocked":[{"pod":"payments/payments-orchestrator-7f4b9c0-a","why":"Evacuating node ip-10-0-1-b requires evicting 1 pod covered by PodDisruptionBudget payments/payments-orchestrator-pdb."}]},{"target":"ip-10-0-1-c","headline":"✗ ip-10-0-1-c cannot be evacuated: 1 thing stops the drain","exit":2,"blocked":[{"pod":"payments/payments-orchestrator-7f4b9c1-b","why":"Evacuating node ip-10-0-1-c requires evicting 1 pod covered by PodDisruptionBudget payments/payments-orchestrator-pdb."}]},{"target":"ip-10-0-1-d","headline":"✗ ip-10-0-1-d cannot be evacuated: 1 thing stops the drain","exit":2,"blocked":[{"pod":"payments/payments-orchestrator-7f4b9c2-c","why":"Evacuating node ip-10-0-1-d requires evicting 1 pod covered by PodDisruptionBudget payments/payments-orchestrator-pdb."}]},{"target":"ip-10-0-1-e","headline":"✓ ip-10-0-1-e: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-1-f","headline":"✓ ip-10-0-1-f: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-1-g","headline":"✓ ip-10-0-1-g: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-1-h","headline":"✓ ip-10-0-1-h: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-1-i","headline":"✓ ip-10-0-1-i: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-2-a","headline":"✗ ip-10-0-2-a cannot be evacuated: 1 thing stops the drain","exit":2,"stranded":[{"pod":"workers/licensed-etl-0","why":"requests 250m cpu and 512Mi memory; no surviving node in this reading satisfies the modelled constraints"}]},{"target":"ip-10-0-2-b","headline":"✓ ip-10-0-2-b: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-2-c","headline":"✓ ip-10-0-2-c: nothing this model checks stops the drain","exit":0}]}</script>
 <script type="application/json" id="support-windows">{"asOf":"2026-08-31","source":"https://endoflife.date","rateAsOf":"2026-09","rates":{"aws":0.5,"azure":0.5},"windows":{"aws":[["1.18","2020-10-13","2022-08-15",""],["1.19","2021-02-16","2022-08-01",""],["1.20","2021-05-18","2022-11-01",""],["1.21","2021-07-19","2023-02-16","2024-07-15"],["1.22","2022-04-04","2023-06-04","2024-09-01"],["1.23","2022-08-11","2023-10-11","2024-10-11"],["1.24","2022-11-15","2024-01-31","2025-01-31"],["1.25","2023-02-21","2024-05-01","2025-05-01"],["1.26","2023-04-11","2024-06-11","2025-06-11"],["1.27","2023-05-24","2024-07-24","2025-07-24"],["1.28","2023-09-26","2024-11-26","2025-11-26"],["1.29","2024-01-23","2025-03-23","2026-03-23"],["1.30","2024-05-23","2025-07-23","2026-07-23"],["1.31","2024-09-26","2025-11-26","2026-11-26"],["1.32","2025-01-25","2026-03-23","2027-03-23"],["1.33","2025-05-28","2026-07-29","2027-07-29"],["1.34","2025-10-06","2026-12-02","2027-12-02"],["1.35","2026-01-28","2027-03-27","2028-03-27"],["1.36","2026-06-02","2027-08-02","2028-08-02"]],"azure":[["1.21","2021-08-18","2022-07-31",""],["1.22","2022-01-10","2022-12-04",""],["1.23","2022-04-26","2023-04-02",""],["1.24","2022-08-17","2023-07-31",""],["1.25","2022-12-14","2024-01-14",""],["1.26","2023-04-18","2024-04-11",""],["1.27","2023-08-16","2024-07-31","2025-07-31"],["1.28","2023-11-07","2025-01-31","2026-02-28"],["1.29","2024-03-18","2025-03-31","2026-04-30"],["1.30","2024-08-05","2025-08-22","2026-07-31"],["1.31","2024-10-25","2025-11-01","2026-11-30"],["1.32","2025-04-06","2026-03-31","2027-03-31"],["1.33","2025-06-17","2026-07-31","2027-07-31"],["1.34","2026-01-04","2026-11-30","2027-11-30"],["1.35","2026-03-05","2027-03-31","2028-03-31"],["1.36","2026-06-30","2027-06-30","2028-06-30"]],"gcp":[["1.17","2021-03-29","2021-11-01",""],["1.18","2021-03-29","2022-03-01",""],["1.19","2021-04-14","2022-06-01",""],["1.20","2021-06-09","2022-08-01",""],["1.21","2021-10-01","2023-01-31",""],["1.22","2022-03-07","2023-04-30",""],["1.23","2022-05-03","2023-07-31",""],["1.24","2022-06-23","2023-10-31",""],["1.25","2022-12-14","2024-03-30",""],["1.26","2023-03-31","2024-06-30",""],["1.27","2023-06-15","2024-10-01",""],["1.28","2023-12-04","2025-02-04",""],["1.29","2024-01-26","2025-04-12",""],["1.30","2024-07-31","2025-09-30",""],["1.31","2024-10-25","2026-01-16",""],["1.32","2025-02-11","2026-04-11",""],["1.33","2025-06-03","2026-08-03",""],["1.34","2025-09-30","2026-10-01",""],["1.35","2026-02-11","2027-04-11",""],["1.36","2026-06-09","2027-08-09",""]],"upstream":[["1.16","2019-09-18","2020-08-04",""],["1.17","2019-12-07","2020-12-25",""],["1.18","2020-03-25","2021-06-18",""],["1.19","2020-08-26","2021-10-28",""],["1.20","2020-12-08","2022-02-28",""],["1.21","2021-04-08","2022-06-28",""],["1.22","2021-08-04","2022-10-28",""],["1.23","2021-12-07","2023-02-28",""],["1.24","2022-05-03","2023-07-28",""],["1.25","2022-08-23","2023-10-27",""],["1.26","2022-12-08","2024-02-28",""],["1.27","2023-04-11","2024-06-28",""],["1.28","2023-08-15","2024-10-28",""],["1.29","2023-12-13","2025-02-28",""],["1.30","2024-04-17","2025-07-15",""],["1.31","2024-08-13","2025-11-11",""],["1.32","2024-12-11","2026-02-28",""],["1.33","2025-04-23","2026-06-28",""],["1.34","2025-08-27","2026-10-27",""],["1.35","2025-12-17","2027-02-28",""],["1.36","2026-04-22","2027-06-28",""],["1.37","2026-08-26","2027-10-28",""]]}}</script>
