@@ -109,7 +109,9 @@
         name.textContent = k[0]; n.textContent = fmt(k[1]);
         li.appendChild(name); li.appendChild(n); kindsEl.appendChild(li);
       });
-      readSum.textContent = word(objs, 'object', 'objects') + ' · ' + word(nKinds, 'kind', 'kinds') +
+      // "in 23 kinds": the kinds that held an object. The reading reads more kinds than that — a kind can be read
+      // and be empty — and its own pages say how many it read; "· 23 kinds" beside them read as a contradiction.
+      readSum.textContent = word(objs, 'object', 'objects') + ' in ' + word(nKinds, 'kind', 'kinds') +
         (nKinds === RD.kinds.length ? ' · ' + fmt(RD.kb) + ' KB' : '');
       /* judging: every cell counts up together, and the checks with them */
       var pj = ease((ms - T.read) / (T.judge - T.read)), total = 0;
@@ -430,7 +432,10 @@
     var fit = function () {
       sec.classList.remove('pinned');
       sec.style.removeProperty('--copy-max');
-      if (reduce || window.innerWidth <= 980) return;
+      // THE FILM IS THE PAGE'S ONE PINNED SCENE. This one pinned for 3,060 px of scroll and was the page's only
+      // cinematic moment — on the free preflight, while the product is the reading (D50 site review). It plays
+      // through once in view instead; the pinning below stays for a page that wants it back.
+      if (reduce || window.innerWidth <= 980 || !sec.hasAttribute('data-pin')) return;
       var asking = copyEl.classList.contains('asking');
       copyEl.classList.remove('asking');
       sec.classList.add('pinned', 'measuring');
@@ -457,7 +462,7 @@
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
       onSceneScroll();
       if ('IntersectionObserver' in window) {
-        // Not pinned — a phone, or a screen too short to hold the story — it plays through once when it comes into view.
+        // Not pinned, it plays through once when it comes into view.
         var played = false;
         new IntersectionObserver(function (es) {
           if (played || manual || pinned() || !es[0].isIntersecting) return;
@@ -559,82 +564,6 @@
       });
     }
   }
-
-  /* ── the app video plays while it is on screen ────────────────────────────
-     Muted and looped, and only while visible, so it never runs unseen. It always has its controls: a
-     32-second loop that starts by itself must be stoppable (WCAG 2.2.2). Anyone who asked for reduced motion
-     gets the poster and starts it themselves. */
-  /* The four instrument loops play the same way: muted, looped, while on screen, and stoppable. */
-  var playWhileSeen = function (vid) {
-    if (reduce || !('IntersectionObserver' in window)) {
-      vid.controls = true;
-      return;
-    }
-    /* A pause the reader chose is kept: scrolling past and back does not start it again. */
-    var ours = false, chosen = false;
-    vid.addEventListener('pause', function () { if (!ours) chosen = true; ours = false; });
-    vid.addEventListener('play', function () { chosen = false; });
-    new IntersectionObserver(function (es) {
-      es.forEach(function (e) {
-        if (e.isIntersecting) {
-          if (chosen) return;
-          var p = vid.play(); if (p && p.catch) p.catch(function () {});
-        } else if (!vid.paused) { ours = true; vid.pause(); }
-      });
-    }, { threshold: 0.4 }).observe(vid);
-  };
-  var vid = $('#app-video');
-  if (vid) playWhileSeen(vid);
-
-  /* ── captions under the frame, not over it ────────────────────────────────
-     Drawn by the player, a caption lies over the recording: at the top it printed over the window's own title, at
-     the bottom it would cover the banner that says the demo is a replay, and on a phone it covers a third of the
-     picture. The page prints the track's current cue on a line under the video instead — the same track, so the
-     words are the recorder's — and hands the track back to the player in full screen, where there is no under.
-     A reader who turns the captions off in the player's menu turns the line off with them. */
-  var captionsUnder = function (v) {
-    var t = [].filter.call(v.textTracks || [], function (x) { return x.kind === 'captions'; })[0];
-    if (!t) return;
-    var line = document.createElement('p');
-    line.className = 'vcap';
-    v.insertAdjacentElement('afterend', line);
-    var full = function () { return (document.fullscreenElement || document.webkitFullscreenElement) === v; };
-    var mine = true;
-    var place = function () { if (mine) t.mode = full() ? 'showing' : 'hidden'; };
-    var show = function () {
-      var c = t.mode === 'hidden' && t.activeCues && t.activeCues[0];
-      line.textContent = c ? c.text : '';
-    };
-    t.addEventListener('cuechange', show);
-    v.textTracks.addEventListener('change', function () {
-      if (t.mode === 'disabled') mine = false;
-      else if (!mine && t.mode === 'showing' && !full()) { mine = true; t.mode = 'hidden'; }
-      show();
-    });
-    document.addEventListener('fullscreenchange', place);
-    document.addEventListener('webkitfullscreenchange', place);
-    v.addEventListener('webkitbeginfullscreen', function () { if (mine) t.mode = 'showing'; });
-    v.addEventListener('webkitendfullscreen', function () { if (mine) t.mode = 'hidden'; show(); });
-    place();
-  };
-  [].forEach.call(document.querySelectorAll('#app-video, #ov-video'), captionsUnder);
-
-  /* ── the overview: a dialog, on a click ──────────────────────────────────
-     It plays when the reader opens it (unless they asked for reduced motion: then the controls start it), and it
-     stops when the dialog closes, by the button, Escape or a click outside. */
-  var ovDlg = $('#overview'), ovVid = $('#ov-video'), ovOpen = $('#ov-open');
-  if (ovDlg && ovVid && ovOpen && ovDlg.showModal) {
-    ovOpen.addEventListener('click', function () {
-      ovDlg.showModal();
-      if (!reduce) { var p = ovVid.play(); if (p && p.catch) p.catch(function () {}); }
-    });
-    $('#ov-close').addEventListener('click', function () { ovDlg.close(); });
-    ovDlg.addEventListener('click', function (e) { if (e.target === ovDlg) ovDlg.close(); });
-    ovDlg.addEventListener('close', function () { ovVid.pause(); });
-  } else if (ovOpen) {
-    ovOpen.hidden = true;
-  }
-  [].forEach.call(document.querySelectorAll('.loop video'), playWhileSeen);
 
   /* ── the page's own controls ──────────────────────────────────────────────
      A SLIDER SAYS HOW FAR IT IS SET: its track fills to the thumb, and --p is the one number the stylesheet needs.
@@ -832,19 +761,23 @@
     });
   }
 
-  /* ── the reading, live ──────────────────────────────────────────────────
-     The sample's own page loads into the frame when it comes near the screen and is scaled to fit; until then
-     the screenshot stands in. Opening it is a view transition into the page itself. */
-  var live = $('#live-frame');
-  if (live) {
+  /* ── the product, live ──────────────────────────────────────────────────
+     THE PRODUCT IN THE PAGE, NOT A RECORDING OF IT. Each live frame holds one of the product's own pages — the
+     sample reading, the sample fleet, the app's window — loaded when it comes near the screen and scaled to fit, so
+     what the visitor sees is the product's HTML drawn at their screen's resolution. The founder, on the recordings
+     that were here: terrible quality. A page cannot be blurred by an encoder. Until a frame loads, its screenshot
+     (where it has one) stands in; opening it is a view transition into the page itself. */
+  $$('.live-frame').forEach(function (live) {
     var frame = live.querySelector('iframe'), openA = live.querySelector('.live-open');
+    if (!frame) return;
+    var W = Number(live.getAttribute('data-w')) || 1440, Hh = Number(live.getAttribute('data-h')) || 900;
     var fit = function () {
       if (live.classList.contains('expanded')) {
         frame.style.width = window.innerWidth + 'px'; frame.style.height = window.innerHeight + 'px'; frame.style.transform = 'none';
         return;
       }
-      frame.style.width = '1440px'; frame.style.height = '900px';
-      frame.style.transform = 'scale(' + (live.clientWidth / 1440) + ')';
+      frame.style.width = W + 'px'; frame.style.height = Hh + 'px';
+      frame.style.transform = 'scale(' + (live.clientWidth / W) + ')';
     };
     frame.addEventListener('load', function () { if (frame.getAttribute('src')) live.classList.add('live'); });
     var load = function () { if (!frame.getAttribute('src')) frame.setAttribute('src', frame.getAttribute('data-src')); };
@@ -853,18 +786,20 @@
     } else { load(); }
     fit();
     if ('ResizeObserver' in window) new ResizeObserver(fit).observe(live); else window.addEventListener('resize', fit);
+    if (!openA) return;
     var go = function (e) {
       if (reduce || !document.startViewTransition || !live.classList.contains('live')) return;
       e.preventDefault();
       var href = openA.getAttribute('href');
+      live.classList.add('vt');
       var t = document.startViewTransition(function () { live.classList.add('expanded'); fit(); });
       t.finished.then(function () { location.href = href; });
     };
     openA.addEventListener('click', go);
     live.addEventListener('click', function (e) { if (e.target === live || e.target.tagName === 'IMG') { e.preventDefault(); openA.click(); } });
-    // Back from the reading: the page comes out of the back-forward cache as it was left, grown to the window.
-    window.addEventListener('pageshow', function (e) { if (e.persisted) { live.classList.remove('expanded'); fit(); } });
-  }
+    // Back from the page: it comes out of the back-forward cache as it was left, grown to the window.
+    window.addEventListener('pageshow', function (e) { if (e.persisted) { live.classList.remove('expanded', 'vt'); fit(); } });
+  });
 
   /* ── billing period ───────────────────────────────────────────────────── */
   var billB = $$('[data-bill]');
@@ -937,49 +872,3 @@
     .catch(function () { /* the rows already point at the releases page */ });
 })();
 
-/* ── a screenshot opens at full size ──────────────────────────────────────────
-   Every screenshot here is a 1440-wide capture drawn at a third to a half of that, where its text cannot be read;
-   the adversarial review could not enlarge one. Each opens over the page at the size it was taken, and closes with
-   Escape, the button or a click outside it; focus returns to the image it came from. */
-(function () {
-  var shots = Array.prototype.slice.call(document.querySelectorAll('.gallery img:not(.live-poster), .compare img, .shot-img'));
-  if (!shots.length) return;
-  var box = null, from = null;
-  function close() {
-    if (!box) return;
-    box.remove(); box = null;
-    document.documentElement.classList.remove('zoomed');
-    if (from) from.focus();
-  }
-  function open(img) {
-    from = img;
-    box = document.createElement('div');
-    box.className = 'zoom';
-    box.setAttribute('role', 'dialog');
-    box.setAttribute('aria-modal', 'true');
-    box.setAttribute('aria-label', 'The screenshot at full size');
-    var big = document.createElement('img');
-    big.src = img.currentSrc || img.src; big.alt = img.alt; big.width = img.width; big.height = img.height;
-    var x = document.createElement('button');
-    x.className = 'zoom-close'; x.type = 'button'; x.textContent = 'Close';
-    x.addEventListener('click', close);
-    var hint = document.createElement('p');
-    hint.className = 'zoom-hint'; hint.textContent = 'Drag to move around it';
-    box.appendChild(big); box.appendChild(hint); box.appendChild(x);
-    box.addEventListener('click', function (e) { if (e.target === box) close(); });
-    document.body.appendChild(box);
-    document.documentElement.classList.add('zoomed');
-    x.focus();
-  }
-  shots.forEach(function (img) {
-    img.classList.add('zoomable');
-    img.setAttribute('tabindex', '0');
-    img.setAttribute('role', 'button');
-    img.setAttribute('aria-label', 'Open at full size: ' + (img.alt || 'screenshot'));
-    img.addEventListener('click', function () { open(img); });
-    img.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(img); }
-    });
-  });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
-})();

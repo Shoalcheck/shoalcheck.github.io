@@ -37,10 +37,10 @@
     </a>
     <button class="menu" aria-expanded="false" aria-controls="site-nav">Menu</button>
     <nav class="nav" id="site-nav" aria-label="Sections">
+      <a href="index.html#flow">The flow</a>
       <a href="index.html#finds">What it finds</a>
-      <a href="index.html#reading">The reading</a>
+      <a href="index.html#integrations">Integrations</a>
       <a href="index.html#zone">Before a change</a>
-      <a href="index.html#arithmetic">The arithmetic</a>
       <a href="index.html#pricing">Pricing</a>
       <a href="index.html#faq">FAQ</a>
       <a href="docs.html">Docs</a>
@@ -73,10 +73,10 @@
           Open the sample reading
         </a>
       </div>
-      <button class="ov-open" id="ov-open" type="button" aria-haspopup="dialog">
+      <a class="ov-open" href="index.html#flow">
         <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z"/></svg>
-        Watch the overview <span class="ov-len">56 s, with subtitles</span>
-      </button>
+        Watch the whole flow <span class="ov-len">twelve chapters, drawn from the sample</span>
+      </a>
       <ul class="trust">
         <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>No account</li>
         <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Nothing installed in the cluster</li>
@@ -107,6 +107,43 @@
     <div class="stat reveal"><b>47</b><span>resource types read, with get and list</span></div>
     <div class="stat reveal"><b>0</b><span>object writes — counted, not promised</span></div>
     <div class="stat reveal"><b>3</b><span>systems: macOS, Windows, Linux</span></div>
+  </div>
+</section>
+
+<!-- ═══ THE FLOW ═══
+     One finding, followed from the reading to the next reading, then the rest of what a reading does. Drawn by
+     film.js from the product's own output (#film-data, #film-mcp, #film-ci, #hero-reading, #caps-data), each held
+     equal by a gate; without the script the chapters read as text. -->
+<section class="film" id="flow" aria-labelledby="fl-title">
+  <div class="film-pin">
+    <div class="wrap film-grid">
+      <div class="film-copy">
+        <span class="eyebrow">The whole flow · one finding, end to end</span>
+        <h2 id="fl-title">From a finding to a fix your team ships.</h2>
+        <ol class="film-steps" id="film-steps">
+          <li data-ch="0"><span class="fs-n">01 · Read</span><h3>Every object. Every rule. One pass.</h3><p>Read-only, with <b>get</b> and <b>list</b>: <span data-f="kinds">27</span> kinds read, <span data-f="objects">104</span> objects, <span data-f="rules">103</span> rules, <span data-f="checks">1,915</span> checks — each kept with the objects it looked at.</p></li>
+          <li data-ch="1"><span class="fs-n">02 · Find</span><h3>A finding you can defend in review.</h3><p><span data-f="title">Right-size over-provisioned requests on workers/webhook-dispatcher</span>: <span data-f="usd">$300</span> a month at list price, from a week of the cluster's own usage — an upper bound, and the finding says so, beside the evidence it read.</p></li>
+          <li data-ch="2"><span class="fs-n">03 · Ticket</span><h3>Into Linear in one command. Never twice.</h3><p><code>shoalcheck ticket push</code> files the finding with its evidence, its basis and its patch. A marker in the ticket stops a second push from filing it again.</p></li>
+          <li data-ch="3"><span class="fs-n">04 · Your AI agent</span><h3>Hand the whole cluster to your AI agent.</h3><p>Point Claude, Cursor or any MCP client at <code>shoalcheck-mcp</code>. It answers from the reading — <span data-f="total">141</span> findings, grouped by the team that owns each namespace — and cannot reach the cluster.</p></li>
+          <li data-ch="4"><span class="fs-n">05 · Every team</span><h3>Every team gets its own tickets.</h3><p>The agent files each team's share where that team works: Linear, or Jira through Atlassian's own MCP server. The <span data-f="unowned">43</span> findings no namespace label claims go to triage — not to nobody.</p></li>
+          <li data-ch="5"><span class="fs-n">06 · Fix</span><h3>The fix comes with the finding.</h3><p>The reading's own patch: CPU <span data-f="cpuFrom">2000m</span> → <span data-f="cpuTo">840m</span>, memory <span data-f="memFrom">8192Mi</span> → <span data-f="memTo">4992Mi</span>. Your team reviews it and applies it; Shoalcheck writes nothing to your cluster.</p></li>
+          <li data-ch="6"><span class="fs-n">07 · Read again</span><h3>Read again. Gone is counted, not assumed.</h3><p>We applied that patch to the sample and read it an hour later: <span data-f="gone">1</span> finding no longer in the set, <span data-f="added">0</span> new, <span data-f="ne">0</span> not evaluated — and <span data-f="usdBefore">$1,659</span> a month identified became <span data-f="usdAfter">$1,360</span>. A finding that disappears is counted as missing, never as dealt with.</p></li>
+          <li data-ch="7"><span class="fs-n">08 · CI/CD</span><h3>Stop the merge that grants cluster-admin.</h3><p>In any pipeline, <code>shoalcheck gate</code> compares the pull request's cluster with your baseline and exits <span data-f="ciExit">2</span> when the policy fires — here on one new critical finding, named: <span data-f="ciNew">Review cluster-admin grant on ServiceAccount payments/ledger-exporter</span>.</p></li>
+          <li data-ch="8"><span class="fs-n">09 · Money</span><h3>Every dollar, with its rate.</h3><p><span data-f="money">$1,659</span> a month across <span data-f="moneyRules">5</span> rules — dated list prices and a week of the cluster's own usage, each row with what it was computed from.</p></li>
+          <li data-ch="9"><span class="fs-n">10 · Reach</span><h3>See exactly who can reach cluster-admin.</h3><p>Every binding traced from its subject to the role it grants: <span data-f="grants">7</span> grants, <span data-f="crit">3</span> of them critical.</p></li>
+          <li data-ch="10"><span class="fs-n">11 · Before a change</span><h3>Know before you drain.</h3><p><code>shoalcheck preflight drain <span data-f="node">ip-10-0-1-a</span></code> exits <span data-f="pfExit">2</span> and names the pod that stops it. Free on every plan.</p></li>
+          <li data-ch="11"><span class="fs-n">12 · One reading</span><h3>One reading. Every team. Every fix with its proof.</h3><p>All of it is one sample reading of a fictional cluster through the real engine. Open it and work in it.</p><div class="cta"><a class="btn btn-primary" href="sample-report.html">Open the sample reading</a><a class="btn" href="index.html#download">Download</a></div></li>
+        </ol>
+        <div class="film-rail" id="film-rail" aria-label="Chapters of the flow">
+          <button type="button" title="Read" aria-label="Chapter 1, read"></button><button type="button" title="Find" aria-label="Chapter 2, find"></button><button type="button" title="Ticket" aria-label="Chapter 3, ticket"></button><button type="button" title="Your AI agent" aria-label="Chapter 4, your AI agent"></button><button type="button" title="Every team" aria-label="Chapter 5, every team"></button><button type="button" title="Fix" aria-label="Chapter 6, fix"></button><button type="button" title="Read again" aria-label="Chapter 7, read again"></button><button type="button" title="CI/CD" aria-label="Chapter 8, CI/CD"></button><button type="button" title="Money" aria-label="Chapter 9, money"></button><button type="button" title="Reach" aria-label="Chapter 10, reach"></button><button type="button" title="Before a change" aria-label="Chapter 11, before a change"></button><button type="button" title="One reading" aria-label="Chapter 12, one reading"></button>
+        </div>
+      </div>
+      <div class="film-stage" id="film-stage" aria-hidden="true">
+        <div class="film-sky" id="film-sky"></div>
+        <div class="film-world" id="film-world"></div>
+        <span class="film-chip">Illustrative sample · acme-pay-prod · drawn from the product’s own output</span>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -172,6 +209,26 @@
   </div>
 </section>
 
+<!-- ═══ INTEGRATIONS ═══
+     Every card is a command that ships in the download, named as it is typed. -->
+<section class="band band-alt" id="integrations" aria-labelledby="in-title">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <span class="eyebrow">Works where your team works</span>
+      <h2 id="in-title">From one reading to every tool your team already uses.</h2>
+      <p>The reading feeds your tracker, your AI agent, your pipeline and your security tab. Every card is a command in the download — no account, and no server of ours in between.</p>
+    </div>
+    <div class="ints">
+      <article class="int reveal"><span class="int-k">Linear</span><h3>Every finding a ticket. Never a duplicate.</h3><p>Filed with its evidence, its basis and its patch; a marker in the ticket stops a second push from filing it again.</p><code>shoalcheck ticket push --tracker linear</code></article>
+      <article class="int reveal"><span class="int-k">Claude · Cursor · any MCP client</span><h3>Your AI agent reads the whole cluster.</h3><p>Five tools over the reading — list, explain, compare — and no way to reach the cluster itself.</p><code>shoalcheck-mcp</code></article>
+      <article class="int reveal"><span class="int-k">Jira · GitHub Issues · any tracker</span><h3>Routed to the team that owns it.</h3><p>Each finding carries its team from your namespace labels; your agent files every team's share through that tracker's own MCP server.</p><code>shoalcheck audit --owner-label team</code></article>
+      <article class="int reveal"><span class="int-k">GitHub Actions · GitLab CI · any pipeline</span><h3>Block the merge that makes it worse.</h3><p>Compared with your baseline through the same gates as a reading; exit 2 when a new high finding appears, and the finding is named.</p><code>shoalcheck gate --baseline main.json</code></article>
+      <article class="int reveal"><span class="int-k">GitHub and GitLab code scanning</span><h3>Findings in your security tab.</h3><p>SARIF 2.1.0: every result with its rule, its severity and the object it rests on.</p><code>shoalcheck audit --export-sarif findings.sarif</code></article>
+      <article class="int reveal"><span class="int-k">kubectl · spreadsheets · docs</span><h3>Right where you already type.</h3><p>A kubectl plugin, and every finding as CSV or Markdown for whoever lives in a spreadsheet or a wiki.</p><code>kubectl shoalcheck · --export-csv · --export-md</code></article>
+    </div>
+  </div>
+</section>
+
 <!-- ═══ THE READING ═══ -->
 <section class="band band-alt" id="reading" aria-labelledby="r-title">
   <div class="wrap">
@@ -180,73 +237,17 @@
       <h2 id="r-title">A reading you can work in, not a PDF you scroll.</h2>
       <p><code>shoalcheck audit</code> reads reliability, security, cost and topology and writes one self-contained file: every finding with the object it rests on, every dollar with its rate, and what could not be read named as such — never counted as clean. Filter it, slice it, open any finding, hand it off.</p>
     </div>
-    <div class="gallery">
-      <figure class="g-main reveal">
-        <div class="live-frame" id="live-frame">
-          <img class="live-poster" src="assets/shot-reading.png" width="1440" height="900" loading="lazy" alt="The overview of the sample reading of acme-pay-prod, labelled Illustrative sample: 141 findings, 11 critical or high, $1,659 a month identified, the four claims it leads with, a severity by category grid and findings by namespace.">
-          <iframe data-src="sample-report.html" title="The sample reading, live" tabindex="-1" aria-hidden="true"></iframe>
-          <a class="live-open" href="sample-report.html">Open it — the whole reading</a>
-        </div>
-        <figcaption><b>Overview.</b> What it found first, how bad and of what kind, where — 141 findings on the sample cluster.</figcaption>
-      </figure>
-      <figure class="reveal">
-        <img src="assets/reading-blast.png" width="1440" height="900" loading="lazy" alt="The Blast radius workspace of the sample reading: the cluster by failure domain, three zones of four nodes each, the nodes named by a feasibility finding marked, what has nowhere to go and what one lost zone takes.">
-        <figcaption><b>Blast radius.</b> The cluster by failure domain, and what has nowhere to go.</figcaption>
-      </figure>
-      <figure class="reveal">
-        <img src="assets/reading-another.png" width="1440" height="900" loading="lazy" alt="The Method workspace of the sample reading: what it would take another way — the objects read, their size as kubectl prints them, the rule by object checks, the tokens an AI agent needs just to read them once, each model's price, and the hours by hand.">
-        <figcaption><b>What it would take another way.</b> Tokens for an AI agent, hours by hand — every figure a floor.</figcaption>
-      </figure>
-    </div>
-    <div class="loops reveal">
-      <figure class="loop">
-        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-narrow.jpg"
-          aria-label="Recorded on the sample reading: the Findings workspace, narrowed to the high findings and to one rule, then one finding opened — what it is, why it matters, the object it rests on, its evidence.">
-          <source src="assets/loop-narrow.webm" type="video/webm">
-          <source src="assets/loop-narrow.mp4" type="video/mp4">
-        </video>
-        <figcaption><b>Narrow it, open one.</b> Keep the high findings, open one, read what it rests on.</figcaption>
-      </figure>
-      <figure class="loop">
-        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-ask.jpg"
-          aria-label="Recorded on the sample reading: the search palette, payments-gateway typed in, and the whole reading cut to the four findings about that workload, twelve dollars a month of it identified.">
-          <source src="assets/loop-ask.webm" type="video/webm">
-          <source src="assets/loop-ask.mp4" type="video/mp4">
-        </video>
-        <figcaption><b>Ask by name.</b> Type a workload; every workspace keeps only what is about it.</figcaption>
-      </figure>
-      <figure class="loop">
-        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-money.jpg"
-          aria-label="Recorded on the sample reading: the Cost workspace, then the largest rule's figure followed to the ten findings behind it, $777 of $1,659 a month identified.">
-          <source src="assets/loop-money.webm" type="video/webm">
-          <source src="assets/loop-money.mp4" type="video/mp4">
-        </video>
-        <figcaption><b>Follow the money.</b> From the largest figure in Cost to the findings behind it.</figcaption>
-      </figure>
-      <figure class="loop">
-        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-trace.jpg"
-          aria-label="Recorded on the sample reading: the Access graph, the ServiceAccount workers/cicd-deployer pinned, and its two bindings lit through to the roles they reach, cluster-admin among them.">
-          <source src="assets/loop-trace.webm" type="video/webm">
-          <source src="assets/loop-trace.mp4" type="video/mp4">
-        </video>
-        <figcaption><b>Trace a grant.</b> Pin a ServiceAccount; the graph lights every binding and the role it reaches.</figcaption>
-      </figure>
-    </div>
+    <figure class="live-main reveal">
+      <div class="live-frame" id="live-frame" data-w="1440" data-h="900">
+        <img class="live-poster" src="assets/shot-reading.png" width="1440" height="900" loading="lazy" alt="The overview of the sample reading of acme-pay-prod, labelled Illustrative sample: 141 findings, 11 critical or high, $1,659 a month identified, the four claims it leads with, a severity by category grid and findings by namespace.">
+        <iframe data-src="sample-report.html" title="The sample reading, live" tabindex="-1" aria-hidden="true"></iframe>
+        <a class="live-open" href="sample-report.html">Open it — the whole reading</a>
+      </div>
+      <figcaption><b>The sample reading itself, live in the page</b> — not a recording: what it found first, how bad and of what kind, where — 141 findings on the sample cluster. Open it: Findings, Blast radius, Access, Cost, Topology, Compliance, Method and every other workspace, each one working.</figcaption>
+    </figure>
     <div class="reading-cta reveal">
       <a class="btn btn-primary" href="sample-report.html">Open the sample reading</a>
       <span class="note">A fictional cluster run through the real engine — every panel, filter and finding works. Labelled as a sample on every screen.</span>
-    </div>
-    <div class="compare reveal">
-      <figure>
-        <img src="assets/reading-compare.png" width="1440" height="900" loading="lazy" alt="The Since last workspace of a real reading of the kind test cluster: 12 findings more than the reading before it, 12 new, none gone, and the twelve new findings listed — a single replica without a disruption budget, no health probes, privilege escalation, a mutable image tag — every one on shop/checkout.">
-      </figure>
-      <div class="compare-copy">
-        <span class="eyebrow">Read it again</span>
-        <h3>The second reading says what changed since the first.</h3>
-        <p>Two real readings of our own kind test cluster, two seconds apart, around one deliberate bad deploy: <code>shop/checkout</code> on <code>nginx:latest</code>, one replica, no probes. The second names the twelve findings the first did not have, and each one opens to what it rests on.</p>
-        <p class="note">A finding that goes missing is counted as missing, never as dealt with: the object may have been deleted, or a rule may not have run. History stays on your machine.</p>
-        <a class="btn" href="sample-compare.html#v=eyJ3cyI6InRyZW5kIn0">Open the comparison</a>
-      </div>
     </div>
     <div class="compare compare-flip reveal">
       <div class="compare-copy">
@@ -257,7 +258,11 @@
         <a class="btn" href="sample-fleet.html">Open the sample fleet</a>
       </div>
       <figure>
-        <img src="assets/reading-fleet.png" width="1440" height="900" loading="lazy" alt="The fleet overview of the sample company's three clusters, labelled Illustrative sample: acme-pay-prod 141 findings, acme-pay-staging 137, acme-pay-dr 122; $1,659 a month identified on prod and staging, read from their own Prometheus, and $1,647 on acme-pay-dr, read from a metrics.k8s.io snapshot; 400 findings and $4,965 a month across the fleet; every context read; and what they declare differently — Pod Security levels on api and payments, a NetworkPolicy, a ResourceQuota and a LimitRange in payments, Velero's API group on acme-pay-dr, and the monitoring namespace on two of the three.">
+        <div class="live-frame" data-w="1440" data-h="900">
+          <iframe data-src="sample-fleet.html" title="The sample fleet, live" tabindex="-1" aria-hidden="true"></iframe>
+          <a class="live-open" href="sample-fleet.html">Open the sample fleet</a>
+        </div>
+        <figcaption>The sample fleet itself, live — Illustrative sample: acme-pay-prod 141 findings, acme-pay-staging 137, acme-pay-dr 122; $1,659 a month identified on production and on staging, read from their own Prometheus, and $1,647 on acme-pay-dr, from a metrics.k8s.io snapshot; 400 findings and $4,965 a month across the fleet; every context read.</figcaption>
       </figure>
     </div>
   </div>
@@ -276,15 +281,12 @@
       </div>
       <p class="note">The demo is the real window replaying a session recorded against our kind test cluster. Nothing in it talks to a cluster.</p>
     </div>
-    <figure class="app-video reveal">
-      <video id="app-video" muted loop playsinline controls preload="none" width="1280" height="800" poster="assets/app-session-poster.jpg"
-        aria-label="The interactive demo, recorded: the app reads the kind test cluster — its four named steps in turn, the kinds it read, findings arriving, every request it issued, and a Stop button while it runs — writes the reading, which says unpriced because kind has no list price, and names the most severe finding its first three left out and why; opens the reading; then asks on the Preflight screen whether assay-e2e-worker can be drained, and what losing zone eu-central-1a would do to the mesh test cluster.">
-        <source src="assets/app-session.webm" type="video/webm">
-        <source src="assets/app-session.mp4" type="video/mp4">
-        <track kind="captions" src="assets/app-session.captions.vtt" srclang="en" label="What is on screen" default>
-        <track kind="chapters" src="assets/app-session.chapters.vtt" srclang="en" label="Chapters">
-      </video>
-      <figcaption>The interactive demo, recorded: read the cluster, open the reading, ask whether a node can be drained and what losing a zone would do. 32 seconds of the real window replaying a real session, at 25 frames a second; the banner on every frame says so.</figcaption>
+    <figure class="app-live reveal">
+      <div class="live-frame" data-w="1280" data-h="800">
+        <iframe data-src="app-demo.html" title="The desktop app's window, replaying a recorded session" tabindex="-1" aria-hidden="true"></iframe>
+        <a class="live-open" href="app-demo.html">Open the interactive demo</a>
+      </div>
+      <figcaption>The app's real window in the page, not a recording of it: the same HTML the app draws, replaying a session recorded against our kind test cluster. Open it to click through Home, a reading, Preflight and Plan.</figcaption>
     </figure>
   </div>
 </section>
@@ -334,7 +336,6 @@
       <button class="tab" role="tab" aria-selected="true" aria-controls="t-drain" id="tab-drain">Will this node drain?</button>
       <button class="tab" role="tab" aria-selected="false" aria-controls="t-zone" id="tab-zone">What if a zone fails?</button>
       <button class="tab" role="tab" aria-selected="false" aria-controls="t-upgrade" id="tab-upgrade">What stops an upgrade?</button>
-      <button class="tab" role="tab" aria-selected="false" aria-controls="t-app" id="tab-app">In the app</button>
     </div>
     <div class="panes">
       <div class="pane-q" role="tabpanel" id="t-drain" aria-labelledby="tab-drain">
@@ -373,9 +374,6 @@
 <span class="dim">k8s.upgrade.crd-conversion-webhook-unbacked, api-removals@2026-08-30 · 26ms</span>
 <span class="dim">this model checks a subset of what the scheduler checks: it can say a change will stop, and it cannot</span>
 <span class="dim">promise one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
-      </div>
-      <div class="pane-q" role="tabpanel" id="t-app" aria-labelledby="tab-app" hidden>
-        <img class="shot-img" src="assets/app-preflight.png" width="1440" height="900" loading="lazy" alt="The Preflight screen of the Shoalcheck app: the nodes of the kind test cluster, assay-e2e-worker chosen, and the verdict — assay-e2e-worker cannot be evacuated, 16 reads, 0 writes.">
       </div>
     </div>
   </div>
@@ -648,20 +646,7 @@
 
 </main>
 
-<dialog class="overview" id="overview" aria-labelledby="ov-title">
-  <div class="ov-head">
-    <h2 id="ov-title">Shoalcheck in 56 seconds</h2>
-    <button class="ov-close" id="ov-close" type="button">Close</button>
-  </div>
-  <video id="ov-video" muted controls playsinline preload="none" width="1280" height="800" poster="assets/overview-poster.jpg"
-    aria-label="The overview, recorded from this site's own pages: the hero's real preflight output; a zone of the sample lost on paper; the sample reading — its overview, blast radius, the money followed to its findings, a ServiceAccount traced to cluster-admin; the sample fleet of three clusters; a second reading of our kind test cluster; and the desktop app reading a cluster.">
-    <source src="assets/overview.webm" type="video/webm">
-    <source src="assets/overview.mp4" type="video/mp4">
-    <track kind="captions" src="assets/overview.captions.vtt" srclang="en" label="What is on screen" default>
-    <track kind="chapters" src="assets/overview.chapters.vtt" srclang="en" label="Chapters">
-  </video>
-  <p class="ov-note">Recorded from this site's own pages. The sample reading and the sample fleet are a fictional company through the real engine, labelled as a sample on every frame; the comparison and the app are our kind test clusters.</p>
-</dialog>
+
 
 <footer class="foot">
   <div class="wrap foot-in">
@@ -678,13 +663,17 @@
   </div>
 </footer>
 
+<script type="application/json" id="film-data">{"cluster":"acme-pay-prod","readingAt":"2026-09-15T05:28:50Z","rows":[["medium","Kubernetes 1.31 is past AWS's ordinary support window",365,false],["medium","Right-size over-provisioned requests on workers/webhook-dispatcher",300,true],["low","3 r6i.4xlarge nodes list 10% above r6a.4xlarge, an equivalent x86 shape",266,false],["medium","Right-size over-provisioned requests on workers/ledger-reconciler",210,false],["low","9 m6i.xlarge nodes list 10% above m6a.xlarge, an equivalent x86 shape",151,false],["medium","Right-size over-provisioned requests on api/search-indexer",112,false]],"finding":{"id":"f-b76762a637f1","title":"Right-size over-provisioned requests on workers/webhook-dispatcher","severity":"medium","category":"cost","owner":"data","resource":"Deployment workers/webhook-dispatcher","usd":300,"evidence":["container webhook-dispatcher in Deployment workers/webhook-dispatcher: requests 2000m CPU, 7d p95 usage 640m (×1.3 headroom = 833m) -\u003e recommend 840m, reclaim 1160m × 6 replicas; requests 8192Mi mem, 7d p95 usage 2785Mi / 7d max 4751Mi (recommend = max(p95×1.3, max×1.05), recommend floored at 7d max = 4992Mi), reclaim 3200Mi × 6 replicas","$ model (UPPER BOUND, if consolidated): reclaim 6960m CPU / 19200Mi mem across 6 replicas, divided by m6i.xlarge allocatable (3900m CPU / 15360Mi) × $167.90/node/mo (eu-central-1) -\u003e CPU-bound up to $299.64/mo"],"boundary":"Identified is not realised. Nothing here has been reclaimed, and the arithmetic assumes the freed capacity is actually given up rather than absorbed elsewhere.","kinds":["daemonsets","deployments","nodes","pods","statefulsets"],"usage":"prometheus","yaml":"apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: webhook-dispatcher\n  namespace: workers\nspec:\n  template:\n    spec:\n      containers:\n        - name: webhook-dispatcher\n          resources:\n            requests:\n              cpu: 840m      # 7d p95 ×1.3, right-sized\n              memory: 4992Mi  # 7d p95 ×1.3, right-sized\n","safety":"needs-review","applying":"this edits the workload's pod template, so applying it rolls every pod in the workload — an ordinary rolling restart, but a restart.","change":[["cpu","2000m","840m"],["memory","8192Mi","4992Mi"]]},"ticket":{"title":"[MEDIUM] Right-size over-provisioned requests on workers/webhook-dispatcher","lines":["Found by a Shoalcheck read-only audit of cluster `acme-pay-prod`.","Reading taken at 2026-09-15T05:28:50Z. Nothing here has been re-checked since."],"table":[["severity","medium"],["category","cost"],["effort","low"],["rule","k8s.cost.overprovisioned-resources (logic v1.0.0)"],["finding id","f-b76762a637f1"],["remediation safety","needs-review"],["monthly cost impact","$300/mo (estimate)"]],"marker":"assay-dedup: assay:v1:acme-pay-prod:f-b76762a637f1"},"after":{"at":"2026-09-15T06:28:50Z","findings":[141,140],"usd":[1659,1360],"gone":1,"new":0,"notEvaluated":0,"delta":-300}}</script>
+<script type="application/json" id="film-mcp">[{"tool":"list_findings","args":{"group_by":"owner"},"answer":{"envelope":{"dollarsBasis":"priced","total":141,"totalDollars":1659.2948974358974},"groupBy":"owner","groups":[{"count":43,"dollars":822.874,"dollarsBasis":"priced","findingIds":43,"key":"(no owner resolved)"},{"count":30,"dollars":149.38794871794872,"dollarsBasis":"priced","findingIds":30,"key":"core-api"},{"count":29,"dollars":159.00897435897437,"dollarsBasis":"priced","findingIds":29,"key":"payments"},{"count":27,"dollars":515.5391025641026,"dollarsBasis":"priced","findingIds":27,"key":"data"},{"count":12,"dollars":12.484871794871795,"dollarsBasis":"priced","findingIds":12,"key":"sre"}],"reading":{"cluster":"acme-pay-prod","kindsRead":27,"readingAt":"2026-09-15T05:28:50Z","ruleSetCount":103}}},{"tool":"explain_finding","args":{"id":"f-b76762a637f1"},"answer":{"finding":{"category":"cost","confidence":0.75,"dollarImpactMonthly":299.6369230769231,"id":"f-b76762a637f1","owner":"data","priceBasis":"priced","ruleId":"k8s.cost.overprovisioned-resources","severity":"medium","title":"Right-size over-provisioned requests on workers/webhook-dispatcher"},"reading":{"cluster":"acme-pay-prod","kindsRead":27,"readingAt":"2026-09-15T05:28:50Z","ruleSetCount":103}}},{"tool":"diff_readings","args":{},"answer":{"diff":{"findingsDelta":-1,"newCount":0,"noLongerInSetCount":1,"notEvaluatedCount":0,"previousAt":"2026-09-15T05:28:50Z","savingsDelta":-299.63692307692304},"reading":{"cluster":"acme-pay-prod","kindsRead":27,"readingAt":"2026-09-15T06:28:50Z","ruleSetCount":103}}}]</script>
+<script type="application/json" id="film-ci">{"cmd":"shoalcheck gate --input pr.json --baseline main.json","out":["acme-pay-prod · this reading 2026-09-15T08:28:50Z vs the baseline of 2026-09-15T05:28:50Z","1 new · 0 regressed · 0 no longer in the set · 0 not comparable · 140 still present","  + critical Review cluster-admin grant on ServiceAccount payments/ledger-exporter  (k8s.rbac.cluster-admin-serviceaccount)","","the policy fired (1 reason):","  · new critical: Review cluster-admin grant on ServiceAccount payments/ledger-exporter"],"exit":2}</script>
 <script type="application/json" id="caps-data">{"security":{"chains":[["api/api-operator","acme-api-operator","acme-api-operator","critical"],["Group/system:masters","acme-break-glass","cluster-admin","critical"],["workers/cicd-deployer","acme-deployer-cluster-admin","cluster-admin","critical"],["Group/system:authenticated","acme-everyone-can-read","acme-secret-sync","high"],["workers/acme-migrator-retired","acme-legacy-migrator","acme-secret-sync","high"],["payments/secret-sync","acme-secret-sync","acme-secret-sync","high"],["workers/cicd-deployer","acme-legacy-reporting","acme-reporting-reader","medium"]]},"reliability":{"zones":[["eu-central-1a",[["ip-10-0-1-a",true],["ip-10-0-1-d",true],["ip-10-0-1-g",false],["ip-10-0-2-a",true]]],["eu-central-1b",[["ip-10-0-1-b",true],["ip-10-0-1-e",false],["ip-10-0-1-h",false],["ip-10-0-2-b",false]]],["eu-central-1c",[["ip-10-0-1-c",true],["ip-10-0-1-f",false],["ip-10-0-1-i",false],["ip-10-0-2-c",false]]]]},"money":{"rules":[["requests above use",777,10],["older instance generations",417,2],["extended support",365,1],["idle load balancers",59,3],["gp2 where gp3 is cheaper",40,1]],"total":1659},"topology":{"edges":[["api-gateway","auth-service",121,0],["api-gateway","payments-gateway",35,0],["api-gateway","search-indexer",18,0],["ledger-reconciler","payments-gateway",2.2,0],["payments-gateway","payments-orchestrator",34,0],["payments-orchestrator","webhook-dispatcher",12,0]],"nodes":[["api-gateway",0,0],["ledger-reconciler",0,1],["auth-service",1,0],["search-indexer",1,1],["payments-gateway",1,2],["payments-orchestrator",2,0],["webhook-dispatcher",3,0]],"unit":"flows"},"compliance":{"controls":[["1.1.1","NA"],["1.2.1","NA"],["2.1","NA"],["3.2.1","NA"],["4.2.1","NA"],["5.1.1","FAIL"],["5.1.10","FAIL"],["5.1.11","FAIL"],["5.1.12","FAIL"],["5.1.13","FAIL"],["5.1.2","FAIL"],["5.1.3","MANUAL"],["5.1.4","FAIL"],["5.1.5","FAIL"],["5.1.6","FAIL"],["5.1.7","MANUAL"],["5.1.8","FAIL"],["5.1.9","FAIL"],["5.2.1","FAIL"],["5.2.10","FAIL"],["5.2.11","MANUAL"],["5.2.12","FAIL"],["5.2.13","FAIL"],["5.2.2","FAIL"],["5.2.3","FAIL"],["5.2.4","FAIL"],["5.2.5","FAIL"],["5.2.6","FAIL"],["5.2.7","FAIL"],["5.2.8","PASS"],["5.2.9","PASS"],["5.3.2","FAIL"],["5.4.1","FAIL"],["5.5.1","FAIL"],["5.7.2","MANUAL"],["5.7.3","FAIL"],["5.7.4","FAIL"]],"inScope":32,"checkable":28},"preflight":{"cmd":"shoalcheck preflight drain ip-10-0-1-a","head":"✗ ip-10-0-1-a cannot be evacuated: 1 thing stops the drain","why":"workers/debug-shell-ondemand — kubectl drain refuses to evict the pod on node ip-10-0-1-a unless it is given --force, and with --force deletes it: nothing recreates a pod no controller manages.","exit":2},"fleet":{"clusters":["acme-pay-prod","acme-pay-staging","acme-pay-dr"],"rows":[["api","pod-security.enforce",["(not declared)","baseline","(not declared)"]],["api","pod-security.warn",["(not declared)","restricted","(not declared)"]],["cluster","operators.installed",["(not declared)","(not declared)","velero.io"]],["payments","limitrange.present",["none declared","none declared","declared"]],["payments","networkpolicy.present",["none declared","declared","none declared"]],["payments","pod-security.enforce",["(not declared)","restricted","baseline"]],["payments","resourcequota.present",["none declared","declared","none declared"]]]},"history":{"since":"the week before","new":["Deployment api/auth-service declares an environment variable twice"],"gone":1,"notCompared":0}}</script>
-<script type="application/json" id="hero-reading">{"cluster":"acme-pay-prod","where":"eks · eu-central-1 · k8s 1.31.2-eks-1a2b3c4","kinds":[["pods",33],["nodes",12],["deployments",10],["statefulsets",3],["daemonsets",2],["services",5],["clusterrolebindings",5],["cronjobs",1],["persistentvolumes",3],["jobs",2],["persistentvolumeclaims",2],["poddisruptionbudgets",2],["horizontalpodautoscalers",2],["rolebindings",2],["endpointslices",1],["namespaces",6],["serviceaccounts",5],["clusterroles",2],["ingresses",1],["storageclasses",2],["roles",1],["ingressclasses",1],["priorityclasses",1]],"objects":104,"kb":75,"rules":103,"checks":1915,"total":141,"cats":["security","reliability","config","cost"],"grid":[[1,3,28,22,0],[0,7,22,11,0],[0,0,16,9,1],[0,0,14,5,2]],"dollars":1659,"money":"prometheus over 7d · list price · upper bound if consolidated","claims":[["5 nodes cannot be evacuated","drain feasibility · workers/licensed-etl-0 requests 250m cpu and 512Mi memory"],["1 dated obligation inside 90 days","2026-11-26 · dataset kubeversions 2026-08-31 · embedded"],["9 references point at nothing","a Service publishes no ready address · Service api/api-gateway — a reference, not an opinion"],["$1,659/mo identified","prometheus over 7d · list price · upper bound if consolidated"]]}</script>
+<script type="application/json" id="hero-reading">{"cluster":"acme-pay-prod","where":"eks · eu-central-1 · k8s 1.31.2-eks-1a2b3c4","kinds":[["pods",33],["nodes",12],["deployments",10],["statefulsets",3],["daemonsets",2],["services",5],["clusterrolebindings",5],["cronjobs",1],["persistentvolumes",3],["jobs",2],["persistentvolumeclaims",2],["namespaces",6],["poddisruptionbudgets",2],["horizontalpodautoscalers",2],["rolebindings",2],["endpointslices",1],["serviceaccounts",5],["clusterroles",2],["ingresses",1],["storageclasses",2],["roles",1],["ingressclasses",1],["priorityclasses",1]],"objects":104,"kb":75,"rules":103,"checks":1915,"total":141,"cats":["security","reliability","config","cost"],"grid":[[1,3,28,22,0],[0,7,22,11,0],[0,0,16,9,1],[0,0,14,5,2]],"dollars":1659,"money":"prometheus over 7d · list price · upper bound if consolidated","claims":[["5 nodes cannot be evacuated","drain feasibility · workers/licensed-etl-0 requests 250m cpu and 512Mi memory"],["1 dated obligation inside 90 days","2026-11-26 · dataset kubeversions 2026-08-31 · embedded"],["9 references point at nothing","a Service publishes no ready address · Service api/api-gateway — a reference, not an opinion"],["$1,659/mo identified","prometheus over 7d · list price · upper bound if consolidated"]]}</script>
 <script type="application/json" id="zone-scene">{"cluster":"acme-pay-prod","lost":"eu-central-1a","zones":[{"z":"eu-central-1a","nodes":[{"n":"ip-10-0-1-a","t":"m6i.xlarge","p":[{"k":"payments/payments-gateway-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c0-a"},{"k":"workers/ledger-reconciler-7f4b9c2-c"},{"k":"payments/payments-ledger-db-0","why":"its volume is pinned to eu-central-1a \u2014 it cannot move at all"},{"k":"workers/debug-shell-ondemand","bare":true}]},{"n":"ip-10-0-1-d","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c2-c"},{"k":"default/legacy-cron-runner-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c1-b"}]},{"n":"ip-10-0-1-g","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c2-c"}]},{"n":"ip-10-0-2-a","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c5-f"},{"k":"workers/licensed-etl-0","why":"no surviving node satisfies its placement constraints"}]}]},{"z":"eu-central-1b","nodes":[{"n":"ip-10-0-1-b","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c1-b"},{"k":"workers/ledger-reconciler-7f4b9c3-d"}]},{"n":"ip-10-0-1-e","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c2-c"}]},{"n":"ip-10-0-1-h","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c3-d"}]},{"n":"ip-10-0-2-b","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c2-c"},{"k":"workers/ledger-reconciler-7f4b9c0-a"}]}]},{"z":"eu-central-1c","nodes":[{"n":"ip-10-0-1-c","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c1-b"},{"k":"monitoring/node-exporter-7f4b9c2-c"},{"k":"api/search-indexer-7f4b9c0-a"}]},{"n":"ip-10-0-1-f","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c1-b"}]},{"n":"ip-10-0-1-i","t":"m6i.xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c4-e"}]},{"n":"ip-10-0-2-c","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c3-d"},{"k":"workers/ledger-reconciler-7f4b9c1-b"}]}]}]}</script>
 <script type="application/json" id="scene-verdicts">{"cluster":"acme-pay-prod","zones":[{"target":"eu-central-1a","headline":"✗ losing zone eu-central-1a leaves work with nowhere to go: 2 things","exit":2,"stranded":[{"pod":"payments/payments-ledger-db-0","why":"holds PersistentVolume pvc-ledger-db-0, which names the lost failure domain — it could not move at all"},{"pod":"workers/licensed-etl-0","why":"requests 250m cpu and 512Mi memory; no surviving node in this reading satisfies the modelled constraints"}]},{"target":"eu-central-1b","headline":"✓ zone eu-central-1b: every pod this model can place has somewhere else to go","exit":0},{"target":"eu-central-1c","headline":"✓ zone eu-central-1c: every pod this model can place has somewhere else to go","exit":0}],"nodes":[{"target":"ip-10-0-1-a","headline":"✗ ip-10-0-1-a cannot be evacuated: 1 thing stops the drain","exit":2,"blocked":[{"pod":"workers/debug-shell-ondemand","why":"kubectl drain refuses to evict the pod on node ip-10-0-1-a unless it is given --force, and with --force deletes it: nothing recreates a pod no controller manages."}]},{"target":"ip-10-0-1-b","headline":"✗ ip-10-0-1-b cannot be evacuated: 1 thing stops the drain","exit":2,"blocked":[{"pod":"payments/payments-orchestrator-7f4b9c0-a","why":"Evacuating node ip-10-0-1-b requires evicting 1 pod covered by PodDisruptionBudget payments/payments-orchestrator-pdb."}]},{"target":"ip-10-0-1-c","headline":"✗ ip-10-0-1-c cannot be evacuated: 1 thing stops the drain","exit":2,"blocked":[{"pod":"payments/payments-orchestrator-7f4b9c1-b","why":"Evacuating node ip-10-0-1-c requires evicting 1 pod covered by PodDisruptionBudget payments/payments-orchestrator-pdb."}]},{"target":"ip-10-0-1-d","headline":"✗ ip-10-0-1-d cannot be evacuated: 1 thing stops the drain","exit":2,"blocked":[{"pod":"payments/payments-orchestrator-7f4b9c2-c","why":"Evacuating node ip-10-0-1-d requires evicting 1 pod covered by PodDisruptionBudget payments/payments-orchestrator-pdb."}]},{"target":"ip-10-0-1-e","headline":"✓ ip-10-0-1-e: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-1-f","headline":"✓ ip-10-0-1-f: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-1-g","headline":"✓ ip-10-0-1-g: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-1-h","headline":"✓ ip-10-0-1-h: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-1-i","headline":"✓ ip-10-0-1-i: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-2-a","headline":"✗ ip-10-0-2-a cannot be evacuated: 1 thing stops the drain","exit":2,"stranded":[{"pod":"workers/licensed-etl-0","why":"requests 250m cpu and 512Mi memory; no surviving node in this reading satisfies the modelled constraints"}]},{"target":"ip-10-0-2-b","headline":"✓ ip-10-0-2-b: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-2-c","headline":"✓ ip-10-0-2-c: nothing this model checks stops the drain","exit":0}]}</script>
 <script type="application/json" id="support-windows">{"asOf":"2026-08-31","source":"https://endoflife.date","rateAsOf":"2026-09","rates":{"aws":0.5,"azure":0.5},"windows":{"aws":[["1.18","2020-10-13","2022-08-15",""],["1.19","2021-02-16","2022-08-01",""],["1.20","2021-05-18","2022-11-01",""],["1.21","2021-07-19","2023-02-16","2024-07-15"],["1.22","2022-04-04","2023-06-04","2024-09-01"],["1.23","2022-08-11","2023-10-11","2024-10-11"],["1.24","2022-11-15","2024-01-31","2025-01-31"],["1.25","2023-02-21","2024-05-01","2025-05-01"],["1.26","2023-04-11","2024-06-11","2025-06-11"],["1.27","2023-05-24","2024-07-24","2025-07-24"],["1.28","2023-09-26","2024-11-26","2025-11-26"],["1.29","2024-01-23","2025-03-23","2026-03-23"],["1.30","2024-05-23","2025-07-23","2026-07-23"],["1.31","2024-09-26","2025-11-26","2026-11-26"],["1.32","2025-01-25","2026-03-23","2027-03-23"],["1.33","2025-05-28","2026-07-29","2027-07-29"],["1.34","2025-10-06","2026-12-02","2027-12-02"],["1.35","2026-01-28","2027-03-27","2028-03-27"],["1.36","2026-06-02","2027-08-02","2028-08-02"]],"azure":[["1.21","2021-08-18","2022-07-31",""],["1.22","2022-01-10","2022-12-04",""],["1.23","2022-04-26","2023-04-02",""],["1.24","2022-08-17","2023-07-31",""],["1.25","2022-12-14","2024-01-14",""],["1.26","2023-04-18","2024-04-11",""],["1.27","2023-08-16","2024-07-31","2025-07-31"],["1.28","2023-11-07","2025-01-31","2026-02-28"],["1.29","2024-03-18","2025-03-31","2026-04-30"],["1.30","2024-08-05","2025-08-22","2026-07-31"],["1.31","2024-10-25","2025-11-01","2026-11-30"],["1.32","2025-04-06","2026-03-31","2027-03-31"],["1.33","2025-06-17","2026-07-31","2027-07-31"],["1.34","2026-01-04","2026-11-30","2027-11-30"],["1.35","2026-03-05","2027-03-31","2028-03-31"],["1.36","2026-06-30","2027-06-30","2028-06-30"]],"gcp":[["1.17","2021-03-29","2021-11-01",""],["1.18","2021-03-29","2022-03-01",""],["1.19","2021-04-14","2022-06-01",""],["1.20","2021-06-09","2022-08-01",""],["1.21","2021-10-01","2023-01-31",""],["1.22","2022-03-07","2023-04-30",""],["1.23","2022-05-03","2023-07-31",""],["1.24","2022-06-23","2023-10-31",""],["1.25","2022-12-14","2024-03-30",""],["1.26","2023-03-31","2024-06-30",""],["1.27","2023-06-15","2024-10-01",""],["1.28","2023-12-04","2025-02-04",""],["1.29","2024-01-26","2025-04-12",""],["1.30","2024-07-31","2025-09-30",""],["1.31","2024-10-25","2026-01-16",""],["1.32","2025-02-11","2026-04-11",""],["1.33","2025-06-03","2026-08-03",""],["1.34","2025-09-30","2026-10-01",""],["1.35","2026-02-11","2027-04-11",""],["1.36","2026-06-09","2027-08-09",""]],"upstream":[["1.16","2019-09-18","2020-08-04",""],["1.17","2019-12-07","2020-12-25",""],["1.18","2020-03-25","2021-06-18",""],["1.19","2020-08-26","2021-10-28",""],["1.20","2020-12-08","2022-02-28",""],["1.21","2021-04-08","2022-06-28",""],["1.22","2021-08-04","2022-10-28",""],["1.23","2021-12-07","2023-02-28",""],["1.24","2022-05-03","2023-07-28",""],["1.25","2022-08-23","2023-10-27",""],["1.26","2022-12-08","2024-02-28",""],["1.27","2023-04-11","2024-06-28",""],["1.28","2023-08-15","2024-10-28",""],["1.29","2023-12-13","2025-02-28",""],["1.30","2024-04-17","2025-07-15",""],["1.31","2024-08-13","2025-11-11",""],["1.32","2024-12-11","2026-02-28",""],["1.33","2025-04-23","2026-06-28",""],["1.34","2025-08-27","2026-10-27",""],["1.35","2025-12-17","2027-02-28",""],["1.36","2026-04-22","2027-06-28",""],["1.37","2026-08-26","2027-10-28",""]]}}</script>
 <script type="application/json" id="agent-prices">{"fetched":"2026-10-18","source":"https://platform.claude.com/docs/en/about-claude/pricing","context":1000000,"charsLo":3,"charsHi":4,"secPerCheck":30,"models":[{"n":"Claude Haiku 5.5","in":0.5,"small":0.1,"tier":100000},{"n":"Claude Sonnet 5.5","in":2},{"n":"Claude Opus 5.5","in":4},{"n":"Claude Fable 5.1","in":10}]}</script>
 <script src="landing.js"></script>
+<script src="film.js"></script>
 <script src="nav.js"></script>
 </body>
 </html>
