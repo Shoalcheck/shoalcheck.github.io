@@ -10,8 +10,11 @@
 <meta property="og:description" content="Read-only Kubernetes preflight and audit from your laptop. Which node won't drain, what a lost zone leaves stranded, what blocks the upgrade — before you start.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://shoalcheck.github.io/">
-<meta property="og:image" content="https://shoalcheck.github.io/assets/shot-reading.png">
-<meta property="og:image:alt" content="The overview of the sample reading of acme-pay-prod, labelled Illustrative sample.">
+<meta property="og:image" content="https://shoalcheck.github.io/assets/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Shoalcheck — don't start a change you can't finish. Beside it, the real output of shoalcheck preflight drain on a kind test cluster: assay-e2e-worker cannot be evacuated, 1 thing stops the drain, exit 2.">
+<meta name="twitter:image" content="https://shoalcheck.github.io/assets/og-card.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <!-- Where the download buttons look for files: a GitHub repository whose releases carry the archives. -->
 <meta name="shoalcheck:releases" content="shoalcheck/shoalcheck">
@@ -39,8 +42,10 @@
       <a href="index.html#arithmetic">The arithmetic</a>
       <a href="index.html#pricing">Pricing</a>
       <a href="index.html#faq">FAQ</a>
+      <a href="docs.html">Docs</a>
     </nav>
     <div class="top-cta">
+      <button class="btn btn-ghost just-switch" type="button" data-just-output aria-pressed="false">Just the output</button>
       <a class="btn btn-ghost" href="app-demo.html">Live demo</a>
       <a class="btn btn-primary" href="index.html#download">Download</a>
     </div>
@@ -67,6 +72,10 @@
           Try it in your browser
         </a>
       </div>
+      <button class="ov-open" id="ov-open" type="button" aria-haspopup="dialog">
+        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z"/></svg>
+        Watch the overview <span class="ov-len">53 s, with subtitles</span>
+      </button>
       <ul class="trust">
         <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>No account</li>
         <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Nothing installed in the cluster</li>
@@ -106,7 +115,7 @@
 <!-- ═══ PROOF STRIP ═══ -->
 <section class="strip" aria-label="What it does, in numbers">
   <div class="wrap strip-grid">
-    <div class="stat reveal"><b>102</b><span>rules in every reading, each naming the object it rests on</span></div>
+    <div class="stat reveal"><b>103</b><span>rules in every reading, each naming the object it rests on</span></div>
     <div class="stat reveal"><b>47</b><span>resource types read, with get and list</span></div>
     <div class="stat reveal"><b>0</b><span>object writes — counted, not promised</span></div>
     <div class="stat reveal"><b>3</b><span>systems: macOS, Windows, Linux</span></div>
@@ -121,13 +130,20 @@
         <span class="eyebrow">Lose a zone, on paper first</span>
         <h2 id="z-title">Watch a zone go down before it does.</h2>
         <ol class="scene-steps" id="scene-steps">
-          <li data-step="0"><b>A real-shaped cluster.</b> Three zones, twelve nodes, thirty-two pods — the sample cluster, acme-pay-prod.</li>
-          <li data-step="1"><b>eu-central-1a goes dark.</b> Four nodes and thirteen pods with it.</li>
-          <li data-step="2"><b>Eleven are not stopped.</b> Nothing this model checks — requests, placement rules, volumes — keeps them from the nodes that remain. Where they are drawn is for the picture: the reading names only what has nowhere to go. One of the eleven is a bare pod, and it fades instead: nothing recreates a pod with no controller, as the reading's own finding says.</li>
-          <li data-step="3"><b>Two have nowhere to go.</b> A database whose volume is pinned to the lost zone, and an ETL worker, one pod of a StatefulSet, whose placement rules no surviving node satisfies — each named, each with its reason.</li>
-          <li data-step="4"><b>One command, before the outage.</b> <code>shoalcheck preflight zone eu-central-1a</code> — exit <b>2</b>.</li>
+          <li data-step="0"><b>A real-shaped cluster.</b> <span class="sd"><span>Three zones, twelve nodes, thirty-two pods — the sample cluster, acme-pay-prod.</span></span></li>
+          <li data-step="1"><b>eu-central-1a goes dark.</b> <span class="sd"><span>Four nodes and thirteen pods with it.</span></span></li>
+          <li data-step="2"><b>Eleven are not stopped.</b> <span class="sd"><span>Nothing this model checks — requests, placement rules, volumes — keeps them from the nodes that remain. Where they are drawn is for the picture: the reading names only what has nowhere to go. One of the eleven is a bare pod, and it fades instead: nothing recreates a pod with no controller, as the reading's own finding says.</span></span></li>
+          <li data-step="3"><b>Two have nowhere to go.</b> <span class="sd"><span>A database whose volume is pinned to the lost zone, and an ETL worker, one pod of a StatefulSet, whose placement rules no surviving node satisfies — each named, each with its reason.</span></span></li>
+          <li data-step="4"><b>One command, before the outage.</b> <span class="sd"><span><code>shoalcheck preflight zone eu-central-1a</code> — exit <b>2</b>.</span></span></li>
         </ol>
         <p class="scene-note">Illustrative sample: a fictional cluster run through the real engine. The verdict and its reasons are the reading's own.</p>
+        <div class="scene-try" id="scene-try">
+          <p class="st-cap">Ask it yourself. Every answer below was computed by <code>shoalcheck preflight</code> for each zone and each node of the sample.</p>
+          <div class="st-row"><span class="st-l">Lose a zone</span><span class="st-zones" id="st-zones"></span></div>
+          <div class="st-row"><label class="st-l" for="st-node">Drain a node</label><select id="st-node"><option value="">choose a node</option></select></div>
+          <p class="st-verdict" id="st-verdict" aria-live="polite" hidden></p>
+          <button class="st-back" type="button" id="st-back" hidden>Back to the story</button>
+        </div>
       </div>
       <div class="scene-art">
         <svg id="scene" viewBox="0 0 640 520" role="img" aria-labelledby="scene-desc">
@@ -198,6 +214,31 @@
   </div>
 </section>
 
+<!-- ═══ DEADLINES ═══ -->
+<section class="band" id="deadlines" aria-labelledby="dl-title">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <span class="eyebrow">Deadlines</span>
+      <h2 id="dl-title">When does your version stop being supported — and what does the extra time cost?</h2>
+      <p>The dates every reading uses to place a cluster's version, and the rate it prices extended support at. Pick yours.</p>
+    </div>
+    <div class="calc deadline reveal" id="dl-calc">
+      <div class="calc-in">
+        <h3>Your clusters</h3>
+        <label>Provider <select id="dl-provider"></select></label>
+        <label>Kubernetes version <select id="dl-minor"></select></label>
+        <label>Clusters on that version <output id="o-dl-n">5</output><input type="range" id="dl-n" min="1" max="100" step="1" value="5"></label>
+      </div>
+      <div class="calc-out" aria-live="polite">
+        <div><b id="dl-std">—</b><span id="dl-std-l">ordinary support</span></div>
+        <div><b id="dl-ext">—</b><span id="dl-ext-l">extended support</span></div>
+        <div class="dl-wide"><b id="dl-cost">—</b><span id="dl-cost-l">extended support, a month</span></div>
+        <p class="calc-basis" id="dl-basis"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ═══ THE READING ═══ -->
 <section class="band band-alt" id="reading" aria-labelledby="r-title">
   <div class="wrap">
@@ -208,8 +249,12 @@
     </div>
     <div class="gallery">
       <figure class="g-main reveal">
-        <img src="assets/shot-reading.png" width="1440" height="900" loading="lazy" alt="The overview of the sample reading of acme-pay-prod, labelled Illustrative sample: 136 findings, 10 critical or high, $1,647 a month identified, the four claims it leads with, a severity by category grid and findings by namespace.">
-        <figcaption><b>Overview.</b> What it found first, how bad and of what kind, where — 136 findings on the sample cluster.</figcaption>
+        <div class="live-frame" id="live-frame">
+          <img class="live-poster" src="assets/shot-reading.png" width="1440" height="900" loading="lazy" alt="The overview of the sample reading of acme-pay-prod, labelled Illustrative sample: 137 findings, 10 critical or high, $1,647 a month identified, the four claims it leads with, a severity by category grid and findings by namespace.">
+          <iframe data-src="sample-report.html" title="The sample reading, live" tabindex="-1" aria-hidden="true"></iframe>
+          <a class="live-open" href="sample-report.html">Open it — the whole reading</a>
+        </div>
+        <figcaption><b>Overview.</b> What it found first, how bad and of what kind, where — 137 findings on the sample cluster.</figcaption>
       </figure>
       <figure class="reveal">
         <img src="assets/reading-blast.png" width="1440" height="900" loading="lazy" alt="The Blast radius workspace of the sample reading: the cluster by failure domain, three zones of four nodes each, the nodes named by a feasibility finding marked, what has nowhere to go and what one lost zone takes.">
@@ -218,6 +263,40 @@
       <figure class="reveal">
         <img src="assets/reading-another.png" width="1440" height="900" loading="lazy" alt="The Method workspace of the sample reading: what it would take another way — the objects read, their size as kubectl prints them, the rule by object checks, the tokens an AI agent needs just to read them once, each model's price, and the hours by hand.">
         <figcaption><b>What it would take another way.</b> Tokens for an AI agent, hours by hand — every figure a floor.</figcaption>
+      </figure>
+    </div>
+    <div class="loops reveal">
+      <figure class="loop">
+        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-narrow.jpg"
+          aria-label="Recorded on the sample reading: the Findings workspace, narrowed to the high findings and to one rule, then one finding opened — what it is, why it matters, the object it rests on, its evidence.">
+          <source src="assets/loop-narrow.webm" type="video/webm">
+          <source src="assets/loop-narrow.mp4" type="video/mp4">
+        </video>
+        <figcaption><b>Narrow it, open one.</b> Keep the high findings, open one, read what it rests on.</figcaption>
+      </figure>
+      <figure class="loop">
+        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-ask.jpg"
+          aria-label="Recorded on the sample reading: the search palette, payments-gateway typed in, and the whole reading cut to the four findings about that workload, twelve dollars a month of it identified.">
+          <source src="assets/loop-ask.webm" type="video/webm">
+          <source src="assets/loop-ask.mp4" type="video/mp4">
+        </video>
+        <figcaption><b>Ask by name.</b> Type a workload; every workspace keeps only what is about it.</figcaption>
+      </figure>
+      <figure class="loop">
+        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-money.jpg"
+          aria-label="Recorded on the sample reading: the Cost workspace, then the largest rule's figure followed to the nine findings behind it, $765 of $1,647 a month identified.">
+          <source src="assets/loop-money.webm" type="video/webm">
+          <source src="assets/loop-money.mp4" type="video/mp4">
+        </video>
+        <figcaption><b>Follow the money.</b> From the largest figure in Cost to the findings behind it.</figcaption>
+      </figure>
+      <figure class="loop">
+        <video muted loop playsinline controls preload="none" width="960" height="600" poster="assets/loop-trace.jpg"
+          aria-label="Recorded on the sample reading: the Access graph, the ServiceAccount workers/cicd-deployer pinned, and its two bindings lit through to the roles they reach, cluster-admin among them.">
+          <source src="assets/loop-trace.webm" type="video/webm">
+          <source src="assets/loop-trace.mp4" type="video/mp4">
+        </video>
+        <figcaption><b>Trace a grant.</b> Pin a ServiceAccount; the graph lights every binding and the role it reaches.</figcaption>
       </figure>
     </div>
     <div class="reading-cta reveal">
@@ -240,12 +319,12 @@
       <div class="compare-copy">
         <span class="eyebrow">Read them all</span>
         <h3>A fleet is one file: every cluster, and what they declare differently.</h3>
-        <p>Our two kind test clusters, read together. Each name opens that cluster's full reading. The totals add only what could be priced — <code>kind-assay-mesh</code> carries made-up cloud labels, so the price table has something to price; <code>kind-assay-e2e</code> is plain kind and says unpriced.</p>
-        <p class="note">What the clusters declare differently is listed side by side, and no value is marked as the right one. A context that could not be read is named, never counted as a cluster with no problems.</p>
-        <a class="btn" href="sample-fleet.html">Open the fleet</a>
+        <p>The sample company's three clusters — production, staging and disaster recovery — each read by the engine and put together the way <code>shoalcheck fleet</code> does. Each name opens that cluster's full reading. Staging declares Pod Security levels, a NetworkPolicy and a quota that production does not yet; the recovery cluster runs without monitoring and serves Velero's API.</p>
+        <p class="note">What the clusters declare differently is listed side by side, and no value is marked as the right one. A context that could not be read is named, never counted as a cluster with no problems. Like the sample reading, it is labelled as a sample on every screen.</p>
+        <a class="btn" href="sample-fleet.html">Open the sample fleet</a>
       </div>
       <figure>
-        <img src="assets/reading-fleet.png" width="1440" height="900" loading="lazy" alt="The fleet overview of our two kind test clusters, labelled with the words they were read with — kind-assay-mesh's cloud labels are set by hand: kind-assay-e2e, 56 findings, unpriced; kind-assay-mesh, 151 findings, $42 a month identified; 207 findings across the fleet; every context read; and what they declare differently — the operators installed, and seven namespaces present in one cluster and not the other.">
+        <img src="assets/reading-fleet.png" width="1440" height="900" loading="lazy" alt="The fleet overview of the sample company's three clusters, labelled Illustrative sample: acme-pay-prod 137 findings, acme-pay-staging 133, acme-pay-dr 122, $1,647 a month identified on each; 392 findings and $4,941 a month across the fleet; every context read; and what they declare differently — Pod Security levels on api and payments, a NetworkPolicy, a ResourceQuota and a LimitRange in payments, Velero's API group on acme-pay-dr, and the monitoring namespace on two of the three.">
       </figure>
     </div>
   </div>
@@ -269,6 +348,8 @@
         aria-label="The interactive demo, recorded: the app reads the kind test cluster — its four named steps in turn, the kinds it read, findings arriving, every request it issued, and a Stop button while it runs — writes the reading, which says unpriced because kind has no list price, and names the most severe finding its first three left out and why; opens the reading; then asks on the Preflight screen whether assay-e2e-worker can be drained, and what losing zone eu-central-1a would do to the mesh test cluster.">
         <source src="assets/app-session.webm" type="video/webm">
         <source src="assets/app-session.mp4" type="video/mp4">
+        <track kind="captions" src="assets/app-session.captions.vtt" srclang="en" label="What is on screen" default>
+        <track kind="chapters" src="assets/app-session.chapters.vtt" srclang="en" label="Chapters">
       </video>
       <figcaption>The interactive demo, recorded: read the cluster, open the reading, ask whether a node can be drained and what losing a zone would do. 32 seconds of the real window replaying a real session, at 25 frames a second; the banner on every frame says so.</figcaption>
     </figure>
@@ -508,11 +589,29 @@
     <div class="cta">
       <a class="btn btn-primary btn-lg" href="index.html#download">Download</a>
       <a class="btn btn-lg" href="app-demo.html">Try it in your browser</a>
+      <button class="btn btn-lg just-switch" type="button" data-just-output aria-pressed="false">Just the output</button>
     </div>
+    <p class="just-note">"Just the output" hides our sentences and keeps what the product printed — the terminals, the scene,
+      the calculators, the video and the readings — with every caption that says what each rests on.</p>
   </div>
 </section>
 
 </main>
+
+<dialog class="overview" id="overview" aria-labelledby="ov-title">
+  <div class="ov-head">
+    <h2 id="ov-title">Shoalcheck in 53 seconds</h2>
+    <button class="ov-close" id="ov-close" type="button">Close</button>
+  </div>
+  <video id="ov-video" muted controls playsinline preload="none" width="1280" height="800" poster="assets/overview-poster.jpg"
+    aria-label="The overview, recorded from this site's own pages: the hero's real preflight output; a zone of the sample lost on paper; the sample reading — its overview, blast radius, the money followed to its findings, a ServiceAccount traced to cluster-admin; the sample fleet of three clusters; a second reading of our kind test cluster; and the desktop app reading a cluster.">
+    <source src="assets/overview.webm" type="video/webm">
+    <source src="assets/overview.mp4" type="video/mp4">
+    <track kind="captions" src="assets/overview.captions.vtt" srclang="en" label="What is on screen" default>
+    <track kind="chapters" src="assets/overview.chapters.vtt" srclang="en" label="Chapters">
+  </video>
+  <p class="ov-note">Recorded from this site's own pages. The sample reading and the sample fleet are a fictional company through the real engine, labelled as a sample on every frame; the comparison and the app are our kind test clusters.</p>
+</dialog>
 
 <footer class="foot">
   <div class="wrap foot-in">
@@ -520,15 +619,18 @@
     <ul>
       <li><a href="sample-report.html">The sample reading</a></li>
       <li><a href="sample-compare.html">A real comparison</a></li>
-      <li><a href="sample-fleet.html">A real fleet</a></li>
+      <li><a href="sample-fleet.html">The sample fleet</a></li>
       <li><a href="app-demo.html">The interactive demo</a></li>
       <li><a href="read-only.html">What it reads</a></li>
-      <li><a href="https://github.com/shoalcheck/shoalcheck/releases">Releases</a></li>
+      <li><a href="docs.html">Docs</a></li>
+      <li><a href="https://github.com/shoalcheck/shoalcheck/releases">Changelog and releases</a></li>
     </ul>
   </div>
 </footer>
 
 <script type="application/json" id="zone-scene">{"cluster":"acme-pay-prod","lost":"eu-central-1a","zones":[{"z":"eu-central-1a","nodes":[{"n":"ip-10-0-1-a","t":"m6i.xlarge","p":[{"k":"payments/payments-gateway-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c0-a"},{"k":"workers/ledger-reconciler-7f4b9c2-c"},{"k":"payments/payments-ledger-db-0","why":"its volume is pinned to eu-central-1a \u2014 it cannot move at all"},{"k":"workers/debug-shell-ondemand","bare":true}]},{"n":"ip-10-0-1-d","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c2-c"},{"k":"default/legacy-cron-runner-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c1-b"}]},{"n":"ip-10-0-1-g","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c2-c"}]},{"n":"ip-10-0-2-a","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c5-f"},{"k":"workers/licensed-etl-0","why":"no surviving node satisfies its placement constraints"}]}]},{"z":"eu-central-1b","nodes":[{"n":"ip-10-0-1-b","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c0-a"},{"k":"monitoring/node-exporter-7f4b9c1-b"},{"k":"workers/ledger-reconciler-7f4b9c3-d"}]},{"n":"ip-10-0-1-e","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c0-a"},{"k":"api/search-indexer-7f4b9c2-c"}]},{"n":"ip-10-0-1-h","t":"m6i.xlarge","p":[{"k":"api/api-gateway-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c3-d"}]},{"n":"ip-10-0-2-b","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c2-c"},{"k":"workers/ledger-reconciler-7f4b9c0-a"}]}]},{"z":"eu-central-1c","nodes":[{"n":"ip-10-0-1-c","t":"m6i.xlarge","p":[{"k":"payments/payments-orchestrator-7f4b9c1-b"},{"k":"monitoring/node-exporter-7f4b9c2-c"},{"k":"api/search-indexer-7f4b9c0-a"}]},{"n":"ip-10-0-1-f","t":"m6i.xlarge","p":[{"k":"api/auth-service-7f4b9c1-b"},{"k":"workers/webhook-dispatcher-7f4b9c1-b"}]},{"n":"ip-10-0-1-i","t":"m6i.xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c0-a"},{"k":"workers/webhook-dispatcher-7f4b9c4-e"}]},{"n":"ip-10-0-2-c","t":"r6i.4xlarge","p":[{"k":"workers/risk-batch-processor-7f4b9c3-d"},{"k":"workers/ledger-reconciler-7f4b9c1-b"}]}]}]}</script>
+<script type="application/json" id="scene-verdicts">{"cluster":"acme-pay-prod","zones":[{"target":"eu-central-1a","headline":"✗ losing zone eu-central-1a leaves work with nowhere to go: 2 things","exit":2,"stranded":[{"pod":"payments/payments-ledger-db-0","why":"holds PersistentVolume pvc-ledger-db-0, which names the lost failure domain — it could not move at all"},{"pod":"workers/licensed-etl-0","why":"requests 250m cpu and 512Mi memory; no surviving node in this reading satisfies the modelled constraints"}]},{"target":"eu-central-1b","headline":"✓ zone eu-central-1b: every pod this model can place has somewhere else to go","exit":0},{"target":"eu-central-1c","headline":"✓ zone eu-central-1c: every pod this model can place has somewhere else to go","exit":0}],"nodes":[{"target":"ip-10-0-1-a","headline":"✗ ip-10-0-1-a cannot be evacuated: 1 thing stops the drain","exit":2,"blocked":[{"pod":"workers/debug-shell-ondemand","why":"kubectl drain refuses to evict the pod on node ip-10-0-1-a unless it is given --force, and with --force deletes it: nothing recreates a pod no controller manages."}]},{"target":"ip-10-0-1-b","headline":"✗ ip-10-0-1-b cannot be evacuated: 1 thing stops the drain","exit":2,"blocked":[{"pod":"payments/payments-orchestrator-7f4b9c0-a","why":"Evacuating node ip-10-0-1-b requires evicting 1 pod covered by PodDisruptionBudget payments/payments-orchestrator-pdb."}]},{"target":"ip-10-0-1-c","headline":"✗ ip-10-0-1-c cannot be evacuated: 1 thing stops the drain","exit":2,"blocked":[{"pod":"payments/payments-orchestrator-7f4b9c1-b","why":"Evacuating node ip-10-0-1-c requires evicting 1 pod covered by PodDisruptionBudget payments/payments-orchestrator-pdb."}]},{"target":"ip-10-0-1-d","headline":"✗ ip-10-0-1-d cannot be evacuated: 1 thing stops the drain","exit":2,"blocked":[{"pod":"payments/payments-orchestrator-7f4b9c2-c","why":"Evacuating node ip-10-0-1-d requires evicting 1 pod covered by PodDisruptionBudget payments/payments-orchestrator-pdb."}]},{"target":"ip-10-0-1-e","headline":"✓ ip-10-0-1-e: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-1-f","headline":"✓ ip-10-0-1-f: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-1-g","headline":"✓ ip-10-0-1-g: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-1-h","headline":"✓ ip-10-0-1-h: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-1-i","headline":"✓ ip-10-0-1-i: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-2-a","headline":"✗ ip-10-0-2-a cannot be evacuated: 1 thing stops the drain","exit":2,"stranded":[{"pod":"workers/licensed-etl-0","why":"requests 250m cpu and 512Mi memory; no surviving node in this reading satisfies the modelled constraints"}]},{"target":"ip-10-0-2-b","headline":"✓ ip-10-0-2-b: nothing this model checks stops the drain","exit":0},{"target":"ip-10-0-2-c","headline":"✓ ip-10-0-2-c: nothing this model checks stops the drain","exit":0}]}</script>
+<script type="application/json" id="support-windows">{"asOf":"2026-08-31","source":"https://endoflife.date","rateAsOf":"2026-09","rates":{"aws":0.5,"azure":0.5},"windows":{"aws":[["1.18","2020-10-13","2022-08-15",""],["1.19","2021-02-16","2022-08-01",""],["1.20","2021-05-18","2022-11-01",""],["1.21","2021-07-19","2023-02-16","2024-07-15"],["1.22","2022-04-04","2023-06-04","2024-09-01"],["1.23","2022-08-11","2023-10-11","2024-10-11"],["1.24","2022-11-15","2024-01-31","2025-01-31"],["1.25","2023-02-21","2024-05-01","2025-05-01"],["1.26","2023-04-11","2024-06-11","2025-06-11"],["1.27","2023-05-24","2024-07-24","2025-07-24"],["1.28","2023-09-26","2024-11-26","2025-11-26"],["1.29","2024-01-23","2025-03-23","2026-03-23"],["1.30","2024-05-23","2025-07-23","2026-07-23"],["1.31","2024-09-26","2025-11-26","2026-11-26"],["1.32","2025-01-25","2026-03-23","2027-03-23"],["1.33","2025-05-28","2026-07-29","2027-07-29"],["1.34","2025-10-06","2026-12-02","2027-12-02"],["1.35","2026-01-28","2027-03-27","2028-03-27"],["1.36","2026-06-02","2027-08-02","2028-08-02"]],"azure":[["1.21","2021-08-18","2022-07-31",""],["1.22","2022-01-10","2022-12-04",""],["1.23","2022-04-26","2023-04-02",""],["1.24","2022-08-17","2023-07-31",""],["1.25","2022-12-14","2024-01-14",""],["1.26","2023-04-18","2024-04-11",""],["1.27","2023-08-16","2024-07-31","2025-07-31"],["1.28","2023-11-07","2025-01-31","2026-02-28"],["1.29","2024-03-18","2025-03-31","2026-04-30"],["1.30","2024-08-05","2025-08-22","2026-07-31"],["1.31","2024-10-25","2025-11-01","2026-11-30"],["1.32","2025-04-06","2026-03-31","2027-03-31"],["1.33","2025-06-17","2026-07-31","2027-07-31"],["1.34","2026-01-04","2026-11-30","2027-11-30"],["1.35","2026-03-05","2027-03-31","2028-03-31"],["1.36","2026-06-30","2027-06-30","2028-06-30"]],"gcp":[["1.17","2021-03-29","2021-11-01",""],["1.18","2021-03-29","2022-03-01",""],["1.19","2021-04-14","2022-06-01",""],["1.20","2021-06-09","2022-08-01",""],["1.21","2021-10-01","2023-01-31",""],["1.22","2022-03-07","2023-04-30",""],["1.23","2022-05-03","2023-07-31",""],["1.24","2022-06-23","2023-10-31",""],["1.25","2022-12-14","2024-03-30",""],["1.26","2023-03-31","2024-06-30",""],["1.27","2023-06-15","2024-10-01",""],["1.28","2023-12-04","2025-02-04",""],["1.29","2024-01-26","2025-04-12",""],["1.30","2024-07-31","2025-09-30",""],["1.31","2024-10-25","2026-01-16",""],["1.32","2025-02-11","2026-04-11",""],["1.33","2025-06-03","2026-08-03",""],["1.34","2025-09-30","2026-10-01",""],["1.35","2026-02-11","2027-04-11",""],["1.36","2026-06-09","2027-08-09",""]],"upstream":[["1.16","2019-09-18","2020-08-04",""],["1.17","2019-12-07","2020-12-25",""],["1.18","2020-03-25","2021-06-18",""],["1.19","2020-08-26","2021-10-28",""],["1.20","2020-12-08","2022-02-28",""],["1.21","2021-04-08","2022-06-28",""],["1.22","2021-08-04","2022-10-28",""],["1.23","2021-12-07","2023-02-28",""],["1.24","2022-05-03","2023-07-28",""],["1.25","2022-08-23","2023-10-27",""],["1.26","2022-12-08","2024-02-28",""],["1.27","2023-04-11","2024-06-28",""],["1.28","2023-08-15","2024-10-28",""],["1.29","2023-12-13","2025-02-28",""],["1.30","2024-04-17","2025-07-15",""],["1.31","2024-08-13","2025-11-11",""],["1.32","2024-12-11","2026-02-28",""],["1.33","2025-04-23","2026-06-28",""],["1.34","2025-08-27","2026-10-27",""],["1.35","2025-12-17","2027-02-28",""],["1.36","2026-04-22","2027-06-28",""],["1.37","2026-08-26","2027-10-28",""]]}}</script>
 <script type="application/json" id="agent-prices">{"fetched":"2026-10-18","source":"https://platform.claude.com/docs/en/about-claude/pricing","context":1000000,"charsLo":3,"charsHi":4,"secPerCheck":30,"models":[{"n":"Claude Haiku 5.5","in":0.5,"small":0.1,"tier":100000},{"n":"Claude Sonnet 5.5","in":2},{"n":"Claude Opus 5.5","in":4},{"n":"Claude Fable 5.1","in":10}]}</script>
 <script src="landing.js"></script>
 <script src="nav.js"></script>

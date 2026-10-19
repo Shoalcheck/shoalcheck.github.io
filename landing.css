@@ -142,8 +142,21 @@ p { margin: 0; }
 .band-head.center { margin-left: auto; margin-right: auto; text-align: center; align-items: center; }
 
 /* ── the scene ──────────────────────────────────────────────────────────── */
-.scene { position: relative; height: 340vh; border-top: 1px solid var(--line); }
-.scene-pin { position: sticky; top: 64px; height: calc(100vh - 64px); display: flex; align-items: center; }
+/* PINNED ONLY WHERE IT FITS. Pinned by the stylesheet alone, the scene grew taller than a 900-pixel screen: centred
+   in its frame it spilled up over the figures strip, and its heading slid under the navigation bar. landing.js
+   pins it (.pinned) when its copy — every step folded but the one being told, the tallest of them open — fits under
+   the bar; anywhere else it stays in the page and plays once when seen, as on a phone. */
+.scene { position: relative; border-top: 1px solid var(--line); }
+.scene-pin { padding: 72px 0; }
+.scene.pinned { height: 340vh; }
+.scene.pinned .scene-pin { position: sticky; top: 64px; height: calc(100vh - 64px); display: flex; align-items: center;
+                           padding: 0; }
+.scene.pinned .scene-copy { min-height: var(--copy-max, auto); }
+.scene.pinned .scene-note { margin-top: auto; }
+.scene-steps .sd { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .35s var(--ease); }
+.scene-steps .sd > span { overflow: hidden; min-height: 0; }
+.scene.pinned .scene-steps li:not(.on) .sd, .scene.measuring .scene-steps .sd { grid-template-rows: 0fr; }
+.scene.measuring .scene-steps .sd { transition: none; }
 .scene-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 40px; align-items: center; }
 .scene-copy { display: flex; flex-direction: column; gap: 18px; }
 .scene-steps { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; counter-reset: s; }
@@ -166,14 +179,32 @@ p { margin: 0; }
 #scene .pod.moved { fill: var(--accent2); }
 #scene .pod.stranded { fill: var(--bad); }
 #scene .pod.gone { opacity: .15; }
+#scene .pod.held { fill: var(--warn); }
+.tray .t-row.held { border-color: rgba(253, 176, 34, .35); background: rgba(30, 22, 8, .6); }
+.tray .t-row.held i { background: var(--warn); }
+.scene-copy.asking .scene-steps { display: none; }
+.scene-try { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border: 1px solid var(--line2);
+             border-radius: 14px; background: var(--surface); }
+.st-cap { margin: 0; font-size: 13px; color: var(--dim); line-height: 1.5; }
+.st-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.st-l { min-width: 92px; font: 600 12px var(--mono); color: var(--fg2); }
+.st-zones { display: flex; flex-wrap: wrap; gap: 6px; }
+.st-z { min-height: 32px; padding: 0 10px; border: 1px solid var(--line2); border-radius: 8px; background: var(--bg2);
+        color: var(--fg); font: 500 12px var(--mono); cursor: pointer; }
+.st-z[aria-pressed="true"] { border-color: var(--accent); color: var(--accent2); }
+#st-node { min-height: 32px; padding: 0 8px; border: 1px solid var(--line2); border-radius: 8px; background: var(--bg2);
+           color: var(--fg); font: 500 12px var(--mono); }
+.st-verdict { margin: 0; font-size: 13.5px; line-height: 1.55; }
+.st-verdict b.bad { color: var(--bad); } .st-verdict b.ok { color: var(--ok); }
+.st-verdict code { font: 12px var(--mono); color: var(--dim); }
+.st-back { align-self: flex-start; min-height: 30px; padding: 0 10px; border: 1px solid var(--line2); border-radius: 8px;
+           background: none; color: var(--fg2); font-size: 12.5px; cursor: pointer; }
 .tray { display: flex; flex-direction: column; gap: 5px; min-height: 230px; }
 .tray .t-row { display: grid; grid-template-columns: 10px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 6px 10px; border: 1px solid rgba(249, 112, 102, .28); border-radius: 9px; background: rgba(30, 12, 12, .6); font-size: 12px; line-height: 1.45; color: var(--fg2); opacity: 0; transform: translateY(8px); transition: opacity .4s var(--ease), transform .4s var(--ease); }
 .tray .t-row.in { opacity: 1; transform: none; }
 .tray .t-row i { width: 8px; height: 8px; border-radius: 50%; background: var(--bad); align-self: center; }
 .tray .t-row b { font: 600 11.5px var(--mono); color: var(--fg); }
 @media (max-width: 980px) {
-  .scene { height: auto; }
-  .scene-pin { position: static; height: auto; padding: 72px 0; }
   .scene-grid { grid-template-columns: minmax(0, 1fr); }
   .tray { min-height: 0; }
   .tray .t-row { opacity: 1; transform: none; }
@@ -248,6 +279,8 @@ p { margin: 0; }
 .calc-out em { font: 600 13px var(--mono); font-style: normal; color: var(--fg2); }
 .calc-basis { grid-column: 1 / -1; font-size: 12px; line-height: 1.6; color: var(--faint); }
 @media (max-width: 900px) { .calc { grid-template-columns: minmax(0, 1fr); } .calc-in { border-right: 0; border-bottom: 1px solid var(--line); } }
+.calc.deadline { margin-top: 0; }
+.calc-out .dl-wide { grid-column: 1 / -1; }
 
 /* ── read-only ──────────────────────────────────────────────────────────── */
 .ro-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 48px; align-items: center; }
@@ -334,6 +367,13 @@ p { margin: 0; }
 }
 
 /* ── a screenshot at full size (landing.js) ─────────────────────────────── */
+/* The video's captions, at the size of the frame's own text rather than the browser's default poster type. The
+   player draws them only in full screen; on the page they are the line under the frame (.vcap, landing.js). */
+video::cue { font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.4; color: #f2f6f6;
+                  background-color: rgba(5, 9, 10, .86); }
+/* Two lines held for it, three on a phone, so the page under the video does not jump as the cues change. */
+.vcap { margin: 0; min-height: 3em; font-size: 14px; line-height: 1.5; color: var(--fg2); }
+@media (max-width: 640px) { .vcap { min-height: 4.5em; font-size: 13.5px; } }
 .zoomable { cursor: zoom-in; }
 .zoomed, .zoomed body { overflow: hidden; }
 .zoom { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center;
@@ -355,3 +395,62 @@ p { margin: 0; }
                padding: 8px 12px; border: 1px solid var(--line2); border-radius: 9px; background: var(--surface);
                font-size: 12.5px; color: var(--fg2); }
 }
+
+/* ── just the output ─────────────────────────────────────────────────────
+   Our sentences go; what the product printed stays, with every caption that says what it rests on (a gate in
+   internal/gatecheck refuses a rule here that hides a caption, a basis line or the sample's label). */
+.just-output .hero .lede, .just-output .band-head p, .just-output .compare-copy p, .just-output .scene-steps,
+.just-output .st-cap, .just-output .ro-grid .band-head ~ p, .just-output #faq, .just-output .final-in > p:not(.just-note) { display: none; }
+.just-switch[aria-pressed="true"] { border-color: var(--accent); color: var(--accent2); }
+.just-note { font-size: 13px; color: var(--faint); max-width: 60ch; margin: 14px auto 0; }
+@media (max-width: 900px) { .top-cta .just-switch { display: none; } }
+
+/* ── the reading, live ───────────────────────────────────────────────────
+   The sample's own page in the frame, scaled from 1440 px; the screenshot is its poster until it has loaded.
+   Opening it grows the frame to the window — a view transition — and then goes to the page it already shows. */
+.live-frame { position: relative; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 14px; border: 1px solid var(--line2);
+              background: var(--surface); box-shadow: 0 30px 60px -32px rgba(0, 0, 0, .8); view-transition-name: sample-reading; }
+.gallery .live-frame img.live-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+              border: 0; border-radius: 0; box-shadow: none; transform: none; }
+.live-frame iframe { position: absolute; top: 0; left: 0; width: 1440px; height: 900px; border: 0; transform-origin: 0 0;
+              opacity: 0; transition: opacity .7s var(--ease); pointer-events: none; background: var(--surface); }
+.live-frame.live iframe { opacity: 1; }
+.live-open { position: absolute; right: 12px; bottom: 12px; display: inline-flex; align-items: center; min-height: 38px;
+             padding: 0 14px; border-radius: 10px; background: var(--accent); color: #04211d; font-weight: 600; font-size: 14px; text-decoration: none;
+             box-shadow: 0 10px 30px -10px rgba(45, 212, 191, .6); }
+.live-frame.expanded { position: fixed; inset: 0; z-index: 300; aspect-ratio: auto; border-radius: 0; border: 0; }
+.live-frame.expanded .live-open { display: none; }
+.js .gallery .g-main.reveal .live-frame { transform: perspective(1200px) translateY(46px) rotateX(7deg); opacity: .4;
+              transition: transform 1.1s var(--ease), opacity 1.1s var(--ease); }
+.js .gallery .g-main.reveal.in .live-frame { transform: none; opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .js .gallery .g-main.reveal .live-frame { transform: none; opacity: 1; transition: none; } }
+
+/* ── four loops: what a reader does in a reading ─────────────────────────
+   Recorded from the sample with scripts/site/record-loops.mjs. Muted, looped, played only while on screen, and
+   always with their controls; the poster is each loop's last frame, its outcome. */
+/* Two across: at a quarter of the page a frame of the instrument is texture, at half it can be read. */
+.loops { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 20px; margin-top: 28px; }
+.loop { margin: 0; min-width: 0; }
+.loop video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; border-radius: 10px;
+              border: 1px solid var(--line2); background: var(--surface); }
+.loop figcaption { margin-top: 9px; font-size: 13px; line-height: 1.5; color: var(--dim); }
+.loop figcaption b { color: var(--fg); }
+@media (max-width: 640px) { .loops { grid-template-columns: minmax(0, 1fr); } }
+
+/* ── the overview, on a click ────────────────────────────────────────────
+   Nothing downloads until the reader asks; subtitles are on by default and say only what is on screen. */
+.ov-open { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; padding: 6px 0; border: 0;
+           background: none; color: var(--accent2); font: 600 14.5px/1.4 var(--sans); cursor: pointer; }
+.ov-open svg { width: 14px; height: 14px; }
+.ov-open .ov-len { color: var(--dim); font-weight: 500; }
+.ov-open:hover { color: var(--fg); }
+.overview { width: min(1100px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 18px 18px 14px;
+            border: 1px solid var(--line2); border-radius: 16px; background: var(--bg2); color: var(--fg); }
+.overview::backdrop { background: rgba(3, 6, 7, .78); }
+.ov-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.ov-head h2 { margin: 0; font-size: 17px; }
+.ov-close { min-height: 36px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 10px;
+            background: rgba(255, 255, 255, .03); color: var(--fg); font: 600 13.5px/1 var(--sans); cursor: pointer; }
+.overview video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; border-radius: 10px;
+                  background: var(--surface); }
+.ov-note { margin: 10px 2px 0; font-size: 12.5px; line-height: 1.55; color: var(--faint); }

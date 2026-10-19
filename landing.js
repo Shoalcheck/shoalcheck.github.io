@@ -93,7 +93,7 @@
       return n;
     };
     var ZW = 200, NH = 58, GAP = 10, X0 = 10, Y0 = 46;
-    var pods = [], survivors = [], stranded = [];
+    var pods = [], survivors = [], stranded = [], allNodes = [], manual = false;
     // Three layers, so a pod moving into another zone is drawn over that zone's nodes, not under them.
     var gBack = el('g', {}), gPods;
     scene.zones.forEach(function (z, zi) {
@@ -105,12 +105,13 @@
         var ny = Y0 + 4 + ni * (NH + GAP);
         var rect = el('rect', { x: x + 10, y: ny, width: ZW - 20, height: NH, rx: 9, 'class': 'node' }, gBack);
         var t = el('text', { x: x + 20, y: ny + 18, 'class': 'node-lbl' }, gBack); t.textContent = n.n + ' · ' + n.t;
-        var node = { x: x + 10, y: ny, rect: rect, used: n.p.length, lost: lost };
+        var node = { x: x + 10, y: ny, rect: rect, used: n.p.length, base: n.p.length, lost: lost, name: n.n, zone: z.z };
+        allNodes.push(node);
         if (!lost) survivors.push(node);
         n.p.forEach(function (p, pi) {
           var cx = x + 24 + pi * 15, cy = ny + 38;
           var c = el('circle', { cx: cx, cy: cy, r: 5, 'class': 'pod' }, gPods || (gPods = el('g', {})));
-          var pod = { c: c, cx: cx, cy: cy, key: p.k, why: p.why, bare: !!p.bare, lost: lost };
+          var pod = { c: c, cx: cx, cy: cy, key: p.k, why: p.why, bare: !!p.bare, lost: lost, node: node };
           pods.push(pod);
           if (lost && p.why) stranded.push(pod);
         });
@@ -142,6 +143,7 @@
       p.row = row;
     });
 
+    var storyRows = Array.prototype.slice.call(tray.children);
     var steps = $$('#scene-steps li'), shown = -1;
     var paint = function (s) {
       if (s === shown) return;
@@ -163,29 +165,138 @@
       });
       floor.style.opacity = s >= 3 ? 1 : 0;
     };
-    var sec = $('#zone');
-    var pinned = function () { return window.innerWidth > 980; };
+    var sec = $('#zone'), copyEl = $('#zone .scene-copy'), pinEl = $('#zone .scene-pin');
+    /* PIN IT ONLY WHERE IT FITS (landing.css): the copy measured with every step's description folded, plus the
+       tallest of them open — the most it ever needs while the story is told — against the frame under the bar. */
+    var fit = function () {
+      sec.classList.remove('pinned');
+      sec.style.removeProperty('--copy-max');
+      if (reduce || window.innerWidth <= 980) return;
+      var asking = copyEl.classList.contains('asking');
+      copyEl.classList.remove('asking');
+      sec.classList.add('pinned', 'measuring');
+      var open = Math.max.apply(null, $$('#scene-steps .sd > span').map(function (s) { return s.scrollHeight; }));
+      var need = copyEl.offsetHeight + open;
+      sec.classList.remove('measuring');
+      if (asking) copyEl.classList.add('asking');
+      if (need > pinEl.clientHeight - 24) { sec.classList.remove('pinned'); return; }
+      sec.style.setProperty('--copy-max', need + 'px');
+    };
+    var pinned = function () { return sec.classList.contains('pinned'); };
     var onSceneScroll = function () {
-      if (!pinned()) return;
+      if (!pinned() || manual) return;
       var rect = sec.getBoundingClientRect(), span = sec.offsetHeight - window.innerHeight;
       var p = Math.min(1, Math.max(0, -rect.top / Math.max(1, span)));
       paint(Math.min(4, Math.floor(p * 5)));
     };
+    fit();
     if (reduce) { paint(4); }
     else {
+      var refit = function () { fit(); onSceneScroll(); };
       window.addEventListener('scroll', onSceneScroll, { passive: true });
-      window.addEventListener('resize', onSceneScroll);
+      window.addEventListener('resize', refit);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
       onSceneScroll();
-      if (!pinned() && 'IntersectionObserver' in window) {
-        // A phone has no room to pin a scene: it plays through once when it comes into view.
+      if ('IntersectionObserver' in window) {
+        // Not pinned — a phone, or a screen too short to hold the story — it plays through once when it comes into view.
         var played = false;
         new IntersectionObserver(function (es) {
-          if (played || !es[0].isIntersecting) return;
+          if (played || manual || pinned() || !es[0].isIntersecting) return;
           played = true;
-          [0, 1, 2, 3, 4].forEach(function (k) { setTimeout(function () { paint(k); }, k * 1100); });
+          [0, 1, 2, 3, 4].forEach(function (k) { setTimeout(function () { if (!manual && !pinned()) paint(k); }, k * 1100); });
         }, { threshold: 0.35 }).observe(svg);
       }
       if (shown < 0) paint(0);
+    }
+
+    /* ── ask it yourself: the engine's own answer for any zone and any node ──
+       testdata/golden/sample-preflight.json is internal/preflight asked about every zone and node of the sample;
+       the page carries it verbatim (make site-data, gated). A pod whose eviction is refused — by a disruption budget,
+       or by kubectl itself for a pod no controller manages — stays where it is, in amber; a pod with nowhere to go drops to the floor, in red; a bare pod fades; the rest are drawn on nodes
+       that remain — where, exactly, is for the picture, as in the story above. */
+    var verEl = $('#scene-verdicts'), tryBox = $('#scene-try');
+    var V = verEl ? JSON.parse(verEl.textContent || '{}') : {};
+    if (tryBox && V.zones && V.nodes) {
+      var zBox = $('#st-zones'), nSel = $('#st-node'), vLine = $('#st-verdict'), back = $('#st-back');
+      V.zones.forEach(function (a) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'st-z'; b.textContent = a.target; b.setAttribute('data-zone', a.target);
+        b.setAttribute('aria-pressed', 'false');
+        zBox.appendChild(b);
+      });
+      V.nodes.forEach(function (a) {
+        var o = document.createElement('option'); o.value = a.target; o.textContent = a.target; nSel.appendChild(o);
+      });
+      var addRow = function (key, why, cls) {
+        var row = document.createElement('div');
+        row.className = 't-row in' + (cls ? ' ' + cls : '');
+        row.innerHTML = '<i></i><span><b></b> — <span class="why"></span></span>';
+        row.querySelector('b').textContent = key;
+        row.querySelector('.why').textContent = why;
+        tray.appendChild(row);
+      };
+      var play = function (kind, target) {
+        var ans = (kind === 'zone' ? V.zones : V.nodes).filter(function (a) { return a.target === target; })[0];
+        if (!ans) return;
+        manual = true; shown = -1;
+        tryBox.parentNode.classList.add('asking');
+        steps.forEach(function (li) { li.classList.remove('on'); });
+        $$('.st-z').forEach(function (b) { b.setAttribute('aria-pressed', String(kind === 'zone' && b.getAttribute('data-zone') === target)); });
+        if (kind === 'zone') nSel.value = '';
+        var lost = allNodes.filter(function (n) { return kind === 'zone' ? n.zone === target : n.name === target; });
+        var isLost = function (n) { return lost.indexOf(n) >= 0; };
+        var rest = allNodes.filter(function (n) { return !isLost(n); });
+        rest.forEach(function (n) { n.used = n.base; });
+        var strandedBy = {}, blockedBy = {};
+        (ans.stranded || []).forEach(function (p) { strandedBy[p.pod] = p.why; });
+        (ans.blocked || []).forEach(function (p) { blockedBy[p.pod] = p.why; });
+        scene.zones.forEach(function (z) {
+          var dark = kind === 'zone' && z.z === target;
+          z.box.classList.toggle('lost', dark); z.lbl.classList.toggle('lost', dark);
+        });
+        allNodes.forEach(function (n) { n.rect.classList.toggle('dark', isLost(n)); });
+        tray.innerHTML = '';
+        var k = 0, floorK = 0;
+        pods.forEach(function (p) {
+          var tf = '', cls = '';
+          if (isLost(p.node)) {
+            if (blockedBy[p.key]) { cls = 'held'; addRow(p.key, blockedBy[p.key], 'held'); }
+            else if (strandedBy[p.key]) {
+              cls = 'stranded'; addRow(p.key, strandedBy[p.key]);
+              tf = 'translate(' + (X0 + 120 + floorK * 22 - p.cx) + 'px,' + (floorY - 4 - p.cy) + 'px)'; floorK++;
+            } else if (p.bare) { cls = 'gone'; }
+            else if (rest.length) {
+              var n = rest[k++ % rest.length];
+              tf = 'translate(' + (n.x + 14 + n.used * 15 - p.cx) + 'px,' + (n.y + 38 - p.cy) + 'px)'; n.used++; cls = 'moved';
+            }
+          }
+          p.c.classList.toggle('moved', cls === 'moved');
+          p.c.classList.toggle('stranded', cls === 'stranded');
+          p.c.classList.toggle('held', cls === 'held');
+          p.c.classList.toggle('gone', cls === 'gone');
+          p.c.style.transform = tf;
+        });
+        floor.style.opacity = floorK ? 1 : 0;
+        vLine.hidden = false; back.hidden = false;
+        vLine.innerHTML = '';
+        var h = document.createElement('b'); h.textContent = ans.headline; h.className = ans.exit === 0 ? 'ok' : 'bad';
+        var c = document.createElement('code'); c.textContent = 'shoalcheck preflight ' + kind + ' ' + target + ' — exit ' + ans.exit;
+        vLine.appendChild(h); vLine.appendChild(document.createElement('br')); vLine.appendChild(c);
+      };
+      zBox.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-zone]'); if (b) play('zone', b.getAttribute('data-zone'));
+      });
+      nSel.addEventListener('change', function () { if (nSel.value) play('drain', nSel.value); });
+      back.addEventListener('click', function () {
+        manual = false; shown = -1;
+        tryBox.parentNode.classList.remove('asking');
+        vLine.hidden = true; back.hidden = true; nSel.value = '';
+        $$('.st-z').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+        allNodes.forEach(function (n) { n.used = n.base; });
+        pods.forEach(function (p) { p.c.classList.remove('held'); });
+        tray.innerHTML = ''; storyRows.forEach(function (r) { tray.appendChild(r); });
+        if (pinned() && !reduce) onSceneScroll(); else paint(4);
+      });
     }
   }
 
@@ -193,25 +304,77 @@
      Muted and looped, and only while visible, so it never runs unseen. It always has its controls: a
      32-second loop that starts by itself must be stoppable (WCAG 2.2.2). Anyone who asked for reduced motion
      gets the poster and starts it themselves. */
-  var vid = $('#app-video');
-  if (vid) {
+  /* The four instrument loops play the same way: muted, looped, while on screen, and stoppable. */
+  var playWhileSeen = function (vid) {
     if (reduce || !('IntersectionObserver' in window)) {
       vid.controls = true;
-    } else {
-      /* A pause the reader chose is kept: scrolling past and back does not start it again. */
-      var ours = false, chosen = false;
-      vid.addEventListener('pause', function () { if (!ours) chosen = true; ours = false; });
-      vid.addEventListener('play', function () { chosen = false; });
-      new IntersectionObserver(function (es) {
-        es.forEach(function (e) {
-          if (e.isIntersecting) {
-            if (chosen) return;
-            var p = vid.play(); if (p && p.catch) p.catch(function () {});
-          } else if (!vid.paused) { ours = true; vid.pause(); }
-        });
-      }, { threshold: 0.4 }).observe(vid);
+      return;
     }
+    /* A pause the reader chose is kept: scrolling past and back does not start it again. */
+    var ours = false, chosen = false;
+    vid.addEventListener('pause', function () { if (!ours) chosen = true; ours = false; });
+    vid.addEventListener('play', function () { chosen = false; });
+    new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.isIntersecting) {
+          if (chosen) return;
+          var p = vid.play(); if (p && p.catch) p.catch(function () {});
+        } else if (!vid.paused) { ours = true; vid.pause(); }
+      });
+    }, { threshold: 0.4 }).observe(vid);
+  };
+  var vid = $('#app-video');
+  if (vid) playWhileSeen(vid);
+
+  /* ── captions under the frame, not over it ────────────────────────────────
+     Drawn by the player, a caption lies over the recording: at the top it printed over the window's own title, at
+     the bottom it would cover the banner that says the demo is a replay, and on a phone it covers a third of the
+     picture. The page prints the track's current cue on a line under the video instead — the same track, so the
+     words are the recorder's — and hands the track back to the player in full screen, where there is no under.
+     A reader who turns the captions off in the player's menu turns the line off with them. */
+  var captionsUnder = function (v) {
+    var t = [].filter.call(v.textTracks || [], function (x) { return x.kind === 'captions'; })[0];
+    if (!t) return;
+    var line = document.createElement('p');
+    line.className = 'vcap';
+    v.insertAdjacentElement('afterend', line);
+    var full = function () { return (document.fullscreenElement || document.webkitFullscreenElement) === v; };
+    var mine = true;
+    var place = function () { if (mine) t.mode = full() ? 'showing' : 'hidden'; };
+    var show = function () {
+      var c = t.mode === 'hidden' && t.activeCues && t.activeCues[0];
+      line.textContent = c ? c.text : '';
+    };
+    t.addEventListener('cuechange', show);
+    v.textTracks.addEventListener('change', function () {
+      if (t.mode === 'disabled') mine = false;
+      else if (!mine && t.mode === 'showing' && !full()) { mine = true; t.mode = 'hidden'; }
+      show();
+    });
+    document.addEventListener('fullscreenchange', place);
+    document.addEventListener('webkitfullscreenchange', place);
+    v.addEventListener('webkitbeginfullscreen', function () { if (mine) t.mode = 'showing'; });
+    v.addEventListener('webkitendfullscreen', function () { if (mine) t.mode = 'hidden'; show(); });
+    place();
+  };
+  [].forEach.call(document.querySelectorAll('#app-video, #ov-video'), captionsUnder);
+
+  /* ── the overview: a dialog, on a click ──────────────────────────────────
+     It plays when the reader opens it (unless they asked for reduced motion: then the controls start it), and it
+     stops when the dialog closes, by the button, Escape or a click outside. */
+  var ovDlg = $('#overview'), ovVid = $('#ov-video'), ovOpen = $('#ov-open');
+  if (ovDlg && ovVid && ovOpen && ovDlg.showModal) {
+    ovOpen.addEventListener('click', function () {
+      ovDlg.showModal();
+      if (!reduce) { var p = ovVid.play(); if (p && p.catch) p.catch(function () {}); }
+    });
+    $('#ov-close').addEventListener('click', function () { ovDlg.close(); });
+    ovDlg.addEventListener('click', function (e) { if (e.target === ovDlg) ovDlg.close(); });
+    ovDlg.addEventListener('close', function () { ovVid.pause(); });
+  } else if (ovOpen) {
+    ovOpen.hidden = true;
   }
+  [].forEach.call(document.querySelectorAll('.loop video'), playWhileSeen);
 
   /* ── the arithmetic ───────────────────────────────────────────────────── */
   var priceEl = $('#agent-prices');
@@ -228,6 +391,12 @@
       var rate = m.tier ? (tokens > m.tier ? m['in'] : m.small) : m['in'];
       return tokens * rate / 1e6;
     };
+    /* EVERY FIGURE IS THE ONE BEFORE IT, MULTIPLIED OUT. Each was rounded from an unrounded figure, so none was
+       the one before it times anything a reader could see: 1.1 M tokens printed as 114% of a 1 M window, 156 h a
+       reading as 3,738 h for 24 readings, and those as $336,384 at $90. Now a token count is rounded once, to the
+       unit it is printed in, and the window share and the price are worked from that; the hours for one reading
+       are rounded once, and the month and the money are that figure times the readings, times the rate. */
+    var tokShown = function (n) { return n >= 1e6 ? Math.round(n / 1e5) * 1e5 : Math.round(n / 1000) * 1000; };
     var fmtTok = function (n) { return n >= 1e6 ? (n / 1e6).toFixed(1) + ' M' : Math.round(n / 1000) + ' k'; };
     /* "1.2–2.6 M", never "1.2 M–2.6 M": one unit for the range when both ends share it. */
     var tokRange = function (lo, hi) {
@@ -236,6 +405,15 @@
       return fmtTok(lo) + '–' + fmtTok(hi);
     };
     var fmtUsd = function (x) { return x >= 100 ? '$' + Math.round(x).toLocaleString('en-US') : '$' + x.toFixed(2); };
+    /* "$55–$110", never "$54.64–$110": a range is printed to one precision, the one its larger end needs. */
+    var usdRange = function (lo, hi) {
+      var whole = hi >= 100, f = function (x) { return whole ? '$' + Math.round(x).toLocaleString('en-US') : '$' + x.toFixed(2); };
+      return f(lo) + '–' + f(hi);
+    };
+    var hoursShown = function (h) { return h >= 10 ? Math.round(h) : Math.round(h * 10) / 10; };
+    var fmtHours = function (h, dp) {
+      return h.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + ' h';
+    };
     /* ONE MODEL FOR THE CHART AND THE CALCULATOR, calibrated on our kind test cluster (24 pods, 259 objects,
        287 KB, 1,894 checks): about 160 cluster-wide objects (nodes, namespaces, roles, bindings, CRDs) plus
        four per pod; a pod 5.4 KB as kubectl prints it, 9.3 KB with a mesh sidecar; everything else 0.67 KB;
@@ -259,17 +437,148 @@
       $('#o-clusters').textContent = clusters; $('#o-reads').textContent = reads;
       $('#o-sec').textContent = sec; $('#o-rate').textContent = '$' + rate;
       var perMonth = clusters * reads;
-      $('#r-tokens').textContent = tokRange(c.lo, c.hi);
-      $('#r-ctx').textContent = Math.round(c.lo / P.context * 100) + '–' + Math.round(c.hi / P.context * 100) + '%';
-      $('#r-agent').textContent = fmtUsd(cost(c.lo, m) * perMonth) + '–' + fmtUsd(cost(c.hi, m) * perMonth);
+      var lo = tokShown(c.lo), hi = tokShown(c.hi);
+      $('#r-tokens').textContent = tokRange(lo, hi);
+      $('#r-ctx').textContent = Math.round(lo / P.context * 100) + '–' + Math.round(hi / P.context * 100) + '%';
+      $('#r-agent').textContent = usdRange(cost(lo, m) * perMonth, cost(hi, m) * perMonth);
       /* A MONTH BESIDE A MONTH: the agent's figure is every reading of every cluster, so the hours are too. */
-      var one = c.checks * sec / 3600, hours = one * perMonth;
+      var one = hoursShown(c.checks * sec / 3600), dp = one >= 10 ? 0 : 1;
+      var hours = Number((one * perMonth).toFixed(dp));
       $('#r-hours').textContent = fmtUsd(hours * rate);
-      $('#r-hours-month').textContent = Math.round(hours).toLocaleString('en-US') + ' h';
-      $('#r-hours-one').textContent = Math.round(one).toLocaleString('en-US') + ' h';
+      $('#r-hours-month').textContent = fmtHours(hours, dp);
+      $('#r-hours-one').textContent = fmtHours(one, dp);
     };
     ['#i-pods', '#i-clusters', '#i-reads', '#i-model', '#i-sec', '#i-rate'].forEach(function (s) { $(s).addEventListener('input', calc); });
     calc();
+  }
+
+  /* ── deadlines ────────────────────────────────────────────────────────
+     The support windows and the extended-support rate every reading uses (make site-data writes them; a gate
+     holds them equal). Days are counted from the visitor's own clock; the dates are as the source published them. */
+  var supEl = $('#support-windows');
+  if (supEl && $('#dl-calc')) {
+    var T = JSON.parse(supEl.textContent || '{}');
+    var NAMES = { aws: 'Amazon EKS', azure: 'Azure AKS', gcp: 'Google GKE', upstream: 'Kubernetes upstream' };
+    var pSel = $('#dl-provider'), mSel = $('#dl-minor'), nIn = $('#dl-n');
+    ['aws', 'azure', 'gcp', 'upstream'].forEach(function (p) {
+      if (!T.windows || !T.windows[p]) return;
+      var o = document.createElement('option'); o.value = p; o.textContent = NAMES[p]; pSel.appendChild(o);
+    });
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var day = function (s) { return s ? new Date(s + 'T00:00:00') : null; };
+    var gap = function (d) { return Math.round((d - today) / 86400000); };
+    var long = function (s) { return day(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); };
+    /* "ordinary support ended 82 days ago" · "extended support ends in 283 days" — the subject, then its tense. */
+    var when = function (s, subject) {
+      var n = gap(day(s)), k = Math.abs(n).toLocaleString('en-US') + (Math.abs(n) === 1 ? ' day' : ' days');
+      return subject + (n < 0 ? ' ended ' + k + ' ago' : n === 0 ? ' ends today' : ' ends in ' + k);
+    };
+    var usd0 = function (x) { return '$' + Math.round(x).toLocaleString('en-US'); };
+    var fillMinors = function () {
+      var rows = T.windows[pSel.value] || [];
+      mSel.innerHTML = '';
+      rows.slice().reverse().forEach(function (w) {
+        var o = document.createElement('option'); o.value = w[0]; o.textContent = w[0]; mSel.appendChild(o);
+      });
+      /* The first version shown is the newest one already past ordinary support: the case that costs money. */
+      var past = rows.filter(function (w) { return w[2] && gap(day(w[2])) < 0; });
+      mSel.value = (past.length ? past[past.length - 1] : rows[rows.length - 1] || [''])[0];
+    };
+    var dl = function () {
+      var p = pSel.value, rows = T.windows[p] || [], n = Number(nIn.value);
+      var i = rows.findIndex(function (w) { return w[0] === mSel.value; }), w = rows[i];
+      $('#o-dl-n').textContent = n;
+      if (!w) return;
+      var name = NAMES[p], next = rows[i + 1] ? rows[i + 1][0] : '';
+      $('#dl-std').textContent = w[2] ? long(w[2]) : 'unpublished';
+      $('#dl-std-l').textContent = w[2] ? when(w[2], 'ordinary support') : 'the source publishes no date';
+      if (w[3]) {
+        $('#dl-ext').textContent = long(w[3]);
+        $('#dl-ext-l').textContent = when(w[3], 'extended support');
+      } else {
+        $('#dl-ext').textContent = '—';
+        $('#dl-ext-l').textContent = p === 'upstream' ? 'upstream Kubernetes sells no extension'
+          : 'no extension date in the source for ' + name;
+      }
+      var rate = (T.rates || {})[p], cost = $('#dl-cost'), costL = $('#dl-cost-l');
+      var beyond = w[3] && gap(day(w[3])) < 0, inside = w[2] && gap(day(w[2])) < 0 && !beyond;
+      if (p === 'upstream') {
+        cost.textContent = '—';
+        costL.textContent = 'upstream sells no extension, so there is no surcharge to price';
+      } else if (!rate) {
+        cost.textContent = '—';
+        costL.textContent = 'this build carries no published extended-support rate for ' + name + ', so nothing is estimated';
+      } else if (beyond) {
+        cost.textContent = '$0';
+        costL.textContent = 'past the extension: no surcharge left to stop — and no more patches';
+      } else {
+        cost.textContent = usd0(rate * 730 * n);
+        costL.textContent = (inside ? 'a month in surcharge, now, for ' : 'a month in surcharge from ' + long(w[2]) + ', if still on it, for ') +
+          n + (n === 1 ? ' cluster' : ' clusters') + ' — $' + rate.toFixed(2) + ' per cluster-hour on top of the ordinary rate';
+      }
+      $('#dl-basis').textContent = 'Support dates: endoflife.date, fetched ' + T.asOf + '. Rate: the provider\'s published surcharge, in the price table of ' +
+        T.rateAsOf + '; 730 hours to a month. These are the tables a reading uses to place your cluster\'s version' +
+        (next ? ' — shoalcheck preflight upgrade ' + next + ' says what stops the move.' : '.');
+    };
+    pSel.addEventListener('input', function () { fillMinors(); dl(); });
+    mSel.addEventListener('input', dl);
+    nIn.addEventListener('input', dl);
+    fillMinors(); dl();
+  }
+
+  /* ── just the output ───────────────────────────────────────────────────
+     A reader who wants evidence, not copy: our sentences hide, the product's output and its captions stay. The
+     choice is remembered on this browser only. */
+  var justB = $$('[data-just-output]');
+  if (justB.length) {
+    var setJust = function (on) {
+      document.documentElement.classList.toggle('just-output', on);
+      justB.forEach(function (b) {
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.textContent = on ? 'Show the whole page' : 'Just the output';
+      });
+      try { localStorage.setItem('shoalcheck.just-output', on ? '1' : ''); } catch (e) {}
+    };
+    var was = false;
+    try { was = localStorage.getItem('shoalcheck.just-output') === '1'; } catch (e) {}
+    if (was) setJust(true);
+    justB.forEach(function (b) {
+      b.addEventListener('click', function () { setJust(!document.documentElement.classList.contains('just-output')); });
+    });
+  }
+
+  /* ── the reading, live ──────────────────────────────────────────────────
+     The sample's own page loads into the frame when it comes near the screen and is scaled to fit; until then
+     the screenshot stands in. Opening it is a view transition into the page itself. */
+  var live = $('#live-frame');
+  if (live) {
+    var frame = live.querySelector('iframe'), openA = live.querySelector('.live-open');
+    var fit = function () {
+      if (live.classList.contains('expanded')) {
+        frame.style.width = window.innerWidth + 'px'; frame.style.height = window.innerHeight + 'px'; frame.style.transform = 'none';
+        return;
+      }
+      frame.style.width = '1440px'; frame.style.height = '900px';
+      frame.style.transform = 'scale(' + (live.clientWidth / 1440) + ')';
+    };
+    frame.addEventListener('load', function () { if (frame.getAttribute('src')) live.classList.add('live'); });
+    var load = function () { if (!frame.getAttribute('src')) frame.setAttribute('src', frame.getAttribute('data-src')); };
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { load(); o.disconnect(); } }, { rootMargin: '600px' }).observe(live);
+    } else { load(); }
+    fit();
+    if ('ResizeObserver' in window) new ResizeObserver(fit).observe(live); else window.addEventListener('resize', fit);
+    var go = function (e) {
+      if (reduce || !document.startViewTransition || !live.classList.contains('live')) return;
+      e.preventDefault();
+      var href = openA.getAttribute('href');
+      var t = document.startViewTransition(function () { live.classList.add('expanded'); fit(); });
+      t.finished.then(function () { location.href = href; });
+    };
+    openA.addEventListener('click', go);
+    live.addEventListener('click', function (e) { if (e.target === live || e.target.tagName === 'IMG') { e.preventDefault(); openA.click(); } });
+    // Back from the reading: the page comes out of the back-forward cache as it was left, grown to the window.
+    window.addEventListener('pageshow', function (e) { if (e.persisted) { live.classList.remove('expanded'); fit(); } });
   }
 
   /* ── billing period ───────────────────────────────────────────────────── */
@@ -348,7 +657,7 @@
    the adversarial review could not enlarge one. Each opens over the page at the size it was taken, and closes with
    Escape, the button or a click outside it; focus returns to the image it came from. */
 (function () {
-  var shots = Array.prototype.slice.call(document.querySelectorAll('.gallery img, .compare img, .shot-img'));
+  var shots = Array.prototype.slice.call(document.querySelectorAll('.gallery img:not(.live-poster), .compare img, .shot-img'));
   if (!shots.length) return;
   var box = null, from = null;
   function close() {
