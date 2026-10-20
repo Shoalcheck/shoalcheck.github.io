@@ -391,7 +391,11 @@
     var timers = [], playing = false;
     new IntersectionObserver(function (es) {
       var e = es[0];
-      if (e.intersectionRatio >= 0.4 && !playing) {
+      /* SEEN IS 40% OF THE SCENE, OR 60% OF THE SCREEN. On a phone the pipeline is ~1,900 px tall: at most 844/1,900
+         of it fits a 390×844 screen, 0.44, and on a 700 px screen 0.37 — so a scene that waited for 40% of itself
+         never played there. A tall scene filling most of the screen is seen. */
+      var seen = e.intersectionRatio >= 0.4 || (e.rootBounds && e.intersectionRect.height >= e.rootBounds.height * 0.6);
+      if (seen && !playing) {
         playing = true;
         box.classList.add('played');
         timers = parts.map(function (p, i) { return setTimeout(function () { p.classList.add('on'); }, 250 + i * step); });
@@ -401,7 +405,7 @@
         box.classList.remove('played');
         parts.forEach(function (p) { p.classList.remove('on'); });
       }
-    }, { threshold: [0, 0.4] }).observe(box);
+    }, { threshold: [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4] }).observe(box);
   };
   (function () {
     var box = $('.isc[data-isc="agent"]'), src = $('#film-mcp');
@@ -460,6 +464,79 @@
     el('span', '', 'shoalcheck-mcp has no kubeconfig and no client-go: it answers from readings, and cannot reach the cluster', wall);
     parts.push(wall);
     playWhenSeen(box, parts, 360);
+  })();
+
+  /* THE PIPELINE, FROM A REAL RUN (D58/D59, the founder: "про інтеграцію в CI CD нуль графіки моушн дизайну … можеш
+     на ilya776 акаунті затестити"). A public repository's pull request, one run per commit, read from GitHub's own
+     record of it (#gate-demo: make site-data writes it from testdata/site/gate-demo.json, a gate holds it): each run's
+     steps lit in order with the seconds they took, the gate's output as the job printed it, and what GitHub said about
+     merging at that commit. Played each time it is seen; drawn whole with reduced motion. */
+  (function () {
+    var box = $('.isc[data-isc="ci"]'), src = $('#gate-demo');
+    var G = src ? JSON.parse(src.textContent || 'null') : null;
+    if (!box || !G || !G.runs || G.runs.length < 2) return;
+    var el = function (tag, cls, text, parent) {
+      var n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text != null) n.textContent = text;
+      if (parent) parent.appendChild(n);
+      return n;
+    };
+    var link = function (text, href, cls, parent) {
+      var a = el('a', cls, text, parent);
+      a.href = href; a.target = '_blank'; a.rel = 'noopener';
+      return a;
+    };
+    /* The workflow's own step names, shortened for a node; a step not named here (checkout, cosign's installer, the
+       SARIF conversion, keeping the report) runs and is not drawn. */
+    var STEP = {
+      'Install shoalcheck': ['Install', 'signature checked'],
+      'A cluster to read': ['Cluster', 'kind, in the runner'],
+      'The cluster before this change': ['Before', 'read: the baseline'],
+      'This change, applied': ['The change', 'applied'],
+      'Gate': ['Gate', ''],
+      'Upload to code scanning': ['Code scanning', 'the findings, SARIF']
+    };
+    var MERGE = {
+      blocked: ['Merging is blocked', 'the required check "gate" failed'],
+      clean: ['Ready to merge', 'every check passed']
+    };
+    var pl = el('div', 'pl', null, box), parts = [];
+    var pr = el('div', 'pl-pr', null, pl);
+    el('span', 'pl-k', 'Pull request', pr);
+    link('#' + G.pr.number + ' · ' + G.pr.title, G.pr.url, 'pl-prt', pr);
+    G.runs.forEach(function (r) {
+      var ok = r.exit === 0, run = el('section', 'pl-run ' + (ok ? 'pass' : 'fail'), null, pl);
+      var head = el('div', 'pl-head', null, run);
+      el('code', 'pl-sha', r.sha, head);
+      el('span', 'pl-msg', r.message, head);
+      link(r.seconds + ' s · the run', r.url, 'pl-link', head);
+      var ol = el('ol', 'pl-steps', null, run);
+      r.steps.forEach(function (s) {
+        var w = STEP[s.name];
+        if (!w) return;
+        var gate = s.name === 'Gate', li = el('li', 'pl-step' + (gate ? ' gate' : ''), null, ol);
+        el('b', '', w[0], li);
+        el('span', '', gate ? 'exit ' + r.exit : w[1], li);
+        el('i', 'pl-t', s.seconds < 1 ? 'under 1 s' : s.seconds + ' s', li);
+        parts.push(li);
+      });
+      var out = el('pre', 'pl-out', null, run);
+      r.gate.forEach(function (line) {
+        var cls = /^\s*\+ (critical|high) /.test(line) ? 'new' : /^the policy fired|^\s*· /.test(line) ? 'fired' : '';
+        el('span', cls, line, out);
+        out.appendChild(document.createTextNode('\n'));
+      });
+      parts.push(out);
+      var m = MERGE[r.mergeableState];
+      if (m) {
+        var mg = el('div', 'pl-merge', null, run);
+        el('b', '', m[0], mg);
+        el('span', '', m[1], mg);
+        parts.push(mg);
+      }
+    });
+    playWhenSeen(box, parts, 240);
   })();
 
   /* ── tabs ─────────────────────────────────────────────────────────────── */

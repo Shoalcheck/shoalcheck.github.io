@@ -985,7 +985,7 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 
 /* ── integrations ─────────────────────────────────────────────────────────
    Six places a reading goes, each headed by what it does for the team and footed by the command that does it. */
-.ints { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.ints { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
 .int { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 24px 24px 20px; border-radius: var(--r); border: 1px solid var(--line2);
        background: linear-gradient(160deg, rgba(45, 212, 191, .06), transparent 45%), var(--surface); transition: border-color .25s var(--ease), transform .25s var(--ease); }
 .int:hover { border-color: rgba(45, 212, 191, .45); transform: translateY(-2px); }
@@ -1058,6 +1058,56 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
   .sq-wall > span:last-child { grid-column: 1 / -1; }
 }
 @media (prefers-reduced-motion: reduce) { .sq-rows > li, .sq-arrow, .sq-t i, .sq-wall { transition: none; } }
+/* the pipeline: a real pull request, one run per commit — its steps lit in order, the gate's own output, and what
+   GitHub said about merging at that commit (D59) */
+.isc-links { margin: 0; font-size: 13px; color: var(--faint); }
+.isc-links a { color: var(--accent2); }
+.pl { display: flex; flex-direction: column; gap: 14px; }
+.pl-pr { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.pl-k { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.pl-prt { font: 500 14px var(--mono); color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--line2); }
+.pl-prt:hover { border-color: var(--accent); }
+.pl-run { display: flex; flex-direction: column; gap: 12px; padding: 14px 14px 12px; border: 1px solid var(--line2); border-radius: 10px; background: var(--surface); }
+.pl-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.pl-sha { font: 500 12.5px var(--mono); color: var(--faint); background: none; padding: 0; }
+.pl-msg { flex: 1 1 14em; min-width: 0; font-size: 14px; font-weight: 600; color: var(--fg2); }
+.pl-link { font: 12.5px var(--mono); color: var(--accent2); }
+.pl-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.pl-step { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 8px 10px; border: 1px solid var(--line2); border-radius: 8px;
+           opacity: .3; transition: opacity .25s var(--ease), border-color .25s var(--ease), background-color .25s var(--ease); }
+.pl-step:not(:last-child)::after { content: ""; position: absolute; top: 50%; right: -13px; width: 14px; height: 2px; background: var(--line2); }
+.pl-step.on { opacity: 1; border-color: rgba(45, 212, 191, .45); }
+.pl-step b { font: 600 13px var(--mono); color: var(--fg); }
+.pl-step span { font-size: 12px; line-height: 1.35; color: var(--faint); }
+.pl-t { font: normal 11.5px var(--mono); color: var(--dim); }
+.pl-run.fail .pl-step.gate.on { border-color: var(--bad); background: rgba(249, 112, 102, .08); }
+.pl-run.fail .pl-step.gate.on b, .pl-run.fail .pl-step.gate.on span { color: var(--bad); }
+.pl-run.pass .pl-step.gate.on { border-color: var(--ok); background: rgba(71, 205, 137, .08); }
+.pl-run.pass .pl-step.gate.on b, .pl-run.pass .pl-step.gate.on span { color: var(--ok); }
+.pl-out { margin: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg2); font: 12.5px/1.55 var(--mono); color: var(--dim);
+          white-space: pre-wrap; overflow-wrap: anywhere; opacity: 0; transition: opacity .3s var(--ease); }
+.pl-out.on { opacity: 1; }
+.pl-out .new { color: var(--bad); font-weight: 600; }
+.pl-out .fired { color: var(--fg2); }
+.pl-merge { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line2);
+            opacity: 0; transform: translateY(4px); transition: opacity .25s var(--ease), transform .25s var(--ease); }
+.pl-merge.on { opacity: 1; transform: none; }
+.pl-merge::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--faint); }
+.pl-merge b { font-size: 14px; font-weight: 600; }
+.pl-merge span { font-size: 13px; color: var(--dim); }
+.pl-run.fail .pl-merge { border-color: rgba(249, 112, 102, .45); }
+.pl-run.fail .pl-merge::before { background: var(--bad); }
+.pl-run.fail .pl-merge b { color: var(--bad); }
+.pl-run.pass .pl-merge { border-color: rgba(71, 205, 137, .45); }
+.pl-run.pass .pl-merge::before { background: var(--ok); }
+.pl-run.pass .pl-merge b { color: var(--ok); }
+/* a narrow scene: three steps to a row, then two, without the connectors */
+@container (width < 620px) {
+  .pl-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .pl-step:not(:last-child)::after { display: none; }
+}
+@container (width < 400px) { .pl-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .pl-step, .pl-out, .pl-merge { transition: none; } }
 @media (max-width: 1000px) { .ints { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .ints { grid-template-columns: minmax(0, 1fr); } }
 .app-live .live-open { right: auto; left: 12px; }
