@@ -923,156 +923,6 @@
   };
   var chosen = function (box) { var r = box.querySelector('input:checked'); return r ? r.value : ''; };
 
-  /* ── the arithmetic ───────────────────────────────────────────────────── */
-  var priceEl = $('#agent-prices');
-  if (priceEl && $('#calc')) {
-    var P = JSON.parse(priceEl.textContent);
-    var sel = $('#i-model');
-    choices(sel, 'model', P.models.map(function (m, k) {
-      return { v: String(k), t: m.n.replace(/^Claude /, ''), s: '$' + m['in'] + ' / M' };
-    }), '1');
-    var cost = function (tokens, m) {
-      var rate = m.tier ? (tokens > m.tier ? m['in'] : m.small) : m['in'];
-      return tokens * rate / 1e6;
-    };
-    /* EVERY FIGURE IS THE ONE BEFORE IT, MULTIPLIED OUT. Each was rounded from an unrounded figure, so none was
-       the one before it times anything a reader could see: 1.1 M tokens printed as 114% of a 1 M window, 156 h a
-       reading as 3,738 h for 24 readings, and those as $336,384 at $90. Now a token count is rounded once, to the
-       unit it is printed in, and the window share and the price are worked from that; the hours for one reading
-       are rounded once, and the month and the money are that figure times the readings, times the rate. */
-    var tokShown = function (n) { return n >= 1e6 ? Math.round(n / 1e5) * 1e5 : Math.round(n / 1000) * 1000; };
-    var fmtTok = function (n) { return n >= 1e6 ? (n / 1e6).toFixed(1) + ' M' : Math.round(n / 1000) + ' k'; };
-    /* "1.2–2.6 M", never "1.2 M–2.6 M": one unit for the range when both ends share it. */
-    var tokRange = function (lo, hi) {
-      if (hi >= 1e6 && lo >= 1e6) return (lo / 1e6).toFixed(1) + '–' + (hi / 1e6).toFixed(1) + ' M';
-      if (1e6 > hi) return Math.round(lo / 1000) + '–' + Math.round(hi / 1000) + ' k';
-      return fmtTok(lo) + '–' + fmtTok(hi);
-    };
-    var fmtUsd = function (x) { return x >= 100 ? '$' + Math.round(x).toLocaleString('en-US') : '$' + x.toFixed(2); };
-    /* "$55–$110", never "$54.64–$110": a range is printed to one precision, the one its larger end needs. */
-    var usdRange = function (lo, hi) {
-      var whole = hi >= 100, f = function (x) { return whole ? '$' + Math.round(x).toLocaleString('en-US') : '$' + x.toFixed(2); };
-      return f(lo) + '–' + f(hi);
-    };
-    var hoursShown = function (h) { return h >= 10 ? Math.round(h) : Math.round(h * 10) / 10; };
-    var fmtHours = function (h, dp) {
-      return h.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + ' h';
-    };
-    /* ONE MODEL FOR THE CHART AND THE CALCULATOR, calibrated on our kind test cluster (24 pods, 259 objects,
-       287 KB, 1,894 checks): about 160 cluster-wide objects (nodes, namespaces, roles, bindings, CRDs) plus
-       four per pod; a pod 5.4 KB as kubectl prints it, 9.3 KB with a mesh sidecar; everything else 0.67 KB;
-       7.3 rule-by-object checks per object. The chart's 1,500-pod line is this function at 1,500, so the two
-       cannot disagree; at 24 pods it gives the kind cluster's own 71 k tokens and about 16 hours. */
-    var model = function (pods) {
-      var objects = 160 + 4 * pods, others = objects - pods;
-      return {
-        objects: objects, checks: objects * 7.3,
-        lo: (pods * 5400 + others * 670) / P.charsHi,
-        hi: (pods * 9300 + others * 670) / P.charsLo
-      };
-    };
-    var big = model(1500);
-    if ($('#r-1500')) $('#r-1500').textContent = tokRange(big.lo, big.hi);
-    /* A LOOP, PRICED CALL BY CALL. Call i of k sends i/k of one look: what calls 1 to i−1 read, re-sent, and its own
-       share. Each call is priced at its own size, because Haiku's rate changes at 100 K tokens a prompt. */
-    var loopCost = function (tokens, m, k) {
-      var sum = 0;
-      for (var i = 1; i <= k; i++) sum += cost(tokens * i / k, m);
-      return sum;
-    };
-    /* AN AGENT'S AUDIT, RULE BY RULE (D61, the founder: "ти неправильно порахував … набагато більше треба токенів").
-       The figures above are one look. An audit gives every rule the objects it reads — the registry's RequiredKinds
-       against a real reading's bytes by kind (#agent-audit: make site-data writes it, a gate holds it) — each rule a
-       prompt of its own, priced at its own size, and writes its findings out at the output price. A prompt larger
-       than the window has to be cut in pieces, and a rule that joins nodes and pods with a third kind cannot see them
-       together in pieces: that is said by naming those rules, never as a guessed accuracy. Still a floor: no reasoning
-       tokens, no retries, and the analyzers that read operators' objects are left out. */
-    var AU = JSON.parse(($('#agent-audit') || {}).textContent || 'null');
-    var audit = function (pods, m) {
-      var pLo = pods * 5400 / P.charsHi, pHi = pods * 9300 / P.charsLo, others = (160 + 3 * pods) * 670;
-      var oLo = others / P.charsHi, oHi = others / P.charsLo, r = { lo: 0, hi: 0, costLo: 0, costHi: 0, over: 0, overJoin: 0 };
-      AU.rules.forEach(function (x) {
-        var a = x[0] * pLo + x[1] * oLo, b = x[0] * pHi + x[1] * oHi;
-        r.lo += a; r.hi += b; r.costLo += cost(a, m); r.costHi += cost(b, m);
-        if (a > P.context) { r.over++; if (x[2]) r.overJoin++; }
-      });
-      var out = (160 + 4 * pods) * AU.findingsPerObject * AU.outputTokensPerFinding;
-      r.costLo += out * m.out / 1e6; r.costHi += out * m.out / 1e6; r.out = out;
-      return r;
-    };
-    /* THE TRIANGLE: one bar per call, the part re-sent below and the call's own share on top. */
-    var tri = $('#r-tri'), triOn = false;
-    var drawTri = function (k) {
-      if (!tri) return;
-      var W = 320, H = 92, top = 6, gap = k > 24 ? 1 : 2, bw = (W - gap * (k - 1)) / k, out = '';
-      for (var i = 1; i <= k; i++) {
-        var x = (i - 1) * (bw + gap), h = H * i / k, share = H / k;
-        var d = ' style="transition-delay:' + Math.round(i * (600 / k)) + 'ms"';
-        if (i > 1) out += '<rect class="re" x="' + x.toFixed(1) + '" y="' + (top + H - h + share).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + (h - share).toFixed(1) + '"' + d + '/>';
-        out += '<rect class="nw" x="' + x.toFixed(1) + '" y="' + (top + H - h).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + share.toFixed(1) + '"' + d + '/>';
-      }
-      out += '<text x="0" y="111">call 1</text><text x="320" y="111" text-anchor="end">call ' + k + '</text>';
-      tri.innerHTML = out;
-      tri.classList.toggle('on', triOn);
-    };
-    if (tri) {
-      if (reduce || !('IntersectionObserver' in window)) triOn = true;
-      else new IntersectionObserver(function (es, io) {
-        if (!es[0].isIntersecting) return;
-        triOn = true; tri.classList.add('on'); io.disconnect();
-      }, { threshold: 0.5 }).observe(tri);
-    }
-    var calc = function () {
-      var pods = Number($('#i-pods').value), clusters = Number($('#i-clusters').value), reads = Number($('#i-reads').value);
-      var k = Number($('#i-k').value), sec = Number($('#i-sec').value), rate = Number($('#i-rate').value);
-      var m = P.models[Number(chosen(sel))], c = model(pods);
-      $('#o-pods').textContent = pods.toLocaleString('en-US');
-      $('#o-clusters').textContent = clusters; $('#o-reads').textContent = reads;
-      $('#o-k').textContent = k; $('#r-k').textContent = k;
-      $('#o-sec').textContent = sec; $('#o-rate').textContent = '$' + rate;
-      var perMonth = clusters * reads;
-      /* ONE READING OF ONE CLUSTER, the headline: what it reads, by hand, an agent's look, and the same as a loop. */
-      $('#r-objects').textContent = Math.round(c.objects).toLocaleString('en-US') + ' · ' +
-        Math.round(c.checks).toLocaleString('en-US') + ' checks';
-      var lo = tokShown(c.lo), hi = tokShown(c.hi);
-      $('#r-tokens').textContent = tokRange(lo, hi);
-      $('#r-ctx').textContent = Math.round(lo / P.context * 100) + '–' + Math.round(hi / P.context * 100) + '%';
-      var f = (k + 1) / 2;
-      $('#r-loop').textContent = tokRange(tokShown(lo * f), tokShown(hi * f));
-      $('#r-tri-x').textContent = String(f);
-      drawTri(k);
-      var one = hoursShown(c.checks * sec / 3600), dp = one >= 10 ? 0 : 1;
-      $('#r-hours-one').textContent = fmtHours(one, dp);
-      /* A MONTH BESIDE A MONTH: the agent's figure is every reading of every cluster, so the hours are too. */
-      $('#r-n').textContent = perMonth + (perMonth === 1 ? ' reading' : ' readings');
-      var hours = Number((one * perMonth).toFixed(dp));
-      $('#r-hours').textContent = fmtUsd(hours * rate);
-      $('#r-hours-month').textContent = fmtHours(hours, dp);
-      /* BOUNDED IN WORDS. 5,000 pods, 20 clusters and 30 readings is thousands of engineers' months; the figure says
-         so rather than printing a seven-figure count of hours as if it were a plan (D50 site review). */
-      var fte = hours / 160;
-      $('#r-fte').textContent = fte < 1 ? 'less than one engineer\'s month' : fte > 1000 ? 'more than a thousand engineers\' months'
-        : Math.round(fte).toLocaleString('en-US') + (Math.round(fte) === 1 ? ' engineer\'s month' : ' engineers\' months');
-      $('#r-agent').textContent = usdRange(cost(lo, m) * perMonth, cost(hi, m) * perMonth);
-      $('#r-agent-loop').textContent = usdRange(loopCost(lo, m, k) * perMonth, loopCost(hi, m, k) * perMonth);
-      if (AU) {
-        var au = audit(pods, m);
-        $('#r-audit').textContent = usdRange(au.costLo * perMonth, au.costHi * perMonth);
-        $('#r-audit-n').textContent = AU.rules.length;
-        $('#r-audit-x').textContent = Math.round(au.lo / lo) + '×';
-        $('#r-audit-win').textContent = au.over
-          ? 'At ' + pods.toLocaleString('en-US') + ' pods, ' + au.over + ' of the ' + AU.rules.length + ' rules need more than a 1 M-token prompt for the objects they read, so each is cut into pieces' +
-            /* A ZERO IS NOT A COUNT TO PRINT: "the 0 that join" read as a claim about the rules, so the join sentence
-               appears only when some of them join. */
-            (au.overJoin ? '; the ' + au.overJoin + ' of them that join nodes and pods with another kind — a drain needs the node, its pods and their budgets in one view — cannot see them together.' : '.')
-          : 'At ' + pods.toLocaleString('en-US') + ' pods every rule\'s objects fit one 1 M-token prompt.';
-      }
-    };
-    ['#i-pods', '#i-clusters', '#i-reads', '#i-k', '#i-sec', '#i-rate'].forEach(function (s) { $(s).addEventListener('input', calc); });
-    sel.addEventListener('change', calc);
-    calc();
-  }
-
   /* ── deadlines: the support windows, drawn (D62) ──────────────────────
      The founder: "пункт з цінами на старі версії багато де 0$ … побудувати по іншому" — the calculator printed "$0"
      for every version past its extension, most of its slider. Now the windows themselves: a bar per minor version of
@@ -1123,6 +973,16 @@
       now.style.left = pct(today) + '%'; axisEl.appendChild(now);
       rowsEl.style.setProperty('--today-f', (pct(today) / 100).toFixed(4));
       rowsEl.textContent = ''; parts = [];
+      /* YEAR GRIDLINES THROUGH THE ROWS, on the same scale as the bars and the today line, so a version's span reads
+         against the calendar instead of floating (the founder: the timeline looked "криво"). A line sits at each
+         January, over the track's own column. */
+      var grid = document.createElement('li'); grid.className = 'dl-grid'; grid.setAttribute('aria-hidden', 'true');
+      for (var gy = t0.getFullYear(); gy <= t1.getFullYear(); gy++) {
+        var gl = document.createElement('span');
+        gl.style.setProperty('--f', (pct(new Date(gy, 0, 1)) / 100).toFixed(4));
+        grid.appendChild(gl);
+      }
+      rowsEl.appendChild(grid);
       rows.forEach(function (w, i) {
         var st = stateOf(w), li = document.createElement('li'), b = document.createElement('button');
         b.type = 'button'; b.className = 'dl-row ' + st; b.setAttribute('aria-pressed', 'false');

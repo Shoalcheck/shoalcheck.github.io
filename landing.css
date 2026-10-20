@@ -98,7 +98,7 @@ p { margin: 0; }
 @media (max-width: 480px) { .top-cta .btn-ghost { display: none; } }
 
 /* ── hero ───────────────────────────────────────────────────────────────── */
-.hero { position: relative; padding: clamp(40px, min(9vw, 10vh), 120px) 0 clamp(56px, 8vw, 96px); overflow: hidden; }
+.hero { position: relative; padding: clamp(22px, min(5vw, 5vh), 72px) 0 clamp(44px, 6vw, 80px); overflow: hidden; }
 /* A FIXED SIZE, NOT THE HERO'S: sized as a share of the hero, the glow moved whenever the hero's text reflowed (the
    web font arriving: CLS 0.094, Lighthouse, D67). */
 .glow { position: absolute; inset: -240px -10% auto; height: 1500px; pointer-events: none; background:
@@ -108,7 +108,7 @@ p { margin: 0; }
   linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
   background-size: 56px 56px; mask-image: radial-gradient(60% 70% at 60% 30%, #000 20%, transparent 75%); opacity: .55; }
 .hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 64px); align-items: center; }
-.hero-copy { display: flex; flex-direction: column; gap: clamp(16px, 2.8vh, 26px); }
+.hero-copy { display: flex; flex-direction: column; gap: clamp(10px, 1.8vh, 20px); }
 /* What the whole reading costs, beside the way in: nothing near the hero said it (D50 site review). */
 .price-anchor { font-size: 14px; line-height: 1.5; color: var(--dim); }
 .price-anchor b { color: var(--fg); font-weight: 650; }
@@ -470,7 +470,6 @@ html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not
 .calc-in input[type=range] { grid-column: 1 / -1; }
 .calc-f { margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
 .calc-f legend { padding: 0; margin-bottom: 8px; font-size: 14px; color: var(--fg2); }
-.calc-unit { color: var(--faint); font-size: 13px; }
 
 /* THE PAGE'S OWN CONTROLS. A slider fills its track to the thumb (--p, set by landing.js from the value) and is tall
    enough to take a finger; a choice shows every option at once, the chosen one outlined. */
@@ -514,22 +513,7 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 /* One reading first, the month after it: each group under its own head, across both columns. */
 .calc-h { grid-column: 1 / -1; margin: 0 0 -10px; font: 600 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
 .calc-h:not(:first-child) { margin-top: 6px; padding-top: 16px; border-top: 1px solid var(--line); }
-/* The loop's triangle: a bar per call, what is re-sent below and the call's own share on top. */
-.tri-fig { grid-column: 1 / -1; margin: 0; display: grid; gap: 8px; }
-.tri { width: 100%; max-width: 520px; height: auto; overflow: visible; }
-.tri rect { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); transition: transform .45s cubic-bezier(.2, .7, .2, 1); }
-.tri.on rect { transform: scaleY(1); }
-.tri .re { fill: var(--line2); }
-.tri .nw { fill: var(--accent); }
-.tri text { font: 10px var(--mono); fill: var(--faint); }
-.tri-fig figcaption { font-size: 12.5px; line-height: 1.5; color: var(--dim); max-width: 62ch; }
-.tri-fig figcaption i { font-family: var(--mono); font-style: normal; color: var(--fg2); }
-@media (prefers-reduced-motion: reduce) { .tri rect { transition: none; } }
 @media (max-width: 900px) { .calc { grid-template-columns: minmax(0, 1fr); } .calc-in { position: static; border-bottom: 1px solid var(--line); } .calc > .calc-out { border-left: 0; } }
-/* AN AGENT'S AUDIT (D61): the figure that answers "why not just give it to an agent" — every rule's reads, priced. */
-.calc-out .calc-audit { grid-column: 1 / -1; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(253, 176, 34, .45); background: rgba(253, 176, 34, .06); }
-.calc-out .calc-audit b { color: var(--warn); }
-.calc-audit-win { grid-column: 1 / -1; margin: -8px 0 0; font-size: 13px; line-height: 1.55; color: var(--dim); }
 .calc.deadline { margin-top: 0; }
 /* THE SUPPORT WINDOWS, DRAWN (D62). A bar per minor version — ordinary support, then the paid extension — on one time
    axis, today's line across them; the chosen version spelled out on the left. Money only where a surcharge is due. */
@@ -540,8 +524,10 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 /* today has a line of its own above the years: on the years' line it sat on top of the nearest one ("today27") */
 .dl-time .dl-axis .dl-now { top: 0; color: var(--fg2); font-weight: 600; }
 .dl-rows { position: relative; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.dl-grid { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; pointer-events: none; z-index: 0; }
+.dl-grid span { position: absolute; top: 2px; bottom: 2px; width: 1px; left: calc(56px + (100% - 184px) * var(--f)); background: rgba(220, 245, 240, .09); }
 .dl-rows::after { content: ""; position: absolute; top: -6px; bottom: -4px; left: calc(56px + (100% - 184px) * var(--today-f, 0)); border-left: 1.5px dashed rgba(220, 245, 240, .55); pointer-events: none; }
-.dl-row { display: grid; grid-template-columns: 46px minmax(0, 1fr) 118px; gap: 10px; align-items: center; width: 100%; min-height: 36px; padding: 0;
+.dl-row { position: relative; z-index: 1; display: grid; grid-template-columns: 46px minmax(0, 1fr) 118px; gap: 10px; align-items: center; width: 100%; min-height: 36px; padding: 0;
           border: 1px solid transparent; border-radius: 8px; background: none; color: var(--fg2); cursor: pointer; text-align: left; font: inherit; }
 .dl-row:hover { background: rgba(220, 245, 240, .035); }
 .dl-row[aria-pressed="true"] { border-color: rgba(45, 212, 191, .55); background: rgba(45, 212, 191, .07); }
