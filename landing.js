@@ -806,6 +806,26 @@
       for (var i = 1; i <= k; i++) sum += cost(tokens * i / k, m);
       return sum;
     };
+    /* AN AGENT'S AUDIT, RULE BY RULE (D61, the founder: "ти неправильно порахував … набагато більше треба токенів").
+       The figures above are one look. An audit gives every rule the objects it reads — the registry's RequiredKinds
+       against a real reading's bytes by kind (#agent-audit: make site-data writes it, a gate holds it) — each rule a
+       prompt of its own, priced at its own size, and writes its findings out at the output price. A prompt larger
+       than the window has to be cut in pieces, and a rule that joins nodes and pods with a third kind cannot see them
+       together in pieces: that is said by naming those rules, never as a guessed accuracy. Still a floor: no reasoning
+       tokens, no retries, and the analyzers that read operators' objects are left out. */
+    var AU = JSON.parse(($('#agent-audit') || {}).textContent || 'null');
+    var audit = function (pods, m) {
+      var pLo = pods * 5400 / P.charsHi, pHi = pods * 9300 / P.charsLo, others = (160 + 3 * pods) * 670;
+      var oLo = others / P.charsHi, oHi = others / P.charsLo, r = { lo: 0, hi: 0, costLo: 0, costHi: 0, over: 0, overJoin: 0 };
+      AU.rules.forEach(function (x) {
+        var a = x[0] * pLo + x[1] * oLo, b = x[0] * pHi + x[1] * oHi;
+        r.lo += a; r.hi += b; r.costLo += cost(a, m); r.costHi += cost(b, m);
+        if (a > P.context) { r.over++; if (x[2]) r.overJoin++; }
+      });
+      var out = (160 + 4 * pods) * AU.findingsPerObject * AU.outputTokensPerFinding;
+      r.costLo += out * m.out / 1e6; r.costHi += out * m.out / 1e6; r.out = out;
+      return r;
+    };
     /* THE TRIANGLE: one bar per call, the part re-sent below and the call's own share on top. */
     var tri = $('#r-tri'), triOn = false;
     var drawTri = function (k) {
@@ -861,85 +881,143 @@
         : Math.round(fte).toLocaleString('en-US') + (Math.round(fte) === 1 ? ' engineer\'s month' : ' engineers\' months');
       $('#r-agent').textContent = usdRange(cost(lo, m) * perMonth, cost(hi, m) * perMonth);
       $('#r-agent-loop').textContent = usdRange(loopCost(lo, m, k) * perMonth, loopCost(hi, m, k) * perMonth);
+      if (AU) {
+        var au = audit(pods, m);
+        $('#r-audit').textContent = usdRange(au.costLo * perMonth, au.costHi * perMonth);
+        $('#r-audit-n').textContent = AU.rules.length;
+        $('#r-audit-x').textContent = Math.round(au.lo / lo) + '×';
+        $('#r-audit-win').textContent = au.over
+          ? 'At ' + pods.toLocaleString('en-US') + ' pods, ' + au.over + ' of the ' + AU.rules.length + ' rules need more than a 1 M-token prompt for the objects they read, so each is cut into pieces' +
+            /* A ZERO IS NOT A COUNT TO PRINT: "the 0 that join" read as a claim about the rules, so the join sentence
+               appears only when some of them join. */
+            (au.overJoin ? '; the ' + au.overJoin + ' of them that join nodes and pods with another kind — a drain needs the node, its pods and their budgets in one view — cannot see them together.' : '.')
+          : 'At ' + pods.toLocaleString('en-US') + ' pods every rule\'s objects fit one 1 M-token prompt.';
+      }
     };
     ['#i-pods', '#i-clusters', '#i-reads', '#i-k', '#i-sec', '#i-rate'].forEach(function (s) { $(s).addEventListener('input', calc); });
     sel.addEventListener('change', calc);
     calc();
   }
 
-  /* ── deadlines ────────────────────────────────────────────────────────
-     The support windows and the extended-support rate every reading uses (make site-data writes them; a gate
-     holds them equal). Days are counted from the visitor's own clock; the dates are as the source published them. */
+  /* ── deadlines: the support windows, drawn (D62) ──────────────────────
+     The founder: "пункт з цінами на старі версії багато де 0$ … побудувати по іншому" — the calculator printed "$0"
+     for every version past its extension, most of its slider. Now the windows themselves: a bar per minor version of
+     the chosen provider, ordinary support then the paid extension, today's line across them, the chosen version lit
+     and spelled out beside it. Money appears only where a surcharge is due; a version past its window says it is
+     unsupported, and a provider with no published rate says that — never "$0". The windows and the rate are the
+     tables a reading uses (make site-data writes them; a gate holds them equal). Days count from the visitor's clock. */
   var supEl = $('#support-windows');
   if (supEl && $('#dl-calc')) {
     var T = JSON.parse(supEl.textContent || '{}');
     var NAMES = { aws: 'Amazon EKS', azure: 'Azure AKS', gcp: 'Google GKE', upstream: 'Kubernetes upstream' };
     var SHORT = { aws: ['EKS', 'Amazon'], azure: ['AKS', 'Azure'], gcp: ['GKE', 'Google'], upstream: ['Upstream', 'Kubernetes'] };
-    var pSel = $('#dl-provider'), mIn = $('#dl-minor'), nIn = $('#dl-n');
+    var pSel = $('#dl-provider'), nIn = $('#dl-n'), rowsEl = $('#dl-rows'), axisEl = $('#dl-axis'), timeEl = $('#dl-time');
     choices(pSel, 'provider', ['aws', 'azure', 'gcp', 'upstream'].filter(function (p) { return T.windows && T.windows[p]; })
       .map(function (p) { return { v: p, t: SHORT[p][0], s: SHORT[p][1] }; }), 'aws');
     var today = new Date(); today.setHours(0, 0, 0, 0);
     var day = function (s) { return s ? new Date(s + 'T00:00:00') : null; };
     var gap = function (d) { return Math.round((d - today) / 86400000); };
     var long = function (s) { return day(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); };
-    /* "ordinary support ended 82 days ago" · "extended support ends in 283 days" — the subject, then its tense. */
-    var when = function (s, subject) {
+    var days = function (s) {
       var n = gap(day(s)), k = Math.abs(n).toLocaleString('en-US') + (Math.abs(n) === 1 ? ' day' : ' days');
-      return subject + (n < 0 ? ' ended ' + k + ' ago' : n === 0 ? ' ends today' : ' ends in ' + k);
+      return n < 0 ? k + ' ago' : n === 0 ? 'today' : 'in ' + k;
     };
     var usd0 = function (x) { return '$' + Math.round(x).toLocaleString('en-US'); };
-    /* The version is a slider over the provider's own list, oldest to newest: twenty versions do not fit on a
-       line as buttons, and one hidden behind a select is what the founder called terrible. */
-    var fillMinors = function () {
-      var rows = T.windows[chosen(pSel)] || [];
-      mIn.max = String(Math.max(rows.length - 1, 0));
-      /* The first version shown is the newest one already past ordinary support: the case that costs money. */
-      var past = rows.filter(function (w) { return w[2] && gap(day(w[2])) < 0; });
-      var first = past.length ? past[past.length - 1] : rows[rows.length - 1];
-      mIn.value = String(Math.max(rows.indexOf(first), 0));
-      fillRange(mIn);
+    var SHOW = 8; // the newest eight minors: the ones in support, and the last ones out of it
+    var stateOf = function (w) {
+      if (!w[2]) return 'unpublished';
+      if (gap(day(w[2])) >= 0) return 'ordinary';
+      if (w[3] && gap(day(w[3])) >= 0) return 'extended';
+      return 'ended';
     };
-    var dl = function () {
-      var p = chosen(pSel), rows = T.windows[p] || [], n = Number(nIn.value);
-      var i = Number(mIn.value), w = rows[i];
-      $('#o-dl-n').textContent = n;
-      $('#o-dl-minor').textContent = w ? w[0] : '—';
-      if (!w) return;
-      var name = NAMES[p], next = rows[i + 1] ? rows[i + 1][0] : '';
-      $('#dl-std').textContent = w[2] ? long(w[2]) : 'unpublished';
-      $('#dl-std-l').textContent = w[2] ? when(w[2], 'ordinary support') : 'the source publishes no date';
-      if (w[3]) {
-        $('#dl-ext').textContent = long(w[3]);
-        $('#dl-ext-l').textContent = when(w[3], 'extended support');
-      } else {
-        $('#dl-ext').textContent = '—';
-        $('#dl-ext-l').textContent = p === 'upstream' ? 'upstream Kubernetes sells no extension'
-          : 'no extension date in the source for ' + name;
+    var WORD = { ordinary: 'ordinary support', extended: 'paid extension', ended: 'unsupported', unpublished: 'no date published' };
+    var picked = {}, rows = [], parts = [];
+    var draw = function () {
+      var p = chosen(pSel), all = T.windows[p] || [];
+      rows = all.slice(-SHOW);
+      if (!rows.length) return;
+      var t0 = day(rows[0][1]), t1 = today;
+      rows.forEach(function (w) { [w[1], w[2], w[3]].forEach(function (s) { if (s && day(s) > t1) t1 = day(s); }); });
+      t0 = new Date(t0.getFullYear(), 0, 1); t1 = new Date(t1.getFullYear() + 1, 0, 1);
+      var pct = function (d) { return Math.max(0, Math.min(100, (d - t0) / (t1 - t0) * 100)); };
+      axisEl.textContent = '';
+      for (var y = t0.getFullYear(); y <= t1.getFullYear(); y++) {
+        var tick = document.createElement('span'); tick.textContent = String(y);
+        tick.style.left = pct(new Date(y, 0, 1)) + '%'; axisEl.appendChild(tick);
       }
-      var rate = (T.rates || {})[p], cost = $('#dl-cost'), costL = $('#dl-cost-l');
-      var beyond = w[3] && gap(day(w[3])) < 0, inside = w[2] && gap(day(w[2])) < 0 && !beyond;
-      if (p === 'upstream') {
-        cost.textContent = '—';
-        costL.textContent = 'upstream sells no extension, so there is no surcharge to price';
-      } else if (!rate) {
-        cost.textContent = '—';
-        costL.textContent = 'this build carries no published extended-support rate for ' + name + ', so nothing is estimated';
-      } else if (beyond) {
-        cost.textContent = '$0';
-        costL.textContent = 'past the extension: no surcharge left to stop — and no more patches';
+      var now = document.createElement('span'); now.className = 'dl-now'; now.textContent = 'today';
+      now.style.left = pct(today) + '%'; axisEl.appendChild(now);
+      rowsEl.style.setProperty('--today-f', (pct(today) / 100).toFixed(4));
+      rowsEl.textContent = ''; parts = [];
+      rows.forEach(function (w, i) {
+        var st = stateOf(w), li = document.createElement('li'), b = document.createElement('button');
+        b.type = 'button'; b.className = 'dl-row ' + st; b.setAttribute('aria-pressed', 'false');
+        b.setAttribute('aria-label', 'Kubernetes ' + w[0] + ' on ' + NAMES[p] + ': ' + WORD[st]);
+        var v = document.createElement('span'); v.className = 'dl-v'; v.textContent = w[0]; b.appendChild(v);
+        var tr = document.createElement('span'); tr.className = 'dl-track'; b.appendChild(tr);
+        var o = document.createElement('i'); o.className = 'dl-o';
+        o.style.left = pct(day(w[1])) + '%'; o.style.width = (pct(day(w[2] || w[1])) - pct(day(w[1]))) + '%';
+        o.style.transitionDelay = (i * 45) + 'ms'; tr.appendChild(o); parts.push(o);
+        if (w[3]) {
+          var x = document.createElement('i'); x.className = 'dl-x';
+          x.style.left = pct(day(w[2])) + '%'; x.style.width = (pct(day(w[3])) - pct(day(w[2]))) + '%';
+          x.style.transitionDelay = (i * 45 + 220) + 'ms'; tr.appendChild(x); parts.push(x);
+        }
+        var sw = document.createElement('span'); sw.className = 'dl-s'; sw.textContent = WORD[st]; b.appendChild(sw);
+        b.addEventListener('click', function () { picked[p] = i; select(); });
+        li.appendChild(b); rowsEl.appendChild(li);
+      });
+      /* The version first shown is the newest one on the paid extension — the case that costs money — or else the
+         oldest still in ordinary support. */
+      if (picked[p] == null || picked[p] >= rows.length) {
+        var ext = -1, ord = -1;
+        rows.forEach(function (w, i) { var st = stateOf(w); if (st === 'extended') ext = i; if (st === 'ordinary' && ord < 0) ord = i; });
+        picked[p] = ext >= 0 ? ext : ord >= 0 ? ord : rows.length - 1;
+      }
+      select();
+      if (timeEl.classList.contains('on')) parts.forEach(function (q) { q.classList.add('on'); });
+    };
+    var select = function () {
+      var p = chosen(pSel), i = picked[p], w = rows[i], n = Number(nIn.value), name = NAMES[p];
+      $('#o-dl-n').textContent = n;
+      [].forEach.call(rowsEl.querySelectorAll('.dl-row'), function (b, j) { b.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });
+      if (!w) return;
+      var st = stateOf(w), all = T.windows[p] || [], at = all.indexOf(w), next = all[at + 1] ? all[at + 1][0] : '';
+      $('#dl-pv').textContent = 'Kubernetes ' + w[0] + ' on ' + name;
+      var badge = $('#dl-badge'); badge.className = 'dl-badge ' + st; badge.textContent = WORD[st];
+      $('#dl-pstd').textContent = w[2] ? (st === 'ordinary' ? 'until ' : 'ended ') + long(w[2]) + ' · ' + days(w[2]) : 'the source publishes no date';
+      $('#dl-pext').textContent = w[3] ? (st === 'ended' ? 'ended ' : 'until ') + long(w[3]) + ' · ' + days(w[3])
+        : p === 'upstream' ? 'upstream Kubernetes sells no extension' : 'no extension date in the source for ' + name;
+      var rate = (T.rates || {})[p], money = $('#dl-money');
+      if (st === 'ended') {
+        money.innerHTML = '';
+        money.appendChild(document.createTextNode('Unsupported since ' + long(w[3] || w[2]) + ': no patches, and no surcharge left to pay.' +
+          (next ? ' shoalcheck preflight upgrade ' + next + ' says what stops the way out.' : '')));
+        money.className = 'dl-money ended';
+      } else if (p === 'upstream') {
+        money.textContent = 'Upstream sells no extension, so there is no surcharge to price.'; money.className = 'dl-money';
+      } else if (!rate || !w[3]) {
+        money.textContent = 'This build carries no published extended-support rate for ' + name + ', so nothing is estimated.'; money.className = 'dl-money';
       } else {
-        cost.textContent = usd0(rate * 730 * n);
-        costL.textContent = (inside ? 'a month in surcharge, now, for ' : 'a month in surcharge from ' + long(w[2]) + ', if still on it, for ') +
-          n + (n === 1 ? ' cluster' : ' clusters') + ' — $' + rate.toFixed(2) + ' per cluster-hour on top of the ordinary rate';
+        money.innerHTML = '';
+        var fig = document.createElement('b'); fig.textContent = usd0(rate * 730 * n); money.appendChild(fig);
+        money.appendChild(document.createTextNode((st === 'extended' ? ' a month in surcharge, now, for ' : ' a month in surcharge from ' + long(w[2]) + ', if still on it, for ') +
+          n + (n === 1 ? ' cluster' : ' clusters') + ' — $' + rate.toFixed(2) + ' per cluster-hour on top of the ordinary rate.'));
+        money.className = 'dl-money due';
       }
       $('#dl-basis').textContent = 'Support dates: endoflife.date, fetched ' + T.asOf + '. Rate: the provider\'s published surcharge, in the price table of ' +
-        T.rateAsOf + '; 730 hours to a month. These are the tables a reading uses to place your cluster\'s version' +
-        (next ? ' — shoalcheck preflight upgrade ' + next + ' says what stops the move.' : '.');
+        T.rateAsOf + '; 730 hours to a month. These are the tables a reading uses to place your cluster\'s version.';
     };
-    pSel.addEventListener('change', function () { fillMinors(); dl(); });
-    mIn.addEventListener('input', dl);
-    nIn.addEventListener('input', dl);
-    fillMinors(); dl();
+    pSel.addEventListener('change', draw);
+    nIn.addEventListener('input', select);
+    draw();
+    /* THE BARS DRAW WHEN THE BLOCK IS SEEN, each version after the one before, and again when it returns. */
+    if (reduce || !('IntersectionObserver' in window)) { timeEl.classList.add('on'); parts.forEach(function (q) { q.classList.add('on'); }); }
+    else new IntersectionObserver(function (es) {
+      var e = es[0];
+      if (e.intersectionRatio >= 0.35) { timeEl.classList.add('on'); parts.forEach(function (q) { q.classList.add('on'); }); }
+      else if (!e.isIntersecting) { timeEl.classList.remove('on'); parts.forEach(function (q) { q.classList.remove('on'); }); }
+    }, { threshold: [0, 0.35] }).observe(timeEl);
   }
 
   /* ── just the output ───────────────────────────────────────────────────

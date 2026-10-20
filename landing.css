@@ -456,8 +456,12 @@ html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not
 .ctx-key i { flex: none; height: 14px; border-left: 1px dashed var(--warn); }
 @media (max-width: 900px) { .ar-grid { grid-template-columns: minmax(0, 1fr); } .bar { grid-template-columns: 92px minmax(0, 1fr) 82px; } .ctx-line { left: calc(104px + (100% - 198px) * .4); } }
 
-.calc { margin-top: 18px; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); border: 1px solid var(--line2); border-radius: var(--r); background: linear-gradient(135deg, rgba(45, 212, 191, .06), transparent 50%), var(--surface); overflow: hidden; }
-.calc-in { display: flex; flex-direction: column; gap: 18px; padding: 28px; border-right: 1px solid var(--line); }
+.calc { margin-top: 18px; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); border: 1px solid var(--line2); border-radius: var(--r); background: linear-gradient(135deg, rgba(45, 212, 191, .06), transparent 50%), var(--surface); overflow: clip; }
+/* THE CONTROLS STAY IN VIEW while the figures they move are read: the column of figures runs twice their height, and
+   the controls scrolled away above an empty column. `overflow: clip` on .calc, not hidden — hidden makes it a scroll
+   container, and a sticky child of one never sticks. */
+.calc-in { display: flex; flex-direction: column; gap: 18px; padding: 28px; position: sticky; top: 80px; align-self: start; }
+.calc > .calc-out { border-left: 1px solid var(--line); }
 .calc-in > label { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 8px; font-size: 14px; color: var(--fg2); }
 .calc-in output { font: 600 15px var(--mono); color: var(--fg); font-variant-numeric: tabular-nums; }
 .calc-in input[type=range] { grid-column: 1 / -1; }
@@ -518,9 +522,66 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 .tri-fig figcaption { font-size: 12.5px; line-height: 1.5; color: var(--dim); max-width: 62ch; }
 .tri-fig figcaption i { font-family: var(--mono); font-style: normal; color: var(--fg2); }
 @media (prefers-reduced-motion: reduce) { .tri rect { transition: none; } }
-@media (max-width: 900px) { .calc { grid-template-columns: minmax(0, 1fr); } .calc-in { border-right: 0; border-bottom: 1px solid var(--line); } }
+@media (max-width: 900px) { .calc { grid-template-columns: minmax(0, 1fr); } .calc-in { position: static; border-bottom: 1px solid var(--line); } .calc > .calc-out { border-left: 0; } }
+/* AN AGENT'S AUDIT (D61): the figure that answers "why not just give it to an agent" — every rule's reads, priced. */
+.calc-out .calc-audit { grid-column: 1 / -1; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(253, 176, 34, .45); background: rgba(253, 176, 34, .06); }
+.calc-out .calc-audit b { color: var(--warn); }
+.calc-audit-win { grid-column: 1 / -1; margin: -8px 0 0; font-size: 13px; line-height: 1.55; color: var(--dim); }
 .calc.deadline { margin-top: 0; }
-.calc-out .dl-wide { grid-column: 1 / -1; }
+/* THE SUPPORT WINDOWS, DRAWN (D62). A bar per minor version — ordinary support, then the paid extension — on one time
+   axis, today's line across them; the chosen version spelled out on the left. Money only where a surcharge is due. */
+.calc-out.dl-time { container-type: inline-size; display: flex; flex-direction: column; gap: 10px; align-content: start; }
+.dl-time .calc-h { margin: 0 0 2px; }
+.dl-time .dl-axis { display: block; position: relative; height: 30px; margin: 0 128px 0 56px; }
+.dl-time .dl-axis span { position: absolute; top: 14px; transform: translateX(-50%); font: 11.5px var(--mono); color: var(--faint); white-space: nowrap; }
+/* today has a line of its own above the years: on the years' line it sat on top of the nearest one ("today27") */
+.dl-time .dl-axis .dl-now { top: 0; color: var(--fg2); font-weight: 600; }
+.dl-rows { position: relative; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.dl-rows::after { content: ""; position: absolute; top: -6px; bottom: -4px; left: calc(56px + (100% - 184px) * var(--today-f, 0)); border-left: 1.5px dashed rgba(220, 245, 240, .55); pointer-events: none; }
+.dl-row { display: grid; grid-template-columns: 46px minmax(0, 1fr) 118px; gap: 10px; align-items: center; width: 100%; min-height: 36px; padding: 0;
+          border: 1px solid transparent; border-radius: 8px; background: none; color: var(--fg2); cursor: pointer; text-align: left; font: inherit; }
+.dl-row:hover { background: rgba(220, 245, 240, .035); }
+.dl-row[aria-pressed="true"] { border-color: rgba(45, 212, 191, .55); background: rgba(45, 212, 191, .07); }
+.dl-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dl-time .dl-v { font: 600 13px var(--mono); color: var(--fg); padding-left: 8px; }
+.dl-time .dl-track { position: relative; height: 10px; border-radius: 5px; background: rgba(220, 245, 240, .05); overflow: hidden; }
+.dl-track i { position: absolute; top: 0; bottom: 0; transform: scaleX(0); transform-origin: left; transition: transform .55s var(--ease); }
+.dl-track i.on { transform: scaleX(1); }
+.dl-track .dl-o { background: var(--accent); border-radius: 5px 0 0 5px; }
+.dl-track .dl-x { background: var(--warn); border-radius: 0 5px 5px 0; }
+.dl-time .dl-s { font: 12px var(--mono); color: var(--dim); white-space: nowrap; }
+.dl-row.extended .dl-s { color: var(--warn); }
+.dl-row.ended .dl-s { color: var(--bad); }
+.dl-row.ended .dl-v { color: var(--dim); }
+/* a window that has closed is history: drawn, and dimmed, so the eye goes to the ones still running */
+.dl-row.ended .dl-track i { opacity: .38; }
+.dl-key { margin: 2px 0 0; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; font: 12px var(--mono); color: var(--dim); }
+.dl-key span { white-space: nowrap; }
+.dl-key i { display: inline-block; width: 14px; height: 8px; border-radius: 4px; margin-right: 6px; vertical-align: middle; }
+.dl-key i.o { background: var(--accent); }
+.dl-key i.x { background: var(--warn); }
+.dl-key i.t { width: 0; height: 12px; border-radius: 0; border-left: 1.5px dashed rgba(220, 245, 240, .6); }
+.dl-pick { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 12px; border: 1px solid var(--line2); background: var(--bg2); }
+.dl-pv { margin: 0; font-size: 17px; font-weight: 650; color: var(--fg); }
+.dl-badge { align-self: flex-start; padding: 3px 10px; border-radius: 999px; font: 600 12px var(--mono); border: 1px solid var(--line2); color: var(--fg2); }
+.dl-badge.ordinary { color: var(--accent2); border-color: rgba(45, 212, 191, .5); }
+.dl-badge.extended { color: var(--warn); border-color: rgba(253, 176, 34, .55); }
+.dl-badge.ended { color: var(--bad); border-color: rgba(249, 112, 102, .55); }
+.dl-dates { margin: 0; display: grid; gap: 6px; }
+.dl-dates div { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 10px; }
+.dl-dates dt { font-size: 13px; color: var(--faint); }
+.dl-dates dd { margin: 0; font: 13px/1.45 var(--mono); color: var(--fg2); }
+.dl-money { margin: 0; font-size: 14px; line-height: 1.5; color: var(--dim); }
+.dl-money b { margin-right: 6px; font-size: 26px; font-weight: 720; color: var(--accent2); font-variant-numeric: tabular-nums; }
+.dl-money.ended { color: var(--bad); }
+/* a narrow timeline drops the words beside each bar: the chosen version's state is spelled out on the left */
+@container (width < 520px) {
+  .dl-row { grid-template-columns: 42px minmax(0, 1fr); }
+  .dl-time .dl-s { display: none; }
+  .dl-time .dl-axis { margin: 0 0 0 52px; }
+  .dl-rows::after { left: calc(52px + (100% - 52px) * var(--today-f, 0)); }
+}
+@media (prefers-reduced-motion: reduce) { .dl-track i { transition: none; } }
 
 /* ── read-only ──────────────────────────────────────────────────────────── */
 .ro-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 48px; align-items: center; }

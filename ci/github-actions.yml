@@ -1,0 +1,129 @@
+# `shoalcheck gate` in a pipeline — the job that reads the cluster and fails on what changed.
+#
+# WHAT MAKES THIS WORTH RUNNING. The comparison is the product's own: a finding that merely became visible —
+# because a rule was added, a reference table moved, or the two readings did not cover the same ground — is
+# withheld, not reported as new. So a red build here means the cluster changed, not that the tool did.
+#
+# AND AN ABSENCE IS NOT A PASS. `unreadable` is in the default policy: if this run could not read a kind the
+# baseline read (RBAC tightened, an API went away), the job fails rather than going green on a smaller reading.
+#
+# WHAT IT NEEDS. A `KUBECONFIG` secret with the read-only access `shoalcheck audit --show-permissions` prints; a
+# Team licence key in the `SHOALCHECK_LICENCE` secret (the gate is a Team command, and without the key it exits 4
+# naming the plan); and the release to pin in the `SHOALCHECK_VERSION` variable, without the leading v
+# (e.g. 0.1.0-rc.10). A pipeline should not change under you, so this never asks for "latest".
+name: shoalcheck gate
+
+on:
+  schedule:
+    - cron: '17 6 * * 1-5'   # weekday mornings, before anyone deploys
+  workflow_dispatch:
+  pull_request:
+    paths: ['deploy/**', 'charts/**', 'k8s/**']
+
+permissions:
+  contents: read
+  security-events: write   # the SARIF upload below
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ vars.SHOALCHECK_VERSION }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: v2.5.2
+
+      # CHECKED THE WAY IT IS SIGNED. Every release publishes checksums.txt and its cosign signature bundle. The
+      # release key is written into this job, not downloaded: a key fetched from the release it vouches for proves
+      # nothing. It is the cosign.pub the releases repository publishes. The signature is checked first, then the
+      # archive against its checksum: a binary that is not the one that was signed has no business reading a
+      # production cluster.
+      - name: Install shoalcheck
+        run: |
+          base="https://github.com/Shoalcheck/shoalcheck/releases/download/v${VERSION}"
+          archive="shoalcheck_${VERSION}_linux_amd64.tar.gz"
+          for f in "$archive" checksums.txt checksums.txt.sigstore.json; do
+            curl -fsSLO "$base/$f"
+          done
+          cat > cosign.pub <<'KEY'
+          -----BEGIN PUBLIC KEY-----
+          MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE69u2ja9r2k/Vy8lSibowBdCnCD3P
+          OVzmcbjHVIvMgoOfkEzEwOY/b8kyjTVJcwrJ89+qC5bjW4XzLqz1S/AryQ==
+          -----END PUBLIC KEY-----
+          KEY
+          cosign verify-blob --key cosign.pub --bundle checksums.txt.sigstore.json checksums.txt
+          grep " $archive\$" checksums.txt | sha256sum -c -
+          sudo tar xz -C /usr/local/bin -f "$archive" shoalcheck
+          shoalcheck version
+
+      # Your own credential step. shoalcheck needs a kubeconfig with the read-only access it prints:
+      #   shoalcheck audit --show-permissions
+      - name: Authenticate to the cluster
+        env:
+          KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG }}
+        run: printf '%s\n' "$KUBECONFIG_CONTENT" > "$RUNNER_TEMP/kubeconfig"
+
+      # The verdict in the job log and in the run's summary, and the exit code the job ends on: 0 the policy is
+      # satisfied, 2 it fired, 1 the run or the comparison could not be made, 4 the licence does not cover the gate.
+      # --json keeps the reading the gate judged, for the steps after it.
+      - name: Gate
+        env:
+          KUBECONFIG: ${{ runner.temp }}/kubeconfig
+          # The store lives here so the run leaves nothing in the runner's home.
+          SHOALCHECK_HOME: ${{ runner.temp }}/shoalcheck
+          SHOALCHECK_LICENCE: ${{ secrets.SHOALCHECK_LICENCE }}
+        run: |
+          set +e
+          shoalcheck gate \
+            --context staging \
+            --baseline .shoalcheck/baseline.json \
+            --fail-on new:high,regressed,unreadable \
+            --output "$RUNNER_TEMP/report.html" \
+            --json shoalcheck-reading.json \
+            -o text > gate.txt
+          code=$?
+          set -e
+          cat gate.txt
+          { echo '### shoalcheck gate'; echo '```'; cat gate.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit $code
+
+      # The findings in the dashboard the team already reads, from the reading the gate judged, so the alert and the
+      # red build cannot disagree; `always()` because a failing gate is exactly when they are wanted.
+      - name: Findings as SARIF
+        if: always() && hashFiles('shoalcheck-reading.json') != ''
+        env:
+          SHOALCHECK_HOME: ${{ runner.temp }}/shoalcheck
+          SHOALCHECK_LICENCE: ${{ secrets.SHOALCHECK_LICENCE }}
+        run: shoalcheck findings --input shoalcheck-reading.json -o sarif > "$RUNNER_TEMP/shoalcheck.sarif"
+
+      - name: Upload to code scanning
+        if: always() && hashFiles('shoalcheck-reading.json') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ runner.temp }}/shoalcheck.sarif
+          category: shoalcheck
+
+      # The report is the artifact a human opens when the gate fails; it is a single file with no external
+      # requests, so it renders from the artifact download exactly as it renders locally.
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shoalcheck-report
+          path: |
+            ${{ runner.temp }}/report.html
+            shoalcheck-reading.json
+          if-no-files-found: ignore
+
+# Recording a baseline the first time (or after a deliberate change):
+#   shoalcheck gate --context staging --baseline .shoalcheck/baseline.json --update-baseline
+# It compares first and writes afterwards, so the run that records still reports what moved.
+#
+# THE BASELINE IS A READING OF THIS SAME CLUSTER. shoalcheck refuses to compare readings of two different clusters —
+# it knows a cluster by its kube-system namespace, not by a context name a rebuilt cluster can reuse — and a refused
+# comparison fails the job with exit 1. Record the baseline from the cluster this job reads. A cluster made new for
+# every run (kind, a preview environment) records its baseline in the same run: apply the manifests the change starts
+# from, run the gate with --update-baseline, apply the change, run the gate again.
