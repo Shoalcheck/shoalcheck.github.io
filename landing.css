@@ -837,7 +837,9 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 .cc-mcp { border-color: rgba(45, 212, 191, .55); box-shadow: 0 0 0 3px rgba(45, 212, 191, .08); }
 .cc-mcp b { color: #7fe7d9; }
 .cc-trk { margin: 0 6px; border-top: 1.5px dashed #46464d; }
-.cc-x { position: relative; margin-left: 22px; border-style: dashed; opacity: .75; }
+/* no opacity: dimming the box dropped the muted line to 3.6:1 (Lighthouse, D67/D63); the dashed border and the red
+   cross already say "no route", at full contrast (5.4:1). */
+.cc-x { position: relative; margin-left: 22px; border-style: dashed; }
 .cc-x::before, .cc-x::after { content: ""; position: absolute; left: -16px; top: 50%; width: 12px; height: 1.5px; background: #f97066; transform: rotate(45deg); }
 .cc-x::after { transform: rotate(-45deg); }
 .cc-pks { position: absolute; height: 0; pointer-events: none; border-top: 1px solid #2a2a2f; }
@@ -1125,3 +1127,107 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 .nb { white-space: nowrap; }
 /* A pod's name in the scene's list is one word too: "licensed-etl-0" broke at a hyphen. */
 .t-row b { white-space: nowrap; }
+
+/* ── how it compares: a sourced matrix (D63) ─────────────────────────────────
+   Eleven capabilities down, Shoalcheck and six tools across. The body is drawn by
+   landing.js from comparison.json, fetched as the section nears. One grid reflows
+   to a stack of cards on a phone — no 7-column table fits 390px. Colour is spent
+   only on a yes and on our own column, per the house rule; every other verdict is
+   told apart by the shape of its mark, not by colour. Each cell's source is its
+   chip (the Arrival Gap device), and its note opens on hover or focus. */
+.cmp { margin-top: 4px; }
+.cmp-fallback { color: var(--fg2); font-size: 15px; line-height: 1.65; max-width: 70ch; }
+.cmp-fallback b { color: var(--fg); }
+
+.cmp-legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0 0 18px; padding: 0; list-style: none; }
+.cmp-legend li { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--dim); }
+
+.cmp-grid { display: grid; grid-template-columns: minmax(168px, 1.25fr) minmax(190px, 1.5fr) repeat(6, minmax(78px, .92fr));
+            border: 1px solid var(--line2); border-radius: 14px; background: var(--surface); }
+.cmp-row { display: contents; }
+.cmp-cell, .cmp-ch { padding: 13px 12px; border-bottom: 1px solid var(--line); min-width: 0; }
+.cmp-row:last-child .cmp-cell { border-bottom: 0; }
+
+/* header row: the tool names. Sticky so they stay as the reader runs down the rows. */
+.cmp-ch { position: sticky; top: 0; z-index: 2; background: var(--surface2); border-bottom: 1px solid var(--line2);
+          font: 600 12px/1.25 var(--mono); color: var(--fg2); display: flex; align-items: flex-end; }
+.cmp-ch-vendor { justify-content: center; text-align: center; }
+.cmp-ch-ours { color: var(--accent2); background: linear-gradient(180deg, var(--surface2), var(--accent-soft)); }
+.cmp-corner { color: var(--faint); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 11px; }
+.cmp-head .cmp-ch:first-child { border-top-left-radius: 13px; }
+.cmp-head .cmp-ch:last-child { border-top-right-radius: 13px; }
+.cmp-row:last-child .cmp-cell:first-child { border-bottom-left-radius: 13px; }
+.cmp-row:last-child .cmp-cell:last-child { border-bottom-right-radius: 13px; }
+
+/* the capability (row header) */
+.cmp-label { display: flex; flex-direction: column; gap: 4px; }
+.cmp-cap { font-size: 14.5px; font-weight: 640; line-height: 1.3; letter-spacing: -.01em; color: var(--fg); }
+.cmp-cap-full { font-size: 12px; line-height: 1.45; color: var(--dim); }
+.cmp-tag { align-self: flex-start; margin-top: 3px; padding: 2px 9px; border-radius: 999px; font: 600 11px var(--mono);
+           letter-spacing: .01em; color: var(--accent-ink); background: var(--accent); }
+
+/* our column — filled with its own basis, and tinted so it reads as ours */
+.cmp-ours { background: var(--accent-soft); display: flex; gap: 9px; align-items: flex-start; }
+.cmp-ours .cmp-mark { margin-top: 1px; }
+.cmp-ours-note { font-size: 12.5px; line-height: 1.5; color: var(--fg2); }
+
+/* a vendor cell: the mark, then an always-there source chip to the vendor's own page.
+   The mark group is centred in its cell, so a tall row (a long capability on the left) is balanced. */
+.cmp-v { position: relative; display: flex; align-items: center; justify-content: center; }
+.cmp-v-in { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.cmp-vlabel, .cmp-verdict { display: none; } /* desktop: the column header names the vendor; the mark is the verdict */
+.cmp-src { display: inline-flex; align-items: center; gap: 3px; font: 600 11px/1 var(--mono); letter-spacing: .02em;
+           color: var(--faint); text-decoration: none; white-space: nowrap; }
+.cmp-src:hover, .cmp-src:focus-visible { color: var(--accent2); }
+.cmp-v:hover .cmp-src { color: var(--dim); }
+
+/* marks: a yes is the only mark given colour */
+.cmp-mark { width: 22px; height: 22px; flex: none; display: block; }
+.cmp-mark.is-yes { color: var(--accent); }
+.cmp-mark.is-partial, .cmp-mark.is-no { color: var(--dim); }
+.cmp-mark.is-nf { color: var(--faint); }
+
+/* unique rows: our column has it and none of theirs does — a faint wash and an accent spine */
+.cmp-row.is-uniq .cmp-cell { background: rgba(45, 212, 191, .045); }
+.cmp-row.is-uniq .cmp-ours { background: var(--accent-soft); }
+.cmp-row.is-uniq .cmp-label { box-shadow: inset 3px 0 0 var(--accent); }
+
+/* the note opens on hover or focus; hidden, it is display:none, so it never widens the page or is measured */
+.cmp-note { display: none; }
+.cmp-v:hover .cmp-note, .cmp-v:focus-within .cmp-note {
+  display: block; position: absolute; z-index: 20; left: 50%; bottom: calc(100% - 3px); transform: translateX(-50%);
+  width: max-content; max-width: 240px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line2);
+  background: var(--surface2); box-shadow: 0 20px 44px -20px rgba(0, 0, 0, .9); text-align: left; }
+.cmp-v.edge-r:hover .cmp-note, .cmp-v.edge-r:focus-within .cmp-note { left: auto; right: 0; transform: none; }
+.cmp-note b { display: block; font: 700 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent2); margin-bottom: 5px; }
+.cmp-note span { font-size: 12.5px; line-height: 1.5; color: var(--fg2); }
+
+/* caption + caveats, both visible */
+.cmp-caption { margin: 18px 0 0; font-size: 13px; line-height: 1.6; color: var(--dim); max-width: 92ch; }
+.cmp-caveats { margin: 14px 0 0; padding: 15px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg2); }
+.cmp-cv-h { margin: 0 0 11px; font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.cmp-caveats ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; }
+.cmp-caveats li { font-size: 12.5px; line-height: 1.5; color: var(--dim); }
+
+/* a phone: the 7-column grid becomes a stack of cards, each capability its own card */
+@media (max-width: 899px) {
+  .cmp-grid { display: flex; flex-direction: column; gap: 14px; border: 0; background: none; border-radius: 0; }
+  .cmp-row.cmp-head { display: none; }
+  .cmp-row { display: flex; flex-direction: column; border: 1px solid var(--line2); border-radius: 14px; background: var(--surface); overflow: hidden; }
+  .cmp-v { display: block; }
+  .cmp-row.is-uniq { border-color: var(--ring); }
+  .cmp-row.is-uniq .cmp-cell { background: none; }
+  .cmp-cell { border-bottom: 1px solid var(--line); border-radius: 0; padding: 12px 15px; }
+  .cmp-row .cmp-cell:last-child { border-bottom: 0; }
+  .cmp-label { background: var(--surface2); }
+  .cmp-row.is-uniq .cmp-label { box-shadow: inset 3px 0 0 var(--accent); }
+  .cmp-ours, .cmp-row.is-uniq .cmp-ours { background: var(--accent-soft); }
+  /* each vendor is one line: name — mark — verdict — source */
+  .cmp-v-in { flex-direction: row; align-items: center; gap: 10px; text-align: left; }
+  .cmp-vlabel { display: inline; font: 600 13px/1.3 var(--sans); color: var(--fg2); flex: none; width: 88px; }
+  .cmp-verdict { display: inline; font: 12px var(--mono); color: var(--dim); }
+  .cmp-mark { width: 20px; height: 20px; }
+  .cmp-src { margin-left: auto; }
+  /* the note is reached by the source link (it goes to the page itself); on a card it is not a hover popover */
+  .cmp-v:hover .cmp-note, .cmp-v:focus-within .cmp-note { display: none; }
+}

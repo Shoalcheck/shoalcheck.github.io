@@ -525,6 +525,117 @@
     new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { o.disconnect(); load(); } }, { rootMargin: '2000px 0px' }).observe(box);
   })();
 
+  /* HOW IT COMPARES (D63): the sourced matrix is drawn from comparison.json, fetched as the section nears or at the
+     reader's first scroll — the 18 KB of data stays off the first screen (landing-check 4i), the same lazy shape the
+     GitHub scene uses. Each cell is one vendor's own documentation; a mark carries the verdict, colour is spent only
+     on a yes and on our own column, the note opens on hover or focus, and every competitor cell links to its source.
+     On a phone the one grid becomes a stack of cards, each cell naming its own vendor. */
+  (function () {
+    var host = $('[data-compare]');
+    if (!host) return;
+    var el = function (tag, cls) { var e = document.createElement(tag); if (cls) e.className = cls; return e; };
+    // Verdict marks — plain SVG, never an emoji. A yes is the only one given colour (the filled teal check); partial,
+    // "not found" and no are drawn in ink, told apart by shape: a half disc, a dash in a dotted ring, a cross.
+    var MARK = {
+      'yes': '<svg class="cmp-mark is-yes" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M6.6 12.4l3.4 3.4 7-7.6" fill="none" stroke="#032420" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      'partial': '<svg class="cmp-mark is-partial" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6a10.4 10.4 0 000 20.8z" fill="currentColor"/><circle cx="12" cy="12" r="10.4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+      'not found': '<svg class="cmp-mark is-nf" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="1.9 2.4"/><path d="M7.4 12h9.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+      'no': '<svg class="cmp-mark is-no" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8.2 8.2l7.6 7.6M15.8 8.2l-7.6 7.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+    };
+    var mark = function (v) { return MARK[v] || MARK['no']; };
+
+    var draw = function (data) {
+      var vendors = data.columns.slice(1);
+      var frag = document.createDocumentFragment();
+
+      // A legend: what each of the four marks means, drawn with the same marks the table uses.
+      var legend = el('ul', 'cmp-legend');
+      [['yes', 'in their docs'], ['partial', 'partial, or with caveats'],
+       ['not found', 'not in their docs on ' + data.fetched], ['no', 'no']].forEach(function (p) {
+        var li = el('li'); li.insertAdjacentHTML('beforeend', mark(p[0]));
+        var s = el('span'); s.textContent = p[1]; li.appendChild(s); legend.appendChild(li);
+      });
+      frag.appendChild(legend);
+
+      var grid = el('div', 'cmp-grid');
+      grid.setAttribute('role', 'table');
+      grid.setAttribute('aria-label', 'Shoalcheck compared with six tools, from each tool’s own documentation, fetched ' + data.fetched);
+
+      // header row: an empty corner, our column, then the six tools.
+      var head = el('div', 'cmp-row cmp-head'); head.setAttribute('role', 'row');
+      var corner = el('div', 'cmp-ch cmp-corner'); corner.setAttribute('role', 'columnheader'); corner.textContent = 'Capability'; head.appendChild(corner);
+      var ch0 = el('div', 'cmp-ch cmp-ch-ours'); ch0.setAttribute('role', 'columnheader'); ch0.textContent = data.columns[0]; head.appendChild(ch0);
+      vendors.forEach(function (v) { var h = el('div', 'cmp-ch cmp-ch-vendor'); h.setAttribute('role', 'columnheader'); h.textContent = v; head.appendChild(h); });
+      grid.appendChild(head);
+
+      data.rows.forEach(function (row) {
+        var r = el('div', 'cmp-row' + (row.unique ? ' is-uniq' : '')); r.setAttribute('role', 'row');
+
+        // the capability (row header), its one-line expansion, and — on a unique row — the tag that says so.
+        var lab = el('div', 'cmp-cell cmp-label'); lab.setAttribute('role', 'rowheader');
+        var cap = el('span', 'cmp-cap'); cap.textContent = row.label; lab.appendChild(cap);
+        var full = el('span', 'cmp-cap-full'); full.textContent = row.full; lab.appendChild(full);
+        if (row.unique) { var tag = el('span', 'cmp-tag'); tag.textContent = 'only Shoalcheck, per their docs'; lab.appendChild(tag); }
+        r.appendChild(lab);
+
+        // our column, filled with its own basis.
+        var own = row.cells[data.columns[0]] || { v: 'yes', note: '' };
+        var ours = el('div', 'cmp-cell cmp-ours'); ours.setAttribute('role', 'cell');
+        ours.setAttribute('aria-label', data.columns[0] + ': yes. ' + own.note);
+        ours.insertAdjacentHTML('beforeend', mark('yes'));
+        var on = el('span', 'cmp-ours-note'); on.textContent = own.note; ours.appendChild(on);
+        r.appendChild(ours);
+
+        // a vendor cell: the mark, an always-visible source chip to its own page, and a note that opens on hover or
+        // focus. The last two columns open their note leftward so it never widens the page at a narrow width.
+        vendors.forEach(function (v, i) {
+          var cell = row.cells[v] || { v: 'no', note: '', url: '#' };
+          var c = el('div', 'cmp-cell cmp-v' + (i >= vendors.length - 2 ? ' edge-r' : '')); c.setAttribute('role', 'cell');
+          c.setAttribute('aria-label', v + ': ' + cell.v + (cell.note ? '. ' + cell.note : ''));
+          var inn = el('div', 'cmp-v-in');
+          var vl = el('span', 'cmp-vlabel'); vl.textContent = v; inn.appendChild(vl);
+          inn.insertAdjacentHTML('beforeend', mark(cell.v));
+          var vw = el('span', 'cmp-verdict'); vw.textContent = cell.v; inn.appendChild(vw);
+          var a = el('a', 'cmp-src'); a.href = cell.url; a.target = '_blank'; a.rel = 'noopener';
+          a.setAttribute('aria-label', 'source: ' + v + ' documentation');
+          a.insertAdjacentHTML('beforeend', 'source <span aria-hidden="true">↗</span>');
+          inn.appendChild(a);
+          c.appendChild(inn);
+          var note = el('div', 'cmp-note');
+          var b = el('b'); b.textContent = cell.v; note.appendChild(b);
+          var sp = el('span'); sp.textContent = cell.note; note.appendChild(sp);
+          c.appendChild(note);
+          r.appendChild(c);
+        });
+        grid.appendChild(r);
+      });
+      frag.appendChild(grid);
+
+      // the caption: the date, that each cell is a vendor's own documentation, and what a dash means.
+      var cap2 = el('p', 'cmp-caption'); cap2.textContent = data.note; frag.appendChild(cap2);
+
+      // the caveats, in full and visible — Kubescape's fast-moving 2026 v4 among them.
+      if (data.caveats && data.caveats.length) {
+        var cav = el('div', 'cmp-caveats');
+        var h = el('p', 'cmp-cv-h'); h.textContent = 'What the verdicts rest on'; cav.appendChild(h);
+        var ul = el('ul'); data.caveats.forEach(function (x) { var li = el('li'); li.textContent = x; ul.appendChild(li); });
+        cav.appendChild(ul); frag.appendChild(cav);
+      }
+
+      host.textContent = '';
+      host.appendChild(frag);
+    };
+
+    var asked = false;
+    var load = function () {
+      if (asked) return; asked = true;
+      fetch('comparison.json').then(function (r) { return r.json(); }).then(draw).catch(function () { asked = false; });
+    };
+    window.addEventListener('scroll', load, { once: true, passive: true });
+    if (!('IntersectionObserver' in window)) { load(); return; }
+    new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { o.disconnect(); load(); } }, { rootMargin: '1200px 0px' }).observe(host);
+  })();
+
   /* ── tabs ─────────────────────────────────────────────────────────────── */
   var tabs = $$('.tab');
   var select = function (t) {

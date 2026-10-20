@@ -276,7 +276,7 @@
       var card = el('article', 'tk-card', null, column(t.team, '1')), top = el('div', 'tk-top', null, card);
       el('span', 'tk-key', t.project, top);
       el('span', '', t.head.replace(/^--- | ---$/g, ''), top);
-      el('h5', 'tk-title', t.title, card);
+      el('p', 'tk-title', t.title, card);
       inline(el('p', 'tk-desc', null, card), t.lines.join(' '));
       var tbl = el('dl', 'tk-tbl', null, card);
       t.table.forEach(function (r) { el('dt', '', r[0], tbl); el('dd', '', r[1], tbl); });
