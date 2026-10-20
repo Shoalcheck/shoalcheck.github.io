@@ -62,11 +62,35 @@
     var T = { read: 2300, judge: 5200, price: 6600, end: 8900 };
     var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
     var ease = function (p) { p = Math.max(0, Math.min(1, p)); return 1 - Math.pow(1 - p, 3); };
-    var word = function (n, one, many) { return fmt(n) + ' ' + (Math.round(n) === 1 ? one : many); };
+    var word = function (n, one, many) { return fmt(n) + '\u00a0' + (Math.round(n) === 1 ? one : many); };
+    /* a figure never ends a line without the word it counts: "inside 90 / days" and "· 103 / rules" (D56 by-eye pass) */
+    var bind = function (s) { return String(s).replace(/(\d) (?=\S)/g, '$1\u00a0'); };
+    /* AN IDENTIFIER IS NEVER BROKEN ACROSS LINES: "workers/licensed-" over "etl-0" (D56 typography). A word holding a
+       hyphen or a slash goes in whole, in a span that does not wrap; the rest wraps at its spaces as before. */
+    var whole = function (el, s) {
+      el.textContent = '';
+      bind(s).split(/( )/).forEach(function (w) {
+        if (/[-\/]/.test(w) && /\w/.test(w)) { var sp = document.createElement('span'); sp.className = 'nb'; sp.textContent = w; el.appendChild(sp); }
+        else el.appendChild(document.createTextNode(w));
+      });
+    };
     rdEl.querySelector('.rd-cl').textContent = RD.cluster;
-    rdEl.querySelector('.rd-where').textContent = RD.where;
+    /* where it ran, each part whole: on a narrow card the line wraps between parts instead of cutting the version
+       to "k8s 1.31.2-ek…". The Kubernetes version without the provider's build suffix — the reading itself carries
+       the whole string. */
+    var whereEl = rdEl.querySelector('.rd-where');
+    String(RD.where).split(' · ').forEach(function (part, i) {
+      if (i) whereEl.appendChild(document.createTextNode(' · '));
+      var sp = document.createElement('span'); sp.className = 'nb';
+      sp.textContent = part.replace(/^(k8s \d+\.\d+\.\d+)-\S+$/, '$1'); whereEl.appendChild(sp);
+    });
     var kindsEl = rdEl.querySelector('.rd-kinds'), gridEl = rdEl.querySelector('.rd-grid');
     var readSum = $('#rd-read-sum'), foundSum = $('#rd-found-sum'), usd = $('#rd-usd'), basis = $('#rd-basis');
+    /* the figure's final width, kept from the start, so the words beside it do not slide while it counts up */
+    usd.textContent = '$' + fmt(RD.dollars);
+    var usdBox = document.createRange(); usdBox.selectNodeContents(usd);
+    usd.style.setProperty('--usd-w', (usdBox.getBoundingClientRect().width / parseFloat(getComputedStyle(usd).fontSize)).toFixed(3) + 'em');
+    usd.textContent = '';
     var claimsEl = $('#rd-claims'), stepEl = $('#rd-step'), replay = $('#rd-replay');
     /* The grid is built once: a head of severities, a row per category, a cell per pair. */
     var cells = [];
@@ -89,8 +113,8 @@
     RD.claims.forEach(function (c) {
       var li = document.createElement('li');
       li.innerHTML = '<b></b><span></span>';
-      li.querySelector('b').textContent = c[0];
-      li.querySelector('span').textContent = c[1];
+      whole(li.children[0], c[0]);
+      whole(li.children[1], c[1]);
       claimsEl.appendChild(li);
     });
     var claimEls = [].slice.call(claimsEl.children);
@@ -108,11 +132,17 @@
         var li = document.createElement('li'), name = document.createElement('span'), n = document.createElement('b');
         name.textContent = k[0]; n.textContent = fmt(k[1]);
         li.appendChild(name); li.appendChild(n); kindsEl.appendChild(li);
+        /* a long kind's name in a narrow card is set smaller until it fits, never cut: at 1024 px the reading's
+           "horizontalpodautoscalers" lost its last letters (D56 typography) */
+        if (k[0].length > 16 && name.scrollWidth > name.clientWidth) {
+          var fit = 11.5 * name.clientWidth / name.scrollWidth;
+          if (fit >= 9) name.style.fontSize = (fit - 0.05).toFixed(2) + 'px';
+        }
       });
       // "in 23 kinds": the kinds that held an object. The reading reads more kinds than that — a kind can be read
       // and be empty — and its own pages say how many it read; "· 23 kinds" beside them read as a contradiction.
       readSum.textContent = word(objs, 'object', 'objects') + ' in ' + word(nKinds, 'kind', 'kinds') +
-        (nKinds === RD.kinds.length ? ' · ' + fmt(RD.kb) + ' KB' : '');
+        (nKinds === RD.kinds.length ? ' · ' + fmt(RD.kb) + '\u00a0KB' : '');
       /* judging: every cell counts up together, and the checks with them */
       var pj = ease((ms - T.read) / (T.judge - T.read)), total = 0;
       RD.grid.forEach(function (row, ci) {
@@ -122,12 +152,15 @@
           cells[ci][si].classList.toggle('on', v > 0);
         });
       });
-      foundSum.textContent = ms < T.read ? '' : word(total, 'finding', 'findings') + ' · ' +
-        fmt(RD.checks * pj) + ' of ' + fmt(RD.checks) + ' checks · ' + RD.rules + ' rules';
+      /* ON THE WAY, A COUNT SAYS IT IS NOT YET THE TOTAL. The in-between figures are the totals eased in, not
+         states the reading passed through, so they say "so far", and the basis — which is the total's — appears
+         only under the total (D50 site review). */
+      foundSum.textContent = ms < T.read ? '' : word(total, 'finding', 'findings') + (pj < 1 ? ' so far' : '') + ' · ' +
+        fmt(RD.checks * pj) + ' of ' + fmt(RD.checks) + '\u00a0checks · ' + RD.rules + '\u00a0rules';
       /* pricing */
       var pp = ease((ms - T.judge) / (T.price - T.judge));
       usd.textContent = ms < T.judge ? '—' : '$' + fmt(RD.dollars * pp);
-      basis.textContent = pp > 0.35 ? RD.money : '';
+      basis.textContent = pp >= 1 ? RD.money : pp > 0 ? 'so far — the rules are still being priced' : '';
       /* what it found first: one claim after another */
       var nClaims = ms < T.price ? 0 : Math.min(claimEls.length, Math.floor((ms - T.price) / ((T.end - T.price) / claimEls.length)) + 1);
       claimEls.forEach(function (li, i) { li.classList.toggle('in', i < nClaims); });
@@ -179,23 +212,47 @@
     };
     var cut = function (s, n) { s = String(s); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
     var usd = function (n) { return '$' + Math.round(n).toLocaleString('en-US'); };
+    /* the width a scene has to draw in: its box less the padding */
+    var roomOf = function (box) { var cs = getComputedStyle(box); return box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight); };
+    /* WHAT A DRAWING SHOWS, AS A LIST, on a tile too narrow to draw it at a size that can be read: scaled into a phone
+       the map's names stood at 5.6 px and the grants ran off the tile's edge (D56 by-eye pass). One row a line. */
+    var listOf = function (box, label, rows) {
+      var ol = mk('ol', { 'class': 'cs-list', 'aria-label': label }, box);
+      return rows.map(function (r) {
+        var li = mk('li', { 'class': r.cls || '' }, ol);
+        mk('span', {}, li, r.from);
+        mk('span', { 'class': 'cs-arrow' }, li, '→');
+        mk('span', { 'class': r.hot ? 'hot' : '' }, li, r.to);
+        if (r.note) mk('span', { 'class': 'cs-why' }, li, '· ' + r.note);
+        return li;
+      });
+    };
     /* in: the scene's parts, in the order they arrive; each gets .on after its delay */
     var builders = {
       security: function (box) {
         var chains = C.security.chains, subs = [], roles = [];
         chains.forEach(function (c) { if (subs.indexOf(c[0]) < 0) subs.push(c[0]); if (roles.indexOf(c[2]) < 0) roles.push(c[2]); });
-        var W = 360, rowH = 17, H = Math.max(subs.length, roles.length) * rowH + 8;
+        /* the drawing needs 480 px for its names to stand at 11 px; a narrower tile lists the grants, most severe first */
+        if (roomOf(box) < 480) {
+          var rank = { critical: 0, high: 1, medium: 2, low: 3 };
+          return listOf(box, chains.length + ' grants from ' + subs.length + ' subjects to ' + roles.length + ' roles',
+            chains.slice().sort(function (a, b) { return (a[3] in rank ? rank[a[3]] : 9) - (b[3] in rank ? rank[b[3]] : 9); }).map(function (c) {
+              return { from: c[0], to: c[2], hot: c[2] === 'cluster-admin', note: c[3], cls: 'r-' + c[3] };
+            }));
+        }
+        /* Wide enough that no subject or role is cut: the longest subject the sample holds is 29 characters. */
+        var W = 480, rowH = 22, H = Math.max(subs.length, roles.length) * rowH + 8;
         var svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, 'class': 'cs-svg', role: 'img',
           'aria-label': chains.length + ' grants from ' + subs.length + ' subjects to ' + roles.length + ' roles' }, box);
         var y = function (i, n) { return 4 + (i + 0.5) * ((H - 8) / n); };
         var parts = [];
         chains.slice().sort(function (a, b) { return (a[3] === 'critical') - (b[3] === 'critical'); }).forEach(function (c) {
           var y1 = y(subs.indexOf(c[0]), subs.length), y2 = y(roles.indexOf(c[2]), roles.length);
-          parts.push(mk('path', { d: 'M150 ' + y1 + ' C 195 ' + y1 + ', 195 ' + y2 + ', 240 ' + y2, 'class': 'cs-edge r-' + c[3], pathLength: 1 }, svg));
+          parts.push(mk('path', { d: 'M202 ' + y1 + ' C 248 ' + y1 + ', 248 ' + y2 + ', 294 ' + y2, 'class': 'cs-edge r-' + c[3], pathLength: 1 }, svg));
         });
-        subs.forEach(function (s, i) { mk('text', { x: 146, y: y(i, subs.length) + 3, 'text-anchor': 'end', 'class': 'cs-lab' }, svg, cut(s, 24)); });
+        subs.forEach(function (s, i) { mk('text', { x: 196, y: y(i, subs.length) + 4, 'text-anchor': 'end', 'class': 'cs-lab' }, svg, cut(s, 30)); });
         roles.forEach(function (r, i) {
-          mk('text', { x: 244, y: y(i, roles.length) + 3, 'class': 'cs-lab' + (r === 'cluster-admin' ? ' cs-hot' : '') }, svg, cut(r, 19));
+          mk('text', { x: 300, y: y(i, roles.length) + 4, 'class': 'cs-lab' + (r === 'cluster-admin' ? ' cs-hot' : '') }, svg, cut(r, 27));
         });
         return parts;
       },
@@ -231,22 +288,29 @@
       topology: function (box) {
         var nodes = C.topology.nodes, edges = C.topology.edges, cols = 0, rows = 0, at = {};
         nodes.forEach(function (n) { cols = Math.max(cols, n[1] + 1); rows = Math.max(rows, n[2] + 1); });
-        var W = 360, H = rows * 26 + 6, cw = W / cols;
+        /* the drawing needs 900 px for its names to stand at 11 px; a narrower tile lists the flows */
+        if (roomOf(box) < 900) {
+          return listOf(box, edges.length + ' observed flows between ' + nodes.length + ' workloads', edges.map(function (e) {
+            return { from: e[0], to: e[1], note: e[3] > 0 ? 'dropped' : '', cls: e[3] > 0 ? 'dropped' : '' };
+          }));
+        }
+        /* The whole width of its tile, so a workload's name is never cut ("auth-servi…" in a third of it). */
+        var W = 900, H = rows * 30 + 6, cw = W / cols;
         var svg = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, 'class': 'cs-svg', role: 'img',
           'aria-label': edges.length + ' observed flows between ' + nodes.length + ' workloads' }, box);
-        nodes.forEach(function (n) { at[n[0]] = { x: n[1] * cw + 6, y: n[2] * 26 + 4 }; });
+        nodes.forEach(function (n) { at[n[0]] = { x: n[1] * cw + 6, y: n[2] * 30 + 4 }; });
         var parts = [];
         edges.forEach(function (e) {
           var a = at[e[0]], b = at[e[1]];
           if (!a || !b) return;
-          var x1 = a.x + cw - 18, y1 = a.y + 10, x2 = b.x, y2 = b.y + 10, mx = (x1 + x2) / 2;
+          var x1 = a.x + cw - 24, y1 = a.y + 11, x2 = b.x, y2 = b.y + 11, mx = (x1 + x2) / 2;
           parts.push(mk('path', { d: 'M' + x1 + ' ' + y1 + ' C ' + mx + ' ' + y1 + ', ' + mx + ' ' + y2 + ', ' + x2 + ' ' + y2,
             'class': 'cs-flow' + (e[3] > 0 ? ' dropped' : ''), pathLength: 1 }, svg));
         });
         nodes.forEach(function (n) {
           var p = at[n[0]];
-          mk('rect', { x: p.x, y: p.y, width: cw - 24, height: 20, rx: 4, 'class': 'cs-wl' }, svg);
-          mk('text', { x: p.x + 5, y: p.y + 13.5, 'class': 'cs-lab' }, svg, cut(n[0], Math.floor((cw - 30) / 5.4)));
+          mk('rect', { x: p.x, y: p.y, width: cw - 30, height: 22, rx: 4, 'class': 'cs-wl' }, svg);
+          mk('text', { x: p.x + 7, y: p.y + 15, 'class': 'cs-lab' }, svg, cut(n[0], Math.floor((cw - 44) / 6.6)));
         });
         return parts;
       },
@@ -263,11 +327,13 @@
       preflight: function (box) {
         var P = C.preflight, pre = mk('pre', { 'class': 'cs-term' }, box);
         return [mk('span', { 'class': 'p' }, pre, '$ ' + P.cmd + '\n'), mk('span', { 'class': 'bad' }, pre, P.head + '\n'),
-                mk('span', { 'class': 'dim' }, pre, '  ' + cut(P.why, 92) + '\n'), mk('span', { 'class': 'exit' }, pre, 'exit ' + P.exit)];
+                mk('span', { 'class': 'dim' }, pre, '  ' + P.why + '\n'), mk('span', { 'class': 'exit' }, pre, 'exit ' + P.exit)];
       },
       fleet: function (box) {
         var F = C.fleet, wrap = mk('div', { 'class': 'cs-fh-wrap' }, box);
-        var tbl = mk('div', { 'class': 'cs-fleet', style: 'grid-template-columns: minmax(0,1.3fr) repeat(' + F.clusters.length + ', minmax(0,1fr))' }, wrap), parts = [];
+        /* every name and value whole: a column is never narrower than what it holds, and a scene with less room
+           than the table scrolls it rather than cut "operators.installed" to "operators.insta…" (D56 by-eye pass) */
+        var tbl = mk('div', { 'class': 'cs-fleet', style: '--n: ' + F.clusters.length }, wrap), parts = [];
         mk('span', { 'class': 'cs-fh' }, tbl, 'what they declare');
         F.clusters.forEach(function (c) { mk('span', { 'class': 'cs-fh' }, tbl, c.replace(/^acme-pay-/, '')); });
         F.rows.forEach(function (r) {
@@ -288,19 +354,29 @@
         return parts;
       }
     };
+    /* A SCENE PLAYS EACH TIME IT IS SEEN. It played once and stayed finished (D50 site review); now it plays when
+       its tile comes into view, and is set back once the tile has left the screen entirely, so scrolling back plays
+       it again. With reduced motion it is drawn finished and stays so. */
     $$('.cap-scene[data-scene]').forEach(function (box) {
       var make = builders[box.getAttribute('data-scene')];
       if (!make) return;
       var parts = make(box) || [];
       var finish = function () { box.classList.add('played'); parts.forEach(function (p) { p.classList.add('on'); }); };
       if (reduce || !('IntersectionObserver' in window)) { finish(); return; }
-      var step = Math.min(220, 2400 / Math.max(1, parts.length));
-      new IntersectionObserver(function (es, io) {
-        if (!es[0].isIntersecting) return;
-        io.disconnect();
-        box.classList.add('played');
-        parts.forEach(function (p, i) { setTimeout(function () { p.classList.add('on'); }, 200 + i * step); });
-      }, { threshold: 0.45 }).observe(box);
+      var step = Math.min(220, 2400 / Math.max(1, parts.length)), timers = [], playing = false;
+      new IntersectionObserver(function (es) {
+        var e = es[0];
+        if (e.intersectionRatio >= 0.45 && !playing) {
+          playing = true;
+          box.classList.add('played');
+          timers = parts.map(function (p, i) { return setTimeout(function () { p.classList.add('on'); }, 200 + i * step); });
+        } else if (!e.isIntersecting && playing) {
+          playing = false;
+          timers.forEach(clearTimeout);
+          box.classList.remove('played');
+          parts.forEach(function (p) { p.classList.remove('on'); });
+        }
+      }, { threshold: [0, 0.45] }).observe(box);
     });
   })();
 
@@ -641,26 +717,70 @@
     };
     var big = model(1500);
     if ($('#r-1500')) $('#r-1500').textContent = tokRange(big.lo, big.hi);
+    /* A LOOP, PRICED CALL BY CALL. Call i of k sends i/k of one look: what calls 1 to i−1 read, re-sent, and its own
+       share. Each call is priced at its own size, because Haiku's rate changes at 100 K tokens a prompt. */
+    var loopCost = function (tokens, m, k) {
+      var sum = 0;
+      for (var i = 1; i <= k; i++) sum += cost(tokens * i / k, m);
+      return sum;
+    };
+    /* THE TRIANGLE: one bar per call, the part re-sent below and the call's own share on top. */
+    var tri = $('#r-tri'), triOn = false;
+    var drawTri = function (k) {
+      if (!tri) return;
+      var W = 320, H = 92, top = 6, gap = k > 24 ? 1 : 2, bw = (W - gap * (k - 1)) / k, out = '';
+      for (var i = 1; i <= k; i++) {
+        var x = (i - 1) * (bw + gap), h = H * i / k, share = H / k;
+        var d = ' style="transition-delay:' + Math.round(i * (600 / k)) + 'ms"';
+        if (i > 1) out += '<rect class="re" x="' + x.toFixed(1) + '" y="' + (top + H - h + share).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + (h - share).toFixed(1) + '"' + d + '/>';
+        out += '<rect class="nw" x="' + x.toFixed(1) + '" y="' + (top + H - h).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + share.toFixed(1) + '"' + d + '/>';
+      }
+      out += '<text x="0" y="111">call 1</text><text x="320" y="111" text-anchor="end">call ' + k + '</text>';
+      tri.innerHTML = out;
+      tri.classList.toggle('on', triOn);
+    };
+    if (tri) {
+      if (reduce || !('IntersectionObserver' in window)) triOn = true;
+      else new IntersectionObserver(function (es, io) {
+        if (!es[0].isIntersecting) return;
+        triOn = true; tri.classList.add('on'); io.disconnect();
+      }, { threshold: 0.5 }).observe(tri);
+    }
     var calc = function () {
       var pods = Number($('#i-pods').value), clusters = Number($('#i-clusters').value), reads = Number($('#i-reads').value);
-      var sec = Number($('#i-sec').value), rate = Number($('#i-rate').value);
+      var k = Number($('#i-k').value), sec = Number($('#i-sec').value), rate = Number($('#i-rate').value);
       var m = P.models[Number(chosen(sel))], c = model(pods);
       $('#o-pods').textContent = pods.toLocaleString('en-US');
       $('#o-clusters').textContent = clusters; $('#o-reads').textContent = reads;
+      $('#o-k').textContent = k; $('#r-k').textContent = k;
       $('#o-sec').textContent = sec; $('#o-rate').textContent = '$' + rate;
       var perMonth = clusters * reads;
+      /* ONE READING OF ONE CLUSTER, the headline: what it reads, by hand, an agent's look, and the same as a loop. */
+      $('#r-objects').textContent = Math.round(c.objects).toLocaleString('en-US') + ' · ' +
+        Math.round(c.checks).toLocaleString('en-US') + ' checks';
       var lo = tokShown(c.lo), hi = tokShown(c.hi);
       $('#r-tokens').textContent = tokRange(lo, hi);
       $('#r-ctx').textContent = Math.round(lo / P.context * 100) + '–' + Math.round(hi / P.context * 100) + '%';
-      $('#r-agent').textContent = usdRange(cost(lo, m) * perMonth, cost(hi, m) * perMonth);
-      /* A MONTH BESIDE A MONTH: the agent's figure is every reading of every cluster, so the hours are too. */
+      var f = (k + 1) / 2;
+      $('#r-loop').textContent = tokRange(tokShown(lo * f), tokShown(hi * f));
+      $('#r-tri-x').textContent = String(f);
+      drawTri(k);
       var one = hoursShown(c.checks * sec / 3600), dp = one >= 10 ? 0 : 1;
+      $('#r-hours-one').textContent = fmtHours(one, dp);
+      /* A MONTH BESIDE A MONTH: the agent's figure is every reading of every cluster, so the hours are too. */
+      $('#r-n').textContent = perMonth + (perMonth === 1 ? ' reading' : ' readings');
       var hours = Number((one * perMonth).toFixed(dp));
       $('#r-hours').textContent = fmtUsd(hours * rate);
       $('#r-hours-month').textContent = fmtHours(hours, dp);
-      $('#r-hours-one').textContent = fmtHours(one, dp);
+      /* BOUNDED IN WORDS. 5,000 pods, 20 clusters and 30 readings is thousands of engineers' months; the figure says
+         so rather than printing a seven-figure count of hours as if it were a plan (D50 site review). */
+      var fte = hours / 160;
+      $('#r-fte').textContent = fte < 1 ? 'less than one engineer\'s month' : fte > 1000 ? 'more than a thousand engineers\' months'
+        : Math.round(fte).toLocaleString('en-US') + (Math.round(fte) === 1 ? ' engineer\'s month' : ' engineers\' months');
+      $('#r-agent').textContent = usdRange(cost(lo, m) * perMonth, cost(hi, m) * perMonth);
+      $('#r-agent-loop').textContent = usdRange(loopCost(lo, m, k) * perMonth, loopCost(hi, m, k) * perMonth);
     };
-    ['#i-pods', '#i-clusters', '#i-reads', '#i-sec', '#i-rate'].forEach(function (s) { $(s).addEventListener('input', calc); });
+    ['#i-pods', '#i-clusters', '#i-reads', '#i-k', '#i-sec', '#i-rate'].forEach(function (s) { $(s).addEventListener('input', calc); });
     sel.addEventListener('change', calc);
     calc();
   }
@@ -749,7 +869,8 @@
       document.documentElement.classList.toggle('just-output', on);
       justB.forEach(function (b) {
         b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        b.textContent = on ? 'Show the whole page' : 'Just the output';
+        /* Short both ways: "Show the whole page" widened the bar's button and wrapped the navigation. */
+        b.textContent = on ? 'Whole page' : 'Just the output';
       });
       try { localStorage.setItem('shoalcheck.just-output', on ? '1' : ''); } catch (e) {}
     };
@@ -779,7 +900,14 @@
       frame.style.width = W + 'px'; frame.style.height = Hh + 'px';
       frame.style.transform = 'scale(' + (live.clientWidth / W) + ')';
     };
-    frame.addEventListener('load', function () { if (frame.getAttribute('src')) live.classList.add('live'); });
+    /* THE PAGE IS DARK, SO ITS FRAMES ARE. A frame follows the visitor's system theme, and a light system drew a
+       white panel in the dark page (D50 site review). The theme is set on this frame's document only — never stored,
+       so the sample opened on its own still follows the visitor's choice. */
+    frame.addEventListener('load', function () {
+      if (!frame.getAttribute('src')) return;
+      try { frame.contentDocument.documentElement.setAttribute('data-theme', 'dark'); } catch (e) { /* another origin */ }
+      live.classList.add('live');
+    });
     var load = function () { if (!frame.getAttribute('src')) frame.setAttribute('src', frame.getAttribute('data-src')); };
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { load(); o.disconnect(); } }, { rootMargin: '600px' }).observe(live);
@@ -809,7 +937,10 @@
       var mo = Number(p.getAttribute('data-monthly')), yr = Number(p.getAttribute('data-yearly'));
       var price = $('[data-price]', p), line = $('[data-line]', p), save = $('[data-save]', p);
       if (b === 'year') {
-        price.textContent = '$' + Math.floor(yr / 12).toLocaleString('en-US');
+        /* To the cent: floor($590 / 12) printed $49, and $49 × 12 is $588 (D50 site review). */
+        var per = yr / 12;
+        price.textContent = '$' + (per % 1 ? per.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          : per.toLocaleString('en-US'));
         line.textContent = '$' + yr.toLocaleString('en-US') + ' billed yearly';
         save.textContent = 'save $' + (12 * mo - yr).toLocaleString('en-US');
       } else {
@@ -827,6 +958,18 @@
   var ua = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || '';
   var os = /mac/i.test(ua) ? 'mac' : /win/i.test(ua) ? 'windows' : /linux|x11/i.test(ua) ? 'linux' : '';
   var names = { mac: 'macOS', windows: 'Windows', linux: 'Linux' };
+  /* A PHONE IS OFFERED WHAT IT CAN OPEN: the app runs on a desktop, so on a phone the sample reading is the primary
+     and the download stays beside it, for the computer it is meant for (D50 site review). */
+  if (/iphone|ipad|ipod|android/i.test(navigator.userAgent || '')) {
+    var dlBtn = $('.hero-copy .cta .btn-primary'), sampleBtn = $('.hero-copy .cta a[href="sample-report.html"]');
+    if (dlBtn && sampleBtn) {
+      dlBtn.classList.remove('btn-primary'); sampleBtn.classList.add('btn-primary');
+      dlBtn.parentNode.insertBefore(sampleBtn, dlBtn);
+      var dlLabel = $('[data-os-label]', dlBtn);
+      if (dlLabel) dlLabel.textContent = 'Download for a computer';
+    }
+    os = '';
+  }
   if (os) {
     var label = $('[data-os-label]');
     if (label) label.textContent = 'Download for ' + names[os];
@@ -845,9 +988,33 @@
     p.textContent = 'Licence keys are not on sale yet.';
     a.replaceWith(p);
   });
-  if (!repo || !window.fetch) return;
+  if (!repo) return;
   var releases = 'https://github.com/' + repo + '/releases';
   $$('[data-asset]').forEach(function (a) { a.href = releases; });
+  /* rel: { tag, prerelease, published, url, assets: [{ name, url }] } */
+  var useRelease = function (rel) {
+    var assets = rel.assets || [];
+    $$('[data-asset]').forEach(function (a) {
+      var re = new RegExp(a.getAttribute('data-asset'));
+      var hit = assets.filter(function (x) { return re.test(x.name); })[0];
+      if (hit) { a.href = hit.url; a.title = hit.name; }
+    });
+    var line = $('[data-release-line]');
+    if (line && rel.tag) {
+      line.textContent = (rel.prerelease ? 'Release candidate ' : 'Latest release ') + rel.tag +
+        (rel.published ? ', ' + rel.published : '') + ' · SHA-256 sums, signed · ';
+      var all = document.createElement('a'); all.href = rel.url || releases; all.textContent = 'all files';
+      line.appendChild(all);
+    }
+  };
+  /* THE RELEASE IS IN THE PAGE. publish-site.sh writes the release the downloads point at into #release when it
+     publishes, so a visit costs no request to GitHub's API — unauthenticated, sixty an hour per address, after which
+     every row silently fell back to the releases page (D50 site review). Only a copy that was never published, such
+     as this repository's own site/, asks the API. */
+  var relEl = $('#release'), given = null;
+  try { given = relEl && relEl.textContent.trim() ? JSON.parse(relEl.textContent) : null; } catch (e) { given = null; }
+  if (given) { useRelease(given); return; }
+  if (!window.fetch) return;
   /* The newest published release, prereleases included: GitHub's /releases/latest skips a release candidate,
      so a page that asked it would find nothing while the only releases are candidates. */
   fetch('https://api.github.com/repos/' + repo + '/releases?per_page=10', { headers: { Accept: 'application/vnd.github+json' } })
@@ -855,19 +1022,8 @@
     .then(function (list) {
       var rel = (list || []).filter(function (x) { return !x.draft; })[0];
       if (!rel) return;
-      var assets = rel.assets || [];
-      $$('[data-asset]').forEach(function (a) {
-        var re = new RegExp(a.getAttribute('data-asset'));
-        var hit = assets.filter(function (x) { return re.test(x.name); })[0];
-        if (hit) { a.href = hit.browser_download_url; a.title = hit.name; }
-      });
-      var line = $('[data-release-line]');
-      if (line && rel.tag_name) {
-        line.textContent = (rel.prerelease ? 'Release candidate ' : 'Latest release ') + rel.tag_name +
-          (rel.published_at ? ', ' + rel.published_at.slice(0, 10) : '') + ' · SHA-256 sums, signed · ';
-        var all = document.createElement('a'); all.href = rel.html_url || releases; all.textContent = 'all files';
-        line.appendChild(all);
-      }
+      useRelease({ tag: rel.tag_name, prerelease: rel.prerelease, published: (rel.published_at || '').slice(0, 10),
+        url: rel.html_url, assets: (rel.assets || []).map(function (x) { return { name: x.name, url: x.browser_download_url }; }) });
     })
     .catch(function () { /* the rows already point at the releases page */ });
 })();

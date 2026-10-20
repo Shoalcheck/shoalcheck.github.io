@@ -43,7 +43,9 @@ code { padding: .1em .38em; border-radius: 6px; background: var(--surface2); col
 
 /* ── type ───────────────────────────────────────────────────────────────── */
 h1, h2, h3 { margin: 0; text-wrap: balance; letter-spacing: -.02em; }
-h1 { font-size: clamp(44px, 6.6vw, 88px); line-height: 1.02; font-weight: 760; letter-spacing: -.04em; }
+/* The headline also answers to the screen's HEIGHT: at 88 px it was 359 px tall and pushed Download below the fold
+   on 1280×720, 1366×768 and 1536×864 laptops (D50 site review). */
+h1 { font-size: clamp(44px, min(6.6vw, 9.4vh), 88px); line-height: 1.02; font-weight: 760; letter-spacing: -.04em; }
 h2 { font-size: clamp(32px, 4.2vw, 54px); line-height: 1.08; font-weight: 720; letter-spacing: -.032em; }
 h3 { font-size: 19px; line-height: 1.3; font-weight: 650; }
 p { margin: 0; }
@@ -73,7 +75,11 @@ p { margin: 0; }
 .brand svg { width: 26px; height: 26px; }
 .brand.small svg { width: 20px; height: 20px; }
 .nav { display: flex; gap: 22px; }
-.nav a { color: var(--dim); text-decoration: none; font-size: 14px; transition: color .15s; }
+.nav a { color: var(--dim); text-decoration: none; font-size: 14px; transition: color .15s; white-space: nowrap; }
+/* ONE LINE. Brand, seven sections and three buttons are about 1,110 px; below that the links wrapped onto a second
+   line (D50 site review). Under 1,240 px the two ghost buttons leave the bar — the mode switch is in the final call
+   and the demo in the page — and the Menu fold takes over under 900 px. */
+@media (max-width: 1240px) { .top-cta .btn-ghost { display: none; } .nav { gap: 18px; } }
 .nav a:hover { color: var(--fg); }
 .top-cta { margin-left: auto; display: flex; gap: 8px; }
 .top-cta .btn { min-height: 36px; padding: 0 14px; font-size: 13.5px; border-radius: 9px; }
@@ -92,7 +98,7 @@ p { margin: 0; }
 @media (max-width: 480px) { .top-cta .btn-ghost { display: none; } }
 
 /* ── hero ───────────────────────────────────────────────────────────────── */
-.hero { position: relative; padding: clamp(48px, 9vw, 120px) 0 clamp(56px, 8vw, 96px); overflow: hidden; }
+.hero { position: relative; padding: clamp(40px, min(9vw, 10vh), 120px) 0 clamp(56px, 8vw, 96px); overflow: hidden; }
 .glow { position: absolute; inset: -20% -10% auto; height: 120%; pointer-events: none; background:
   radial-gradient(40% 50% at 70% 30%, rgba(45, 212, 191, .16), transparent 70%),
   radial-gradient(30% 40% at 15% 10%, rgba(56, 189, 248, .10), transparent 70%); }
@@ -100,7 +106,12 @@ p { margin: 0; }
   linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
   background-size: 56px 56px; mask-image: radial-gradient(60% 70% at 60% 30%, #000 20%, transparent 75%); opacity: .55; }
 .hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 64px); align-items: center; }
-.hero-copy { display: flex; flex-direction: column; gap: 26px; }
+.hero-copy { display: flex; flex-direction: column; gap: clamp(16px, 2.8vh, 26px); }
+/* What the whole reading costs, beside the way in: nothing near the hero said it (D50 site review). */
+.price-anchor { font-size: 14px; line-height: 1.5; color: var(--dim); }
+.price-anchor b { color: var(--fg); font-weight: 650; }
+.price-anchor a { color: var(--accent); }
+@media (max-height: 900px) and (min-width: 981px) { .hero-grid { align-items: start; } }
 .trust { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 20px; color: var(--dim); font-size: 14px; }
 .trust li { display: inline-flex; align-items: center; gap: 7px; }
 .trust svg { width: 15px; height: 15px; color: var(--accent); }
@@ -115,7 +126,9 @@ p { margin: 0; }
 .term-body { margin: 0; padding: 18px 20px 20px; font: 12.6px/1.7 var(--mono); color: var(--fg2); white-space: pre; overflow-x: auto; min-height: 340px; }
 .term-body.solo { border: 1px solid var(--line2); border-radius: 14px; background: var(--surface); min-height: 0; }
 /* ── what one reading finds: seven tiles, each with one of the sample's figures ─────────────────────────────── */
-.caps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 36px; }
+/* TWO COLUMNS, SO A SCENE CAN BE READ. Three columns drew each at 335×138 with 8–10 px text and cut its labels
+   ("auth-servi…"); a graph, a terminal and the fleet take the whole width (D50 site review). */
+.caps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 36px; }
 .cap-card { display: flex; flex-direction: column; gap: 10px; padding: 20px 20px 18px; border: 1px solid var(--line2); border-radius: 14px;
        background: var(--surface); color: var(--fg); text-decoration: none; min-width: 0; transition: border-color .16s, transform .16s var(--ease), background .16s; }
 .cap-card:hover { border-color: rgba(45, 212, 191, .45); background: var(--surface2); transform: translateY(-2px); }
@@ -133,29 +146,30 @@ p { margin: 0; }
 .cap-head .cap-ico { width: 28px; height: 28px; border-radius: 8px; flex: none; }
 .cap-head .cap-ico svg { width: 16px; height: 16px; }
 /* each tile's scene: drawn from #caps-data when the tile is seen (landing.js) */
-.cap-scene { height: 138px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); padding: 10px 12px;
+.cap-scene { container-type: inline-size; min-height: 176px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); padding: 14px 16px;
              overflow: hidden; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-.cap-wide .cap-scene { height: auto; min-height: 138px; }
-.cs-svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.cs-lab { font: 9.5px var(--mono); fill: var(--dim); }
+.cap-wide .cap-scene { min-height: 150px; }
+.cs-svg { width: 100%; height: auto; display: block; overflow: visible; }
+.cs-lab { font: 11px var(--mono); fill: var(--dim); }
 .cs-hot { fill: var(--bad); font-weight: 600; }
 .cs-edge { fill: none; stroke-width: 1.6; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .6s var(--ease); }
 .cs-edge.on { stroke-dashoffset: 0; }
 .cs-edge.r-critical { stroke: var(--bad); } .cs-edge.r-high { stroke: var(--warn); } .cs-edge.r-medium, .cs-edge.r-low { stroke: var(--faint); }
 .cs-zones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .cs-zone { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.cs-zn { font: 9.5px var(--mono); color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.cs-node { font: 10px/1.2 var(--mono); padding: 4px 6px; border-radius: 5px; background: rgba(220, 245, 240, .05); color: var(--dim); transition: background .3s, color .3s; }
+.cs-zn { font: 11px var(--mono); color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.cs-node { font: 12px/1.25 var(--mono); padding: 5px 8px; border-radius: 5px; background: rgba(220, 245, 240, .05); color: var(--dim); transition: background .3s, color .3s; }
 .cs-node.stops.on { background: rgba(249, 112, 102, .18); color: var(--bad); }
-.cs-node.stops.on::after { content: "  stops"; font-size: 9px; }
-.cs-bars { display: flex; flex-direction: column; gap: 6px; }
-.cs-bar { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto; gap: 8px; align-items: center; font: 10px var(--mono); color: var(--dim); }
+.cs-node.stops.on::after { content: "  stops"; font-size: 11px; }
+/* one grid for every row, so the bars start and end together whatever their figures */
+.cs-bars { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto; gap: 6px 10px; align-items: center; font: 12px var(--mono); color: var(--dim); }
+.cs-bar { display: contents; }
 .cs-bl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .cs-bt { height: 6px; border-radius: 3px; background: rgba(220, 245, 240, .06); overflow: hidden; }
 .cs-bt i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .6s var(--ease); }
 .cs-bt i.on { width: var(--w); }
 .cs-bar b { color: var(--fg2); font-weight: 600; text-align: right; }
-.cs-note { margin: 8px 0 0; font: 9.5px/1.4 var(--mono); color: var(--faint); }
+.cs-note { margin: 10px 0 0; font: 11.5px/1.45 var(--mono); color: var(--faint); }
 .cs-wl { fill: var(--surface2); stroke: var(--line2); }
 .cs-flow { fill: none; stroke: var(--accent); stroke-width: 1.4; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .7s var(--ease); }
 .cs-flow.on { stroke-dashoffset: 0; animation: csFlow 1.6s linear .9s infinite; }
@@ -165,7 +179,24 @@ p { margin: 0; }
 .cs-c { aspect-ratio: 1; border-radius: 3px; background: rgba(220, 245, 240, .05); transition: background .25s; }
 .cs-c.on.s-fail { background: rgba(249, 112, 102, .8); } .cs-c.on.s-pass { background: var(--ok); }
 .cs-c.on.s-manual { background: rgba(253, 176, 34, .7); } .cs-c.on.s-na { background: transparent; box-shadow: inset 0 0 0 1px var(--line2); }
-.cs-term { margin: 0; font: 10.5px/1.6 var(--mono); color: var(--fg2); white-space: pre-wrap; overflow-wrap: anywhere; }
+/* a drawing as a list, on a tile too narrow to draw it at a size that can be read (landing.js listOf) */
+.cs-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font: 12px/1.45 var(--mono); color: var(--fg2); }
+.cs-list li > span { white-space: nowrap; }
+.cs-list li { display: flex; flex-wrap: wrap; column-gap: 8px; opacity: 0; transform: translateX(-6px); transition: opacity .3s, transform .3s var(--ease); }
+.cs-list li.on { opacity: 1; transform: none; }
+.cs-arrow { color: var(--accent); }
+.cs-list li.r-critical .cs-arrow, .cs-list li.dropped .cs-arrow { color: var(--bad); }
+.cs-list li.r-high .cs-arrow { color: var(--warn); }
+.cs-list li.r-medium .cs-arrow, .cs-list li.r-low .cs-arrow { color: var(--faint); }
+.cs-list .hot { color: var(--bad); font-weight: 600; }
+.cs-why { color: var(--faint); }
+/* a narrow tile gives each money row two lines, the rule's name whole above its bar (.cap-scene is the container) */
+@container (width < 440px) {
+  .cs-bars { grid-template-columns: minmax(0, 1fr) auto; row-gap: 3px; }
+  .cs-bars .cs-bl { grid-column: 1 / -1; white-space: normal; }
+  .cs-bars .cs-bar + .cs-bar .cs-bl { margin-top: 6px; }
+}
+.cs-term { margin: 0; font: 12.5px/1.6 var(--mono); color: var(--fg2); white-space: pre-wrap; overflow-wrap: anywhere; }
 .cs-term span { opacity: 0; transition: opacity .25s; }
 .cs-term span.on { opacity: 1; }
 .cs-term .p { color: var(--accent); } .cs-term .bad { color: var(--bad); font-weight: 600; } .cs-term .dim { color: var(--faint); }
@@ -173,31 +204,41 @@ p { margin: 0; }
 .cs-fh-wrap { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 .cs-hist { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .cs-hist ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
-.cs-hist li { font: 10px/1.45 var(--mono); color: var(--fg2); opacity: 0; transform: translateX(-6px); transition: opacity .3s, transform .3s var(--ease); }
+.cs-hist li { font: 12px/1.45 var(--mono); color: var(--fg2); opacity: 0; transform: translateX(-6px); transition: opacity .3s, transform .3s var(--ease); }
 .cs-hist li.on { opacity: 1; transform: none; }
 .cs-hist li.new { color: var(--accent2); }
 .cs-hist li.gone.on { opacity: .55; }
-@media (max-width: 640px) { .cs-fh-wrap { grid-template-columns: minmax(0, 1fr); } }
-.cs-fleet { display: grid; gap: 3px 10px; font: 9.5px/1.35 var(--mono); align-items: center; }
-.cs-fh { color: var(--faint); text-transform: uppercase; font-size: 8.5px; letter-spacing: .06em; }
-.cs-fd { color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.cs-fv { opacity: 0; color: var(--fg2); transition: opacity .25s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+/* the history goes under the table when the scene is too narrow for both side by side (.cap-scene is the container) */
+@container (width < 760px) { .cs-fh-wrap { grid-template-columns: minmax(0, 1fr); } }
+.cs-fleet { display: grid; grid-template-columns: max-content repeat(var(--n, 3), minmax(max-content, 1fr)); gap: 4px 12px; font: 12px/1.4 var(--mono); align-items: center; overflow-x: auto; }
+/* A scene too narrow for the table in one line a row gives each row two: what is declared, then the clusters' values
+   under their heads — a clip at the edge read "none declared" as "none" (D56 by-eye pass). */
+@container (width < 520px) {
+  .cs-fleet { grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); row-gap: 2px; }
+  .cs-fleet > .cs-fh:first-child { display: none; }
+  .cs-fleet .cs-fd { grid-column: 1 / -1; margin-top: 6px; }
+  .cs-fleet .cs-fv { white-space: normal; }
+}
+.cs-fh { color: var(--faint); text-transform: uppercase; font-size: 11px; letter-spacing: .06em; }
+.cs-fd { color: var(--dim); white-space: nowrap; }
+.cs-fv { opacity: 0; color: var(--fg2); transition: opacity .25s; white-space: nowrap; }
 .cs-fv.on { opacity: 1; } .cs-fv.none { color: var(--faint); }
 @media (prefers-reduced-motion: reduce) {
-  .cs-edge, .cs-node, .cs-bt i, .cs-flow, .cs-c, .cs-term span, .cs-fv, .cs-hist li { transition: none; }
+  .cs-edge, .cs-node, .cs-bt i, .cs-flow, .cs-c, .cs-term span, .cs-fv, .cs-hist li, .cs-list li { transition: none; }
   .cs-flow.on { animation: none; }
 }
-@media (max-width: 980px) { .caps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 640px) { .caps { grid-template-columns: minmax(0, 1fr); } }
+/* One column under 1,100 px, where two would shrink a scene's text under 11 px; on a phone a drawing keeps the width
+   its labels are read at and scrolls sideways inside its tile. */
+@media (max-width: 1100px) { .caps { grid-template-columns: minmax(0, 1fr); } }
 
 /* ── the opening: a reading being taken (landing.js) ───────────────────────────────────────────────────────
    A window like the reading's own: the cluster and its "Illustrative sample" chip across the top, what it read,
    what it found by severity and category, what it identified, then the claims it leads with. Colour is kept for
    severity and money, as in the reading. */
-.rd { margin: 0; border: 1px solid var(--line2); border-radius: 16px; background: linear-gradient(180deg, rgba(18, 28, 30, .92), rgba(10, 15, 16, .96)); box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .7), 0 0 0 1px rgba(45, 212, 191, .06), 0 0 60px -20px rgba(45, 212, 191, .25); overflow: hidden; min-width: 0; display: flex; flex-direction: column; }
+.rd { container: rd / inline-size; margin: 0; border: 1px solid var(--line2); border-radius: 16px; background: linear-gradient(180deg, rgba(18, 28, 30, .92), rgba(10, 15, 16, .96)); box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .7), 0 0 0 1px rgba(45, 212, 191, .06), 0 0 60px -20px rgba(45, 212, 191, .25); overflow: hidden; min-width: 0; display: flex; flex-direction: column; }
 .rd-bar { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--line); min-width: 0; }
 .rd-cl { font: 600 12.5px var(--mono); color: var(--fg); white-space: nowrap; }
-.rd-where { font: 500 11px var(--mono); color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.rd-where { font: 500 11px/1.4 var(--mono); color: var(--faint); min-width: 0; }
 .rd-chip { margin-left: auto; flex: none; padding: 2px 8px; border: 1px solid rgba(253, 176, 34, .55); border-radius: 999px; font: 600 10.5px var(--mono); color: var(--warn); white-space: nowrap; }
 .rd-body { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.3fr) minmax(0, .85fr); gap: 14px; padding: 14px 14px 6px; }
 .rd h3 { margin: 0 0 8px; font: 600 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
@@ -226,7 +267,7 @@ p { margin: 0; }
 .rd-claims li { display: flex; flex-direction: column; gap: 2px; opacity: 0; transform: translateY(6px); transition: opacity .35s var(--ease), transform .35s var(--ease); min-width: 0; }
 .rd-claims li.in { opacity: 1; transform: none; }
 .rd-claims b { font-size: 13.5px; color: var(--fg); font-weight: 600; }
-.rd-claims span { font: 10.5px/1.45 var(--mono); color: var(--faint); overflow-wrap: anywhere; }
+.rd-claims li > span { font: 10.5px/1.45 var(--mono); color: var(--faint); overflow-wrap: anywhere; }
 .rd-foot { display: flex; align-items: center; gap: 12px; padding: 9px 14px; border-top: 1px solid var(--line); background: rgba(0, 0, 0, .18); }
 .rd-step { font: 11.5px var(--mono); color: var(--dim); display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
 .rd-step::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 rgba(45, 212, 191, .5); animation: rdPulse 1.4s infinite; flex: none; }
@@ -237,8 +278,21 @@ p { margin: 0; }
 .rd-replay[hidden] + .rd-open { margin-left: auto; }
 .rd figcaption { padding: 0 14px 12px; font-size: 12px; line-height: 1.5; color: var(--faint); }
 html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not(.js) .rd-foot { display: none; }
+/* THE CARD'S OWN WIDTH DECIDES ITS COLUMNS. In three columns a laptop left the five severity heads about 20 px each,
+   and at 1024 px they ran into each other — "CRITHIGHMEDLOWINFO" (D56 by-eye pass). Under 620 px the card reads what
+   it read beside what it found, and what it identified is one line beneath them; under 420 px, one column. The card
+   is the container (container: rd, on .rd above). */
+@container rd (420px <= width < 620px) {
+  .rd-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); row-gap: 4px; }
+  .rd-cost { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .rd-cost h3 { margin: 0; }
+  .rd-usd { font-size: 26px; min-width: var(--usd-w, auto); }
+  .rd-per { margin: 0; }
+  .rd-basis { flex-basis: 100%; margin: 0; min-height: 1.5em; }
+}
+@container rd (420px <= width < 500px) { .rd-basis { min-height: 3em; } }
+@container rd (width < 420px) { .rd-body { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) {
-  .rd-body { grid-template-columns: minmax(0, 1fr); }
   .rd-kinds { min-height: 0; }
   .rd-kinds:not(.read) li:nth-last-child(n+6), .rd-kinds.read li:nth-child(n+6) { display: none; }
   .rd-foot { flex-wrap: wrap; }
@@ -450,6 +504,20 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 .calc-out span { font-size: 13px; color: var(--dim); }
 .calc-out em { font: 600 13px var(--mono); font-style: normal; color: var(--fg2); }
 .calc-basis { grid-column: 1 / -1; font-size: 12px; line-height: 1.6; color: var(--faint); }
+/* One reading first, the month after it: each group under its own head, across both columns. */
+.calc-h { grid-column: 1 / -1; margin: 0 0 -10px; font: 600 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.calc-h:not(:first-child) { margin-top: 6px; padding-top: 16px; border-top: 1px solid var(--line); }
+/* The loop's triangle: a bar per call, what is re-sent below and the call's own share on top. */
+.tri-fig { grid-column: 1 / -1; margin: 0; display: grid; gap: 8px; }
+.tri { width: 100%; max-width: 520px; height: auto; overflow: visible; }
+.tri rect { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); transition: transform .45s cubic-bezier(.2, .7, .2, 1); }
+.tri.on rect { transform: scaleY(1); }
+.tri .re { fill: var(--line2); }
+.tri .nw { fill: var(--accent); }
+.tri text { font: 10px var(--mono); fill: var(--faint); }
+.tri-fig figcaption { font-size: 12.5px; line-height: 1.5; color: var(--dim); max-width: 62ch; }
+.tri-fig figcaption i { font-family: var(--mono); font-style: normal; color: var(--fg2); }
+@media (prefers-reduced-motion: reduce) { .tri rect { transition: none; } }
 @media (max-width: 900px) { .calc { grid-template-columns: minmax(0, 1fr); } .calc-in { border-right: 0; border-bottom: 1px solid var(--line); } }
 .calc.deadline { margin-top: 0; }
 .calc-out .dl-wide { grid-column: 1 / -1; }
@@ -868,6 +936,14 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 @media (max-width: 640px) { .ints { grid-template-columns: minmax(0, 1fr); } }
 .app-live .live-open { right: auto; left: 12px; }
 .film-narrow .fp-title { white-space: normal; }
+/* On a phone a finding's title, a rule's name and its version wrap at their spaces: the column is 600 world px, and
+   one line a row cut "Right-size over-provisioned requests on workers/webhook-di…" (D56 typography). */
+.film-narrow .r-title, .film-narrow .g-rt, .film-narrow .it-row dd { white-space: normal; }
+.film-narrow .r-row, .film-narrow .g-row { align-items: flex-start; }
 .tw-box { position: relative; display: inline-block; max-width: 100%; vertical-align: top; }
 .tw-ghost { visibility: hidden; }
 .tw { position: absolute; left: 0; top: 0; right: 0; }
+/* An identifier is one word: "cluster-admin" broke at its hyphen (D50 site review). */
+.nb { white-space: nowrap; }
+/* A pod's name in the scene's list is one word too: "licensed-etl-0" broke at a hyphen. */
+.t-row b { white-space: nowrap; }
