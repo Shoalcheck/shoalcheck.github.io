@@ -426,8 +426,14 @@
   var N = SHOTS.length;
   var narrow = false, sw = 1, sh = 1, frames = [];
   var view = function (r) { // the [cx, cy, w] that fits rect r in the stage, with air, never past scale 1
-    var pad = 1.08, w = Math.max(r[2] * pad, r[3] * pad * sw / sh, sw);
-    if (narrow && r[3] * pad * sw / sh > w * 1.001) w = Math.max(r[2] * pad, sw); // on a phone a tall panel fits its width…
+    // On a desk the whole rect fits the stage. On a phone it fits its WIDTH and a tall one shows its top: the
+    // condition that was meant to say so compared the height with a width already raised to fit that height,
+    // so it never held, and a tall panel shrank to fit the screen (D60).
+    // On a phone a panel that is nearly the stage's height (up to 1.2× what its width allows) fits whole, with 4% more
+    // air so the hold's slow push-in (3.5%) never carries it past the edge — at 0.43 of its size or more, body text 11 px
+    // or more; a taller one fits its width and shows its top. The stage there is short (about 350 × 390).
+    var pad = 1.08, fitW = Math.max(r[2] * pad, sw), fitH = r[3] * pad * sw / sh;
+    var w = !narrow ? Math.max(fitW, fitH) : fitH <= fitW * 1.2 ? Math.max(fitW, fitH * 1.04) : fitW;
     var vh = w * sh / sw, cy = r[1] + r[3] / 2;
     if (r[3] * pad > vh) cy = r[1] + vh / 2 - vh * 0.03; // …and shows its top, where its title is
     return [r[0] + r[2] / 2, cy, w];
@@ -438,6 +444,10 @@
     while (n && n !== world) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
     return [x - 30, y - 30, node.offsetWidth + 60, node.offsetHeight + 60];
   };
+  // ON A PHONE THERE IS NO WHOLE-WORLD SHOT (D60, the founder from a phone: "з телефона жахливий вигляд"). The
+  // drawing is one column of eleven panels there, and the whole of it on a phone's screen is thumbnails nobody can
+  // read. The film opens on the reading and closes on it, so on a phone such a shot is the reading's panel.
+  var namedNear = function () { return 'r'; };
   var worldW = 3780, worldH = 3560;
   var shot = function (r) {
     if (r === '*') return [0, 0, worldW, worldH];
@@ -472,7 +482,7 @@
     frames = [];
     SHOTS.forEach(function (shots, ch) {
       shots.forEach(function (s, i) {
-        var r = shot(s[1]);
+        var r = shot(narrow && s[1] === '*' ? namedNear() : s[1]);
         frames.push({ g: ch + s[0], v: view(r) });
         if (i === shots.length - 1 && ch < N - 1) frames.push({ g: ch + 1, v: view(r), hold: true });
       });
@@ -488,6 +498,9 @@
           var v = a.v; return [v[0], v[1], v[2] * (1 - 0.035 * u)];
         }
         var from = a.hold ? [a.v[0], a.v[1], a.v[2] * (1 - 0.035)] : a.v;
+        // On a phone the camera pans at the panels' one width rather than rising between them: the scroll is the
+        // timeline, so wherever a thumb stops is a frame someone reads, and a rise drew it at a third of its size.
+        if (narrow) { var e = ease(u); return [from[0] + (b.v[0] - from[0]) * e, from[1] + (b.v[1] - from[1]) * e, from[2] + (b.v[2] - from[2]) * e]; }
         return zoomPath(from, b.v)(ease(u));
       }
     }

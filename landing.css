@@ -932,6 +932,71 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 .int h3 { margin: 0; font-size: 21px; line-height: 1.2; letter-spacing: -.015em; color: var(--fg); text-wrap: balance; }
 .int p { margin: 0; flex: 1; font-size: 14.5px; line-height: 1.6; color: var(--dim); }
 .int code { align-self: flex-start; max-width: 100%; overflow-wrap: break-word; font-size: 12.5px; }
+/* THE INTEGRATIONS, DRAWN (D59). A scene card over the text cards: the same frame, a drawing that plays when seen. */
+.int-scenes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; margin-bottom: 18px; }
+.isc-card { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 26px 28px 22px; border-radius: var(--r); border: 1px solid var(--line2);
+            background: linear-gradient(160deg, rgba(45, 212, 191, .07), transparent 40%), var(--surface); }
+.isc-card h3 { margin: 0; font-size: clamp(22px, 2.2vw, 28px); line-height: 1.15; letter-spacing: -.02em; color: var(--fg); text-wrap: balance; }
+.isc-card > code { align-self: flex-start; font-size: 12.5px; }
+.isc-note { margin: 0; font-size: 13px; color: var(--faint); }
+.isc { container-type: inline-size; min-width: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--bg2); padding: 18px 18px 16px; }
+/* the sequence: three lifelines, a call drawn from its caller, an answer drawn back */
+.sq { position: relative; display: flex; flex-direction: column; gap: 14px; }
+.sq-heads, .sq-rows > li { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 0; }
+.sq-h { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; padding: 8px 10px; margin: 0 10px; border: 1px solid var(--line2);
+        border-radius: 10px; background: var(--surface2); }
+.sq-h b { font: 600 14px var(--mono); color: var(--fg); }
+.sq-h span { font-size: 12px; color: var(--faint); }
+.sq-h.mcp { border-color: rgba(45, 212, 191, .5); box-shadow: 0 0 0 1px rgba(45, 212, 191, .15), 0 0 24px -8px rgba(45, 212, 191, .5); }
+.sq-rows { position: relative; list-style: none; margin: 0; padding: 4px 0; display: flex; flex-direction: column; gap: 10px; }
+.sq-rows::before { content: ""; position: absolute; inset: -14px 0 0; pointer-events: none;
+  background: linear-gradient(var(--line2), var(--line2)) calc(100% / 6) 0 / 1px 100% no-repeat,
+              linear-gradient(rgba(45, 212, 191, .35), rgba(45, 212, 191, .35)) 50% 0 / 1px 100% no-repeat,
+              linear-gradient(var(--line2), var(--line2)) calc(500% / 6) 0 / 1px 100% no-repeat; }
+.sq-rows > li { position: relative; align-items: center; row-gap: 6px; opacity: 0; transform: translateY(4px); transition: opacity .25s var(--ease), transform .25s var(--ease); }
+.sq-rows > li.on { opacity: 1; transform: none; }
+.sq-arrow { grid-row: 2; position: relative; height: 2px; margin: 0 25%; background: var(--accent); transform: scaleX(0); transition: transform .35s var(--ease); }
+/* each arrow runs from the centre of one lifeline to the centre of the next: the middle half of the two columns it spans */
+.sq-arrow::after { content: ""; position: absolute; top: -4px; width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+.sq-rows > li.on .sq-arrow { transform: scaleX(1); }
+.sq-call .sq-arrow { grid-column: 1 / 3; transform-origin: left; }
+.sq-call .sq-arrow::after { right: -2px; border-left: 8px solid var(--accent); }
+.sq-read .sq-arrow { grid-column: 2 / 4; transform-origin: left; height: 0; background: none; border-top: 2px dashed var(--faint); }
+.sq-read .sq-arrow::after { right: -2px; top: -6px; border-left: 8px solid var(--faint); }
+.sq-ans .sq-arrow { grid-column: 1 / 3; transform-origin: right; background: var(--fg2); }
+.sq-ans .sq-arrow::after { left: -2px; border-right: 8px solid var(--fg2); }
+.sq-l { grid-row: 1; grid-column: 1 / 3; justify-self: center; font: 500 13px var(--mono); color: var(--accent2); background: none; padding: 0; }
+.sq-read .sq-l { grid-column: 2 / 4; color: var(--faint); font-size: 12px; }
+.sq-card { grid-row: 3; grid-column: 1 / 3; margin: 0 12px; display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 9px;
+           background: rgba(220, 245, 240, .04); border: 1px solid var(--line); min-width: 0; }
+.sq-card b { font-size: 14px; font-weight: 600; color: var(--fg); }
+.sq-m { font: 12.5px/1.45 var(--mono); color: var(--dim); }
+.sq-bars { display: grid; grid-template-columns: max-content minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; font: 12.5px var(--mono); color: var(--dim); }
+.sq-bar { display: contents; }
+.sq-t { height: 6px; border-radius: 3px; background: rgba(220, 245, 240, .06); overflow: hidden; }
+.sq-t i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .5s var(--ease) .15s; }
+.sq-rows > li.on .sq-t i { width: var(--w); }
+.sq-n { color: var(--fg2); text-align: right; }
+.sq-wall { display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: 4px 12px; margin-top: 4px; padding: 10px 14px; border: 1px dashed rgba(249, 112, 102, .45);
+           border-radius: 10px; color: var(--dim); font-size: 13px; opacity: 0; transition: opacity .3s var(--ease); }
+.sq-wall.on { opacity: 1; }
+.sq-wall b { font: 600 13px var(--mono); color: var(--fg2); }
+.sq-x { width: 16px; height: 16px; position: relative; }
+.sq-x::before, .sq-x::after { content: ""; position: absolute; left: 7px; top: 0; width: 2px; height: 16px; background: var(--bad); }
+.sq-x::before { transform: rotate(45deg); } .sq-x::after { transform: rotate(-45deg); }
+/* a narrow scene reads as a list: who asks whom on each line, the answer under it */
+@container (width < 560px) {
+  .sq-heads { display: none; }
+  .sq-rows::before { display: none; }
+  .sq-rows > li { grid-template-columns: minmax(0, 1fr); }
+  .sq-arrow { display: none; }
+  .sq-l, .sq-read .sq-l, .sq-card { grid-column: 1; grid-row: auto; justify-self: start; margin: 0; }
+  .sq-call .sq-l::before { content: "agent → shoalcheck-mcp · "; color: var(--faint); }
+  .sq-read .sq-l::before { content: "shoalcheck-mcp reads "; }
+  .sq-wall { grid-template-columns: auto minmax(0, 1fr); }
+  .sq-wall > span:last-child { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) { .sq-rows > li, .sq-arrow, .sq-t i, .sq-wall { transition: none; } }
 @media (max-width: 1000px) { .ints { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .ints { grid-template-columns: minmax(0, 1fr); } }
 .app-live .live-open { right: auto; left: 12px; }

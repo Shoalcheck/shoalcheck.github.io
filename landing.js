@@ -380,6 +380,88 @@
     });
   })();
 
+  /* ── the integrations, drawn (D59) ──────────────────────────────────────
+     An agent's calls to shoalcheck-mcp as a sequence: the agent, shoalcheck-mcp and the readings on this machine
+     as lifelines, each call an arrow drawn from its caller, each answer drawn back with what shoalcheck-mcp returned
+     over the sample (#film-mcp, the same answers the film prints). Beside them the cluster, behind a crossed line:
+     shoalcheck-mcp has no kubeconfig and no client-go. Played each time it is seen; drawn whole with reduced motion. */
+  var playWhenSeen = function (box, parts, step) {
+    var finish = function () { box.classList.add('played'); parts.forEach(function (p) { p.classList.add('on'); }); };
+    if (reduce || !('IntersectionObserver' in window)) { finish(); return; }
+    var timers = [], playing = false;
+    new IntersectionObserver(function (es) {
+      var e = es[0];
+      if (e.intersectionRatio >= 0.4 && !playing) {
+        playing = true;
+        box.classList.add('played');
+        timers = parts.map(function (p, i) { return setTimeout(function () { p.classList.add('on'); }, 250 + i * step); });
+      } else if (!e.isIntersecting && playing) {
+        playing = false;
+        timers.forEach(clearTimeout);
+        box.classList.remove('played');
+        parts.forEach(function (p) { p.classList.remove('on'); });
+      }
+    }, { threshold: [0, 0.4] }).observe(box);
+  };
+  (function () {
+    var box = $('.isc[data-isc="agent"]'), src = $('#film-mcp');
+    var M = src ? JSON.parse(src.textContent || 'null') : null;
+    if (!box || !M || M.length < 3) return;
+    var el = function (tag, cls, text, parent) {
+      var n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text != null) n.textContent = text;
+      if (parent) parent.appendChild(n);
+      return n;
+    };
+    var usd = function (n) { return '$' + Math.round(Math.abs(n)).toLocaleString('en-US'); };
+    var sq = el('div', 'sq', null, box), parts = [];
+    var heads = el('div', 'sq-heads', null, sq);
+    [['Your agent', 'Claude · Cursor · any MCP client'], ['shoalcheck-mcp', 'on your machine'], ['The readings', 'kept and signed on this machine']]
+      .forEach(function (h, i) { var d = el('div', 'sq-h' + (i === 1 ? ' mcp' : ''), null, heads); el('b', '', h[0], d); el('span', '', h[1], d); });
+    var rows = el('ol', 'sq-rows', null, sq);
+    var row = function (kind, label) {
+      var li = el('li', 'sq-' + kind, null, rows);
+      el('span', 'sq-arrow', null, li);
+      if (label) el('code', 'sq-l', label, li);
+      parts.push(li);
+      return li;
+    };
+    var args = function (a) { return Object.keys(a || {}).map(function (k) { return k + ': ' + a[k]; }).join(', '); };
+    // 1 · what is there, by the team that owns it
+    var L = M[0].answer, E = M[1].answer.finding, D = M[2].answer.diff;
+    row('call', M[0].tool + (args(M[0].args) ? ' · ' + args(M[0].args) : ''));
+    row('read', 'the latest reading');
+    var a1 = row('ans'), c1 = el('div', 'sq-card', null, a1);
+    el('b', '', L.envelope.total + ' findings · ' + usd(L.envelope.totalDollars) + ' a month identified, by owner', c1);
+    var max = L.groups.reduce(function (m, g) { return Math.max(m, g.count); }, 1);
+    var bars = el('div', 'sq-bars', null, c1);
+    L.groups.slice().sort(function (a, b) { return (a.key.charAt(0) === '(') - (b.key.charAt(0) === '(') || b.count - a.count; }).forEach(function (g) {
+      var r = el('div', 'sq-bar', null, bars);
+      el('span', 'sq-k', g.key === '(no owner resolved)' ? 'no owner' : g.key, r);
+      var t = el('span', 'sq-t', null, r);
+      el('i', '', null, t).style.setProperty('--w', (g.count / max * 100).toFixed(1) + '%');
+      el('span', 'sq-n', String(g.count), r);
+    });
+    // 2 · one finding, with what it rests on
+    row('call', M[1].tool + ' · ' + (M[1].args.id || ''));
+    var a2 = row('ans'), c2 = el('div', 'sq-card', null, a2);
+    el('b', '', E.title, c2);
+    el('span', 'sq-m', [E.owner, E.severity, usd(E.dollarImpactMonthly) + ' a month (' + E.priceBasis + ')', 'confidence ' + E.confidence].join(' · '), c2);
+    // 3 · what changed since the reading before
+    row('call', M[2].tool);
+    var a3 = row('ans'), c3 = el('div', 'sq-card', null, a3);
+    el('b', '', D.newCount + ' new · ' + D.noLongerInSetCount + ' no longer in the set · ' + D.notEvaluatedCount + ' not evaluated', c3);
+    el('span', 'sq-m', (D.savingsDelta < 0 ? '−' : '+') + usd(D.savingsDelta) + ' a month identified against the reading before — what left is counted as missing, never as dealt with', c3);
+    // the wall: what shoalcheck-mcp cannot do
+    var wall = el('div', 'sq-wall', null, sq);
+    el('span', 'sq-x', null, wall);
+    el('b', '', 'Your cluster', wall);
+    el('span', '', 'shoalcheck-mcp has no kubeconfig and no client-go: it answers from readings, and cannot reach the cluster', wall);
+    parts.push(wall);
+    playWhenSeen(box, parts, 360);
+  })();
+
   /* ── tabs ─────────────────────────────────────────────────────────────── */
   var tabs = $$('.tab');
   var select = function (t) {
