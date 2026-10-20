@@ -391,7 +391,11 @@
      over the sample (#film-mcp, the same answers the film prints). Beside them the cluster, behind a crossed line:
      shoalcheck-mcp has no kubeconfig and no client-go. Played each time it is seen; drawn whole with reduced motion. */
   var playWhenSeen = function (box, parts, step) {
-    var finish = function () { box.classList.add('played'); parts.forEach(function (p) { p.classList.add('on'); }); };
+    /* A part is an element, given "on" at its turn — 250 ms in, then one every `step` — or a beat { el, cls, at }: an
+       element given its class at its own time (the pipeline's story is paced to its run, not to a metronome). */
+    var at = function (p, i) { return p.at != null ? p.at : 250 + i * step; };
+    var put = function (p, on) { (p.el || p).classList[on ? 'add' : 'remove'](p.cls || 'on'); };
+    var finish = function () { box.classList.add('played'); parts.forEach(function (p) { put(p, true); }); };
     if (reduce || !('IntersectionObserver' in window)) { finish(); return; }
     var timers = [], playing = false;
     new IntersectionObserver(function (es) {
@@ -403,12 +407,12 @@
       if (seen && !playing) {
         playing = true;
         box.classList.add('played');
-        timers = parts.map(function (p, i) { return setTimeout(function () { p.classList.add('on'); }, 250 + i * step); });
+        timers = parts.map(function (p, i) { return setTimeout(function () { put(p, true); }, at(p, i)); });
       } else if (!e.isIntersecting && playing) {
         playing = false;
         timers.forEach(clearTimeout);
         box.classList.remove('played');
-        parts.forEach(function (p) { p.classList.remove('on'); });
+        parts.forEach(function (p) { put(p, false); });
       }
     }, { threshold: [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4] }).observe(box);
   };
@@ -490,77 +494,29 @@
     playWhenSeen(box, parts, 360);
   })();
 
-  /* THE PIPELINE, FROM A REAL RUN (D58/D59, the founder: "про інтеграцію в CI CD нуль графіки моушн дизайну … можеш
-     на ilya776 акаунті затестити"). A public repository's pull request, one run per commit, read from GitHub's own
-     record of it (#gate-demo: make site-data writes it from testdata/site/gate-demo.json, a gate holds it): each run's
-     steps lit in order with the seconds they took, the gate's output as the job printed it, and what GitHub said about
-     merging at that commit. Played each time it is seen; drawn whole with reduced motion. */
+  /* THE PIPELINE IS GITHUB (D64): its pages are drawn by gh-scene.js with gh-scene.css from #gate-demo — 29 KB the first
+     screen does not need (landing-check 4i holds the first load under 450 KB), fetched at the reader's first scroll or
+     as the Integrations band nears, whichever comes first; the stylesheet is in before anything is drawn. */
   (function () {
-    var box = $('.isc[data-isc="ci"]'), src = $('#gate-demo');
-    var G = src ? JSON.parse(src.textContent || 'null') : null;
-    if (!box || !G || !G.runs || G.runs.length < 2) return;
-    var el = function (tag, cls, text, parent) {
-      var n = document.createElement(tag);
-      if (cls) n.className = cls;
-      if (text != null) n.textContent = text;
-      if (parent) parent.appendChild(n);
-      return n;
+    var box = $('.isc[data-isc="ci"]'), src = $('#gate-demo'), asked = false;
+    if (!box || !src) return;
+    var load = function () {
+      if (asked) return;
+      asked = true;
+      var css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'gh-scene.css';
+      css.onload = function () {
+        var js = document.createElement('script');
+        js.src = 'gh-scene.js';
+        js.onload = function () { if (window.ghScene) window.ghScene(box, JSON.parse(src.textContent || 'null'), playWhenSeen); };
+        document.head.appendChild(js);
+      };
+      document.head.appendChild(css);
     };
-    var link = function (text, href, cls, parent) {
-      var a = el('a', cls, text, parent);
-      a.href = href; a.target = '_blank'; a.rel = 'noopener';
-      return a;
-    };
-    /* The workflow's own step names, shortened for a node; a step not named here (checkout, cosign's installer, the
-       SARIF conversion, keeping the report) runs and is not drawn. */
-    var STEP = {
-      'Install shoalcheck': ['Install', 'signature checked'],
-      'A cluster to read': ['Cluster', 'kind, in the runner'],
-      'The cluster before this change': ['Before', 'read: the baseline'],
-      'This change, applied': ['The change', 'applied'],
-      'Gate': ['Gate', ''],
-      'Upload to code scanning': ['Code scanning', 'the findings, SARIF']
-    };
-    var MERGE = {
-      blocked: ['Merging is blocked', 'the required check "gate" failed'],
-      clean: ['Ready to merge', 'every check passed']
-    };
-    var pl = el('div', 'pl', null, box), parts = [];
-    var pr = el('div', 'pl-pr', null, pl);
-    el('span', 'pl-k', 'Pull request', pr);
-    link('#' + G.pr.number + ' · ' + G.pr.title, G.pr.url, 'pl-prt', pr);
-    G.runs.forEach(function (r) {
-      var ok = r.exit === 0, run = el('section', 'pl-run ' + (ok ? 'pass' : 'fail'), null, pl);
-      var head = el('div', 'pl-head', null, run);
-      el('code', 'pl-sha', r.sha, head);
-      el('span', 'pl-msg', r.message, head);
-      link(r.seconds + ' s · the run', r.url, 'pl-link', head);
-      var ol = el('ol', 'pl-steps', null, run);
-      r.steps.forEach(function (s) {
-        var w = STEP[s.name];
-        if (!w) return;
-        var gate = s.name === 'Gate', li = el('li', 'pl-step' + (gate ? ' gate' : ''), null, ol);
-        el('b', '', w[0], li);
-        el('span', '', gate ? 'exit ' + r.exit : w[1], li);
-        el('i', 'pl-t', s.seconds < 1 ? 'under 1 s' : s.seconds + ' s', li);
-        parts.push(li);
-      });
-      var out = el('pre', 'pl-out', null, run);
-      r.gate.forEach(function (line) {
-        var cls = /^\s*\+ (critical|high) /.test(line) ? 'new' : /^the policy fired|^\s*· /.test(line) ? 'fired' : '';
-        el('span', cls, line, out);
-        out.appendChild(document.createTextNode('\n'));
-      });
-      parts.push(out);
-      var m = MERGE[r.mergeableState];
-      if (m) {
-        var mg = el('div', 'pl-merge', null, run);
-        el('b', '', m[0], mg);
-        el('span', '', m[1], mg);
-        parts.push(mg);
-      }
-    });
-    playWhenSeen(box, parts, 240);
+    window.addEventListener('scroll', load, { once: true, passive: true });
+    if (!('IntersectionObserver' in window)) { load(); return; }
+    new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { o.disconnect(); load(); } }, { rootMargin: '2000px 0px' }).observe(box);
   })();
 
   /* ── tabs ─────────────────────────────────────────────────────────────── */

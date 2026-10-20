@@ -1,0 +1,145 @@
+/* THE PIPELINE IS GITHUB (D64): GitHub's pages in its dark palette, its system font, a monospace for the log — none of
+   the landing's own type or colour. Fetched with gh-scene.js when the reader nears it. Only opacity and transform move. */
+.gh { --hb: #0d1117; --hi: #010409; --hs: #151b23; --hl: #30363d; --hl2: #21262d; --hf: #e6edf3; --hm: #7d8590; --hg: #3fb950;
+  --hr: #f85149; --hk: #4493f8; --ht: .2s var(--ease); --hmono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  display: grid; grid-template-columns: minmax(0, 12fr) minmax(0, 13fr); grid-template-rows: auto auto 1fr; gap: 12px 16px;
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; letter-spacing: normal; color: var(--hf); }
+.gh b { font-weight: 600; }
+.gh code { padding: 0; border-radius: 0; background: none; color: inherit; font: 12px/1.5 var(--hmono); }
+.gh a { color: var(--hk); text-decoration: none; }
+.gh a:hover { text-decoration: underline; }
+/* each page its own frame: on a desk the job's beside the other three, which run in the order it happened */
+.gh-pane { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 0 16px 16px; border: 1px solid var(--hl); border-radius: 12px; background: var(--hb); }
+.gh-pr.a { grid-area: 1 / 1; } .gh-secp { grid-area: 2 / 1; } .gh-pr.b { grid-area: 3 / 1; } .gh-job { grid-area: 1 / 2 / 4; }
+.gh-nav { display: flex; justify-content: space-between; gap: 12px; min-height: 40px; margin: 0 -16px; padding: 0 16px; border-bottom: 1px solid var(--hl); font-size: 13px; }
+.gh-repo { align-self: center; min-width: 0; overflow-wrap: anywhere; }
+.gh-tab { position: relative; display: flex; flex: none; align-items: center; margin-right: -8px; padding: 0 8px; font-weight: 600; }
+.gh-tab::after { content: ""; position: absolute; inset: auto 0 -1px; height: 2px; border-radius: 6px; background: #f78166; }
+.gh-i { display: block; flex: none; width: 16px; height: 16px; overflow: hidden; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.gh-i .f { fill: currentColor; stroke: none; }
+.gh-i .k { stroke: var(--hb); stroke-width: 1.8; }
+.gh-i.ok { color: var(--hg); } .gh-i.fail, .gh-shield { color: var(--hr); } .gh-i.wait, .gh-cico, .gh-chev { color: var(--hm); }
+.gh-i.run { color: #d29922; stroke-width: 2; } .gh-i.run .t { opacity: .25; } .gh-i.run .a { transform-origin: 8px 8px; }
+/* a spinner turns only while it is the one showing */
+.gh-job.on:not(.done) :is(.gh-jobhead, .gh-step:first-child:not(.on), .gh-step.on + .gh-step:not(.on)) .run .a,
+:is(.gh-commit, .gh-box).on:not(.done) .run .a { animation: gh-spin 1s linear infinite; }
+@keyframes gh-spin { to { transform: rotate(360deg); } }
+/* a state and the one after it share one place; the later is drawn over the earlier when its moment comes */
+.gh-swap { display: inline-grid; justify-items: start; align-items: center; }
+.gh-swap > * { grid-area: 1 / 1; transition: opacity var(--ht), visibility .2s; }
+.gh .fin, .gh-jobhead .pend, .gh-step .pend, .gh-m, .gh-badge.merged, .gh-sec-merge, .gh-sec-btn { opacity: 0; visibility: hidden; }
+.gh-m.first, .gh-m.on, .gh-prhead.merged .gh-badge.merged, :is(.gh-commit, .gh-box).done .fin, .gh-box.done :is(.gh-sec-merge, .gh-sec-btn),
+.gh-job.on .gh-jobhead .pend, .gh-job.done .gh-jobhead .fin, .gh-step.on .fin,
+.gh-job.on:not(.done) :is(.gh-step:first-child, .gh-step.on + .gh-step):not(.on) .pend { opacity: 1; visibility: visible; }
+.gh-m.past, .gh-prhead.merged .gh-badge.open, :is(.gh-commit, .gh-box).done .pend, .gh-job.on .gh-jobhead .pre, .gh-job.done .gh-jobhead .pend,
+.gh-job.on:not(.done) :is(.gh-step:first-child, .gh-step.on + .gh-step):not(.on) .pre, .gh-step.on :is(.pre, .pend) { opacity: 0; visibility: hidden; }
+.gh-commit, .gh-box, .gh-alert, .gh-merged, .gh-check.later, .gh-secp, .gh-pr.b { opacity: 0; visibility: hidden; transform: translateY(6px);
+  transition: opacity .25s var(--ease), transform .25s var(--ease), visibility .25s; }
+:is(.gh-commit, .gh-box, .gh-alert, .gh-merged, .gh-check.later, .gh-secp, .gh-pr.b).on { opacity: 1; visibility: visible; transform: none; }
+.gh-sec-merge, .gh-sec-btn { transition: opacity .25s var(--ease), visibility .25s; }
+
+.gh-prhead { display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+.gh-title { margin: 0; font-size: 20px; font-weight: 400; line-height: 1.3; }
+.gh-title a { color: inherit; }
+.gh-num { color: var(--hm); font-weight: 300; }
+.gh-state { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--hm); }
+.gh-state b, .gh-merged b, .gh code.gh-mc, .gh .gh-jobname { color: var(--hf); }
+.gh-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px 4px 8px; border-radius: 2em; background: #238636; color: #fff; font-weight: 500; line-height: 18px; }
+.gh-badge.merged { background: #8957e5; }
+.gh-badge .gh-i, .gh-big .gh-i, .gh-btn-c .gh-i { width: 14px; height: 14px; }
+.gh-ref { padding: 1px 6px; border-radius: 6px; background: rgba(56, 139, 253, .15); color: var(--hk); font: 12px/1.6 var(--hmono); white-space: nowrap; }
+.gh-commit { display: flex; align-items: center; gap: 8px; padding: 0 2px; }
+.gh-cmsg { flex: 1; min-width: 0; }
+.gh code.gh-csha { color: var(--hm); }
+/* a box is framed by its parts, so it hugs what is shown: a section still to come is not an empty frame */
+.gh-box > * { border: 1px solid var(--hl); border-top: 0; background: var(--hb); }
+.gh-box > :first-child { border-top: 1px solid var(--hl); border-radius: 6px 6px 0 0; }
+.gh-box > :last-child { border-radius: 0 0 6px 6px; }
+.gh-box > .gh-checks { border: 0; background: none; }
+.gh-sec { display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
+.gh-big { display: grid; flex: none; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: #fff; }
+.gh-big .gh-i { stroke-width: 1.9; }
+.gh-big.ok { background: #238636; } .gh-big.fail { background: #da3633; } .gh-big.wait { background: #9e6a03; } .gh-big.done { background: #8957e5; }
+.gh-big.block { background: var(--hl2); color: var(--hr); box-shadow: inset 0 0 0 1px var(--hl); }
+.gh-sec-t { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.gh-sec-t b, .gh-sec-h b { line-height: 1.4; }
+.gh-sec-d, .gh-check-st, .gh-alert-s, .gh-merged-d, .gh-wf, .gh-sdur { font-size: 12px; color: var(--hm); }
+/* the check rows are framed one by one: the box's edge runs under the last row reported */
+.gh-check { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 0 8px; align-items: start; padding: 8px 12px; border: 1px solid var(--hl); border-block: 0; background: var(--hs); font-size: 13px; }
+.gh-check:last-child { border-bottom: 1px solid var(--hl); }
+.gh-box:not(.done) .gh-check:is(:last-child, :is(:not(.later), .later.on):not(:has(~ :is(:not(.later), .later.on)))) { border-bottom: 1px solid var(--hl); border-radius: 0 0 6px 6px; }
+.gh-check > .gh-ico, .gh-jobhead > .gh-ico { margin-top: 2px; }
+.gh-check-body { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; min-width: 0; }
+.gh-check-name { font-weight: 600; overflow-wrap: anywhere; }
+.gh-req, .gh-lvl { padding: 0 7px; border: 1px solid var(--hl); border-radius: 2em; color: var(--hm); font-size: 12px; font-weight: 500; line-height: 18px; }
+.gh-lvl { border-color: rgba(248, 81, 73, .4); color: var(--hr); }
+.gh-check-st { grid-column: 2 / 4; }
+.gh-details { margin-top: 1px; font-size: 12px; font-weight: 500; }
+.gh-btn { display: inline-flex; border: 1px solid rgba(240, 246, 252, .1); border-radius: 6px; background: #238636; color: #fff; font-weight: 500; line-height: 20px; }
+.gh-btn-l { padding: 4px 14px; }
+.gh-btn-c { display: grid; place-items: center; padding: 0 8px; border-left: 1px solid rgba(1, 4, 9, .35); }
+.gh-btn.off { background: #105823; color: rgba(255, 255, 255, .45); }
+.gh-btn.press { animation: gh-press .3s var(--ease); }
+@keyframes gh-press { 45% { transform: scale(.95); } }
+.gh-secp-k { padding-top: 2px; font-size: 13px; font-weight: 600; }
+.gh-alert { display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; border: 1px solid var(--hl); border-radius: 6px; font-size: 13px; }
+.gh-alert-t { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.gh-alert-t b { font-size: 14px; }
+.gh code.gh-alert-p, .gh-alert-s { color: var(--hm); overflow-wrap: anywhere; }
+.gh-merged { display: flex; gap: 10px; padding: 0 2px; color: var(--hm); }
+.gh-merged .gh-big { width: 32px; height: 32px; }
+.gh-merged-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-top: 5px; }
+.gh code.gh-mc { font-weight: 600; }
+
+.gh-runhead { display: flex; flex-direction: column; padding-top: 4px; }
+.gh-runtitle { font-size: 18px; line-height: 1.3; }
+/* the job's box is framed by its parts too: until the Gate step opens, the steps under it and the box's foot stand
+   over its log's room, moved up by its height, and slide down when it opens */
+.gh-jobhead, .gh-shead, .gh-log, .gh-jobfoot { border: 1px solid var(--hl); border-block: 0; background: var(--hi); }
+.gh-jobhead { display: flex; align-items: flex-start; gap: 8px; padding: 8px 16px; border-top: 1px solid var(--hl); border-radius: 6px 6px 0 0; box-shadow: inset 0 -1px var(--hl2); }
+.gh-jobfoot { height: 6px; border-bottom: 1px solid var(--hl); border-radius: 0 0 6px 6px; }
+.gh-jobt { display: flex; flex-direction: column; min-width: 0; line-height: 20px; }
+.gh .gh-jobname { font-weight: 600; }
+.gh-jobst { min-height: 18px; font-size: 12px; line-height: 18px; color: var(--hm); }
+.gh-search { align-self: center; flex: 0 1 200px; margin-left: auto; padding: 4px 10px; border: 1px solid var(--hl); border-radius: 6px; background: var(--hb); color: var(--hm); font-size: 12px; line-height: 18px; }
+.gh-steps { --logh: 0px; }
+.gh-shead { display: grid; grid-template-columns: 16px 16px minmax(0, 1fr) auto; align-items: center; gap: 0 8px; min-height: 28px; padding: 0 16px 0 8px; font-size: 13px; }
+.gh-step:first-child .gh-shead { min-height: 32px; padding-top: 4px; }
+.gh-chev, .gh-fold-t .gh-i { transition: transform var(--ht); }
+.gh-step.open .gh-chev, .gh-fold-t[aria-expanded="true"] .gh-i { transform: rotate(90deg); }
+.gh-sname { min-width: 0; overflow-wrap: anywhere; }
+.gh-sdur { opacity: 0; transition: opacity var(--ht); }
+.gh-step.on .gh-sdur { opacity: 1; }
+.gh-step.gate ~ * { transition: transform .32s var(--ease); }
+.gh-step.gate:not(.open) ~ * { transform: translateY(calc(var(--logh) * -1)); }
+.gh-log { padding: 2px 0 8px; font: 12px/18px var(--hmono); }
+.gh-step:not(.open) .gh-log { visibility: hidden; }
+.gh-line { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 0 12px; padding: 0 16px 0 8px; opacity: 0; transform: translateY(3px); transition: opacity .18s var(--ease), transform .18s var(--ease); }
+.gh-line.on, .gh-fold .gh-line { opacity: 1; transform: none; }
+.gh-ln { color: var(--hm); text-align: right; user-select: none; }
+.gh-lt { min-width: 0; min-height: 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.gh-lc { display: flex; align-items: flex-start; gap: 2px; min-width: 0; }
+.gh-fold-t { display: grid; flex: none; place-items: center; width: 16px; height: 18px; margin: 0 2px 0 -4px; padding: 0; border: 0; background: none; color: var(--hm); cursor: pointer; }
+.gh-fold-t .gh-i { width: 12px; height: 12px; }
+.gh-line.err { background: rgba(248, 81, 73, .1); }
+.gh-line:is(.err, .crit) .gh-lt { color: var(--hr); }
+.gh-line.crit .gh-lt { font-weight: 600; }
+
+/* a narrow scene: one page under another, each headed as GitHub heads it on a phone — the repository, then its tabs */
+@container (width < 760px) {
+  .gh { display: flex; flex-direction: column; }
+  .gh-pane { padding: 0 12px 12px; }
+  .gh-nav { flex-direction: column; align-items: flex-start; gap: 4px; min-height: 0; margin: 0 -12px; padding: 8px 12px 0; }
+  .gh-repo { align-self: flex-start; }
+  .gh-tab { margin: 0 0 0 -6px; padding: 4px 6px 8px; }
+  .gh-search { display: none; }
+  .gh-runtitle { font-size: 17px; }
+  .gh-jobhead { padding: 8px 12px; }
+  .gh-shead { padding: 0 12px 0 4px; }
+  .gh-line { grid-template-columns: 20px minmax(0, 1fr); gap: 0 8px; padding: 0 8px 0 4px; }
+  .gh-sec, .gh-check { padding-inline: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gh *, .gh-swap > * { transition: none !important; }
+  .gh-i.run .a, .gh-btn.press { animation: none !important; }
+}
