@@ -388,7 +388,7 @@
   /* ── the integrations, drawn (D59) ──────────────────────────────────────
      An agent's calls to shoalcheck-mcp as a sequence: the agent, shoalcheck-mcp and the readings on this machine
      as lifelines, each call an arrow drawn from its caller, each answer drawn back with what shoalcheck-mcp returned
-     over the sample (#film-mcp, the same answers the film prints). Beside them the cluster, behind a crossed line:
+     over the sample (#film-mcp; the flow draws its diff_readings too). Beside them the cluster, behind a crossed line:
      shoalcheck-mcp has no kubeconfig and no client-go. Played each time it is seen; drawn whole with reduced motion. */
   var playWhenSeen = function (box, parts, step) {
     /* A part is an element, given "on" at its turn — 250 ms in, then one every `step` — or a beat { el, cls, at }: an
@@ -400,10 +400,16 @@
     var timers = [], playing = false;
     new IntersectionObserver(function (es) {
       var e = es[0];
-      /* SEEN IS 40% OF THE SCENE, OR 60% OF THE SCREEN. On a phone the pipeline is ~1,900 px tall: at most 844/1,900
-         of it fits a 390×844 screen, 0.44, and on a 700 px screen 0.37 — so a scene that waited for 40% of itself
-         never played there. A tall scene filling most of the screen is seen. */
-      var seen = e.intersectionRatio >= 0.4 || (e.rootBounds && e.intersectionRect.height >= e.rootBounds.height * 0.6);
+      /* SEEN IS 40% OF THE SCENE, 60% OF THE SCREEN, OR A SCENE TALLER THAN THE SCREEN SPANNING ITS MIDDLE. A phone
+         scene runs 2,000–3,000 px: at most 844/2,959 of it fits a 390×844 screen, 0.29, and the GitHub pipeline's own
+         card header pushes its top down so under 60% of a short 700 px screen is covered when it is parked at the
+         card's top (it is the last section, so the page cannot scroll its top to zero). The third clause is the
+         honest one for a tall scene: its top is above the screen's middle and its bottom below it, so it dominates
+         the view — which is exactly when a reader is looking at it. */
+      var rb = e.rootBounds, cr = e.boundingClientRect;
+      var seen = e.intersectionRatio >= 0.4
+        || (rb && e.intersectionRect.height >= rb.height * 0.6)
+        || (rb && cr.height > rb.height && cr.top < rb.height * 0.5 && cr.bottom > rb.height * 0.5);
       if (seen && !playing) {
         playing = true;
         box.classList.add('played');
@@ -647,7 +653,7 @@
     var fit = function () {
       sec.classList.remove('pinned');
       sec.style.removeProperty('--copy-max');
-      // THE FILM IS THE PAGE'S ONE PINNED SCENE. This one pinned for 3,060 px of scroll and was the page's only
+      // THE FLOW IS THE PAGE'S ONE PINNED SCENE. This one pinned for 3,060 px of scroll and was the page's only
       // cinematic moment — on the free preflight, while the product is the reading (D50 site review). It plays
       // through once in view instead; the pinning below stays for a page that wants it back.
       if (reduce || window.innerWidth <= 980 || !sec.hasAttribute('data-pin')) return;
