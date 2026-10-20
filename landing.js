@@ -95,20 +95,25 @@
     /* The grid is built once: a head of severities, a row per category, a cell per pair. */
     var cells = [];
     var SHORT = ['crit', 'high', 'med', 'low', 'info'];
-    gridEl.innerHTML = '<span class="rd-h" role="columnheader"></span>' + SHORT.map(function (s, i) {
+    /* A TABLE IS ROWS OF CELLS: each row a role=row that lays out as nothing (display: contents), so the grid keeps
+       its columns and the accessibility tree its structure (Lighthouse: 30 headers and cells with no row, D67). */
+    gridEl.innerHTML = '<span class="rd-row" role="row"><span class="rd-h" role="columnheader"></span>' + SHORT.map(function (s, i) {
       return '<span class="rd-h" role="columnheader" title="' + SEVS[i] + '">' + s + '</span>';
-    }).join('');
+    }).join('') + '</span>';
     RD.cats.forEach(function (c, ci) {
+      var tr = document.createElement('span');
+      tr.className = 'rd-row'; tr.setAttribute('role', 'row');
       var row = document.createElement('span');
       row.className = 'rd-c'; row.setAttribute('role', 'rowheader'); row.textContent = c;
-      gridEl.appendChild(row);
+      tr.appendChild(row);
       cells[ci] = SEVS.map(function (s, si) {
         var cell = document.createElement('span');
         cell.className = 'rd-n sv' + si; cell.setAttribute('role', 'cell');
         cell.title = RD.grid[ci][si] + ' ' + s + ' · ' + c;
-        gridEl.appendChild(cell);
+        tr.appendChild(cell);
         return cell;
       });
+      gridEl.appendChild(tr);
     });
     RD.claims.forEach(function (c) {
       var li = document.createElement('li');

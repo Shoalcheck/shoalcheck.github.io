@@ -22,6 +22,7 @@
      say keys are not on sale yet, rather than sending anyone to an address nobody reads. -->
 <meta name="shoalcheck:contact" content="">
 <link rel="icon" href="brand/shoalcheck-icon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="landing.css">
 <script>document.documentElement.classList.add('js');</script>
@@ -59,7 +60,7 @@
 <section class="hero" aria-labelledby="hero-title">
   <div class="glow" aria-hidden="true"></div>
   <div class="wrap hero-grid">
-    <div class="hero-copy reveal">
+    <div class="hero-copy">
       <span class="eyebrow">All-in-one · read-only Kubernetes audit</span>
       <h1 id="hero-title">Every finding in your cluster, <span class="hl">with what it rests on.</span></h1>
       <p class="lede">Shoalcheck reads your cluster with <b>get</b> and <b>list</b>, from your laptop, in seconds: reliability, security, cost, topology and compliance in one reading you can work in. Every finding names the objects it rests on, every dollar its rate.</p>
@@ -89,11 +90,11 @@
     <figure class="rd reveal" id="hero-rd" aria-labelledby="rd-cap">
       <div class="rd-bar"><b class="rd-cl"></b><span class="rd-where"></span><span class="rd-chip">Illustrative sample</span></div>
       <div class="rd-body">
-        <section class="rd-col rd-read" aria-label="What it read"><h3>What it read</h3><ol class="rd-kinds"></ol><p class="rd-sum" id="rd-read-sum"></p></section>
-        <section class="rd-col rd-found" aria-label="What it found"><h3>What it found</h3><div class="rd-grid" role="table"></div><p class="rd-sum" id="rd-found-sum"></p></section>
-        <section class="rd-col rd-cost" aria-label="What it identified"><h3>What it identified</h3><b class="rd-usd" id="rd-usd"></b><span class="rd-per">a month, at list price</span><p class="rd-basis" id="rd-basis"></p></section>
+        <section class="rd-col rd-read" aria-label="What it read"><p class="rd-k">What it read</p><ol class="rd-kinds"></ol><p class="rd-sum" id="rd-read-sum"></p></section>
+        <section class="rd-col rd-found" aria-label="What it found"><p class="rd-k">What it found</p><div class="rd-grid" role="table"></div><p class="rd-sum" id="rd-found-sum"></p></section>
+        <section class="rd-col rd-cost" aria-label="What it identified"><p class="rd-k">What it identified</p><b class="rd-usd" id="rd-usd"></b><span class="rd-per">a month, at list price</span><p class="rd-basis" id="rd-basis"></p></section>
       </div>
-      <div class="rd-first"><h3>What it found first</h3><ol class="rd-claims" id="rd-claims"></ol></div>
+      <div class="rd-first"><p class="rd-k">What it found first</p><ol class="rd-claims" id="rd-claims"></ol></div>
       <div class="rd-foot"><span class="rd-step" id="rd-step"></span><button class="rd-replay" id="rd-replay" type="button" hidden>Replay</button><a class="rd-open" href="sample-report.html">Open the whole reading</a></div>
       <noscript><img src="assets/shot-reading.png" width="1440" height="900" alt="The overview of the sample reading of acme-pay-prod."></noscript>
       <figcaption id="rd-cap">The sample reading being taken — acme-pay-prod, a fictional cluster run through the real engine. Every figure here is that reading's own.</figcaption>
@@ -722,8 +723,8 @@
 <script type="application/json" id="gate-demo">{"repo":"ilya776/shoalcheck-gate-demo","repoUrl":"https://github.com/ilya776/shoalcheck-gate-demo","pr":{"number":1,"url":"https://github.com/ilya776/shoalcheck-gate-demo/pull/1","title":"Add the ledger exporter","base":"main"},"runs":[{"sha":"ac85a24","message":"Add the ledger exporter","url":"https://github.com/ilya776/shoalcheck-gate-demo/actions/runs/39424600120","jobUrl":"https://github.com/ilya776/shoalcheck-gate-demo/actions/runs/39424600120/job/118633844899","conclusion":"failure","gateConclusion":"failure","exit":2,"release":"0.1.0-rc.11","mergeableState":"blocked","startedAt":"2026-10-20T12:44:17Z","seconds":72,"steps":[{"name":"Run actions/checkout@v4","conclusion":"success","seconds":0},{"name":"Run sigstore/cosign-installer@v3","conclusion":"success","seconds":1},{"name":"Install shoalcheck","conclusion":"success","seconds":2},{"name":"A cluster to read","conclusion":"success","seconds":47},{"name":"The cluster before this change","conclusion":"success","seconds":6},{"name":"This change, applied","conclusion":"success","seconds":1},{"name":"Gate","conclusion":"failure","seconds":1},{"name":"Findings as SARIF","conclusion":"success","seconds":0},{"name":"Upload to code scanning","conclusion":"success","seconds":7},{"name":"Keep the report","conclusion":"success","seconds":1}],"gate":["kind-staging · this reading 2026-10-20T12:45:21Z vs the baseline of 2026-10-20T12:45:19Z","1 new · 0 regressed · 0 no longer in the set · 0 not comparable · 11 still present","  + critical Review cluster-admin grant on ServiceAccount shop/ledger-exporter  (k8s.rbac.cluster-admin-serviceaccount)","","the policy fired (1 reason):","  · new critical: Review cluster-admin grant on ServiceAccount shop/ledger-exporter"]},{"sha":"64fe366","message":"Narrow the ledger exporter to a Role on ConfigMaps","url":"https://github.com/ilya776/shoalcheck-gate-demo/actions/runs/39424845123","jobUrl":"https://github.com/ilya776/shoalcheck-gate-demo/actions/runs/39424845123/job/118634683081","conclusion":"success","gateConclusion":"success","exit":0,"release":"0.1.0-rc.11","mergeableState":"clean","startedAt":"2026-10-20T12:46:07Z","seconds":70,"steps":[{"name":"Run actions/checkout@v4","conclusion":"success","seconds":1},{"name":"Run sigstore/cosign-installer@v3","conclusion":"success","seconds":1},{"name":"Install shoalcheck","conclusion":"success","seconds":2},{"name":"A cluster to read","conclusion":"success","seconds":40},{"name":"The cluster before this change","conclusion":"success","seconds":9},{"name":"This change, applied","conclusion":"success","seconds":2},{"name":"Gate","conclusion":"success","seconds":0},{"name":"Findings as SARIF","conclusion":"success","seconds":0},{"name":"Upload to code scanning","conclusion":"success","seconds":8},{"name":"Keep the report","conclusion":"success","seconds":1}],"gate":["kind-staging · this reading 2026-10-20T12:47:08Z vs the baseline of 2026-10-20T12:47:06Z","0 new · 0 regressed · 0 no longer in the set · 0 not comparable · 12 still present","","the policy is satisfied."]}],"mergeableStateNow":"unknown","merged":true}</script>
 <script type="application/json" id="agent-audit">{"calibration":{"reading":"kind test cluster, 2026-10-20","objects":262,"bytes":289041,"pods":24,"podBytes":113665},"rules":[[0,0.2107,0],[0,0.6275,0],[0,0.1933,0],[0,0.1963,0],[0,0.2466,0],[0,0.6275,0],[0,0.1639,0],[0,0.0036,0],[0,0,0],[0,0.1971,0],[0,0.0075,0],[1,0.1933,0],[0,0.1933,0],[0,0.1933,0],[0,0.2009,0],[0,0.0776,0],[1,0,0],[1,0.0095,0],[0,0.1933,0],[1,0.1933,0],[0,0.0075,0],[0,0,0],[0,0.264,0],[0,0,0],[1,0.2415,1],[1,0.2522,1],[0,0.0295,0],[0,0,0],[0,0.1933,0],[1,0.1734,0],[1,0.1933,0],[0,0.0776,0],[0,0.4573,0],[0,0.1933,0],[0,0.2107,0],[0,0.204,0],[0,0.2104,0],[0,0.2804,0],[0,0.2028,0],[1,0.0871,1],[1,0.0776,0],[1,0.2415,1],[1,0.0776,1],[1,0.0776,1],[0,0,0],[0,0.0177,0],[1,0.0871,1],[0,0,0],[1,0,0],[0,0,0],[1,0.0776,1],[1,0.0776,1],[0,0.1714,0],[0,0,0],[1,0.2415,1],[0,0.0177,0],[0,0.0177,0],[0,0,0],[1,0,0],[0,0,0],[0,0.2009,0],[0,0.1933,0],[0,0.1933,0],[0,0.1933,0],[1,0.0177,0],[0,0.0177,0],[0,0.1734,0],[0,0,0],[0,0.0095,0],[0,0.2415,0],[1,0.2709,1],[0,0,0],[0,0.0137,0],[1,0.0953,1],[0,0,0],[0,0.0812,0],[0,0.0776,0],[0,0.0776,0],[0,0.0776,0],[1,0.0776,0],[1,0.2709,1],[0,0.1933,0],[0,0.1933,0],[0,0.1933,0],[0,0.1933,0],[0,0.1933,0],[0,0.1933,0],[0,0.1933,0]],"joins":13,"findingsPerObject":0.225,"outputTokensPerFinding":258}</script>
 <script type="application/json" id="agent-prices">{"fetched":"2026-10-18","source":"https://platform.claude.com/docs/en/about-claude/pricing","context":1000000,"charsLo":3,"charsHi":4,"secPerCheck":30,"models":[{"n":"Claude Haiku 5.5","in":0.5,"out":2.5,"small":0.1,"tier":100000},{"n":"Claude Sonnet 5.5","in":2,"out":10},{"n":"Claude Opus 5.5","in":4,"out":20},{"n":"Claude Fable 5.1","in":10,"out":50}]}</script>
-<script src="landing.js"></script>
-<script src="film.js"></script>
-<script src="nav.js"></script>
+<script src="landing.js" defer></script>
+<script src="film.js" defer></script>
+<script src="nav.js" defer></script>
 </body>
 </html>
