@@ -1285,6 +1285,9 @@
     });
   };
   billB.forEach(function (b) { b.addEventListener('click', function () { setBill(b.getAttribute('data-bill')); }); });
+  /* START MONTHLY, to match the hero's $59/mo and keep every card on one period (D66 cold read: the card
+     defaulted to yearly, $49.17, beside the hero's $59). */
+  setBill('month');
 
   /* ── the visitor's system, and the newest release ─────────────────────── */
   var meta = function (n) { var m = document.querySelector('meta[name="' + n + '"]'); return m ? m.content.trim() : ''; };

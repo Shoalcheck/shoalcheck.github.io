@@ -1,7 +1,7 @@
-# `shoalcheck gate` in a pipeline — the job that reads the cluster and fails on what changed.
+# `shoalcheck gate` in a pipeline -- the job that reads the cluster and fails on what changed.
 #
-# WHAT MAKES THIS WORTH RUNNING. The comparison is the product's own: a finding that merely became visible —
-# because a rule was added, a reference table moved, or the two readings did not cover the same ground — is
+# WHAT MAKES THIS WORTH RUNNING. The comparison is the product's own: a finding that merely became visible --
+# because a rule was added, a reference table moved, or the two readings did not cover the same ground -- is
 # withheld, not reported as new. So a red build here means the cluster changed, not that the tool did.
 #
 # AND AN ABSENCE IS NOT A PASS. `unreadable` is in the default policy: if this run could not read a kind the
@@ -10,7 +10,7 @@
 # WHAT IT NEEDS. A `KUBECONFIG` secret with the read-only access `shoalcheck audit --show-permissions` prints; a
 # Team licence key in the `SHOALCHECK_LICENCE` secret (the gate is a Team command, and without the key it exits 4
 # naming the plan); and the release to pin in the `SHOALCHECK_VERSION` variable, without the leading v
-# (e.g. 0.1.0-rc.10). A pipeline should not change under you, so this never asks for "latest".
+# (e.g. 0.1.0-rc.11). A pipeline should not change under you, so this never asks for "latest".
 name: shoalcheck gate
 
 on:
@@ -122,8 +122,8 @@ jobs:
 #   shoalcheck gate --context staging --baseline .shoalcheck/baseline.json --update-baseline
 # It compares first and writes afterwards, so the run that records still reports what moved.
 #
-# THE BASELINE IS A READING OF THIS SAME CLUSTER. shoalcheck refuses to compare readings of two different clusters —
-# it knows a cluster by its kube-system namespace, not by a context name a rebuilt cluster can reuse — and a refused
+# THE BASELINE IS A READING OF THIS SAME CLUSTER. shoalcheck refuses to compare readings of two different clusters --
+# it knows a cluster by its kube-system namespace, not by a context name a rebuilt cluster can reuse -- and a refused
 # comparison fails the job with exit 1. Record the baseline from the cluster this job reads. A cluster made new for
 # every run (kind, a preview environment) records its baseline in the same run: apply the manifests the change starts
 # from, run the gate with --update-baseline, apply the change, run the gate again.

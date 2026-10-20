@@ -1,13 +1,13 @@
 # `shoalcheck gate` on GitLab. The same contract: exit 0 the policy is satisfied, 2 it fired, 1 the run or the
-# comparison could not be made, 4 the licence does not cover the gate — and a comparison the gates refuse is never a
+# comparison could not be made, 4 the licence does not cover the gate -- and a comparison the gates refuse is never a
 # pass.
 #
 # WHAT IT NEEDS (CI/CD variables): KUBECONFIG_FILE, a kubeconfig with the read-only access
 # `shoalcheck audit --show-permissions` prints; SHOALCHECK_LICENCE, a masked variable holding a Team licence key (the
-# gate is a Team command); SHOALCHECK_VERSION, the release to pin without the leading v (e.g. 0.1.0-rc.10).
+# gate is a Team command); SHOALCHECK_VERSION, the release to pin without the leading v (e.g. 0.1.0-rc.11).
 #
-# THE BASELINE IS A READING OF THIS SAME CLUSTER. shoalcheck refuses to compare readings of two different clusters —
-# it knows a cluster by its kube-system namespace, not by a context name a rebuilt cluster can reuse — and a refused
+# THE BASELINE IS A READING OF THIS SAME CLUSTER. shoalcheck refuses to compare readings of two different clusters --
+# it knows a cluster by its kube-system namespace, not by a context name a rebuilt cluster can reuse -- and a refused
 # comparison fails the job with exit 1. Record the baseline once from the cluster this job reads, with
 # --update-baseline, and commit it. A cluster made new for every run records its baseline in the same run: apply the
 # manifests the change starts from, run the gate with --update-baseline, apply the change, run the gate again.

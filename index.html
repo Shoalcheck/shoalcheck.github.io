@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Shoalcheck — every finding in your cluster, with what it rests on</title>
+<title>Shoalcheck — read-only Kubernetes audit from your laptop</title>
 <meta name="description" content="Shoalcheck reads a Kubernetes cluster read-only from your laptop: reliability, security, cost, topology and compliance in one reading you can work in — and, before a change, which node won't drain and what a lost zone leaves stranded. Every finding names what it rests on.">
 <meta name="theme-color" content="#06090a">
 <meta property="og:title" content="Shoalcheck — every finding in your cluster, with what it rests on">
@@ -21,6 +21,7 @@
 <!-- Where a licence key is bought. EMPTY UNTIL THE PROJECT OWNS AN ADDRESS: the plan buttons then
      say keys are not on sale yet, rather than sending anyone to an address nobody reads. -->
 <meta name="shoalcheck:contact" content="">
+<link rel="canonical" href="https://shoalcheck.github.io/">
 <link rel="icon" href="brand/shoalcheck-icon.svg" type="image/svg+xml">
 <link rel="preload" href="fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts.css">
@@ -74,7 +75,7 @@
           Open the sample reading
         </a>
       </div>
-      <p class="price-anchor">The size of any reading is free. The whole reading is Pro: <b>$59 a month</b> — <a href="index.html#pricing">plans and prices</a>.</p>
+      <p class="price-anchor">Free: any reading's size and its five most serious kinds. Every finding is Pro: <b>$59 a month</b> — <a href="index.html#pricing">plans and prices</a>.</p>
       <a class="ov-open" href="index.html#flow">
         <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z"/></svg>
         Watch the whole flow <span class="ov-len">seven real screens, from the reading to the fix</span>
@@ -86,7 +87,7 @@
       </ul>
     </div>
 
-    <!-- The sample reading being taken, drawn from its own figures (#hero-reading, written by make site-data). -->
+    <!-- The sample reading shown, drawn from its own figures (#hero-reading, written by make site-data). -->
     <figure class="rd reveal" id="hero-rd" aria-labelledby="rd-cap">
       <div class="rd-bar"><b class="rd-cl"></b><span class="rd-where"></span><span class="rd-chip">Illustrative sample</span></div>
       <div class="rd-body">
@@ -97,7 +98,7 @@
       <div class="rd-first"><p class="rd-k">What it found first</p><ol class="rd-claims" id="rd-claims"></ol></div>
       <div class="rd-foot"><span class="rd-step" id="rd-step"></span><button class="rd-replay" id="rd-replay" type="button" hidden>Replay</button><a class="rd-open" href="sample-report.html">Open the whole reading</a></div>
       <noscript><img src="assets/shot-reading.png" width="1440" height="900" alt="The overview of the sample reading of acme-pay-prod."></noscript>
-      <figcaption id="rd-cap">The sample reading being taken — acme-pay-prod, a fictional cluster run through the real engine. Every figure here is that reading's own.</figcaption>
+      <figcaption id="rd-cap">The sample reading, acme-pay-prod — a fictional cluster run through the real engine. Every figure here is that reading's own.</figcaption>
     </figure>
   </div>
 </section>
@@ -562,8 +563,8 @@
       <h2 id="p-title">Preflight is free. The full reading is the product.</h2>
       <p>Priced by the clusters you read in any 30 days — never by node, never by seat. A licence is checked offline.</p>
       <div class="bill" role="group" aria-label="Billing period">
-        <button class="bill-b" data-bill="year" aria-pressed="true">Yearly <span class="save-tag">2 months free</span></button>
-        <button class="bill-b" data-bill="month" aria-pressed="false">Monthly</button>
+        <button class="bill-b" data-bill="year" aria-pressed="false">Yearly <span class="save-tag">2 months free</span></button>
+        <button class="bill-b" data-bill="month" aria-pressed="true">Monthly</button>
       </div>
     </div>
     <div class="plans">
@@ -582,8 +583,8 @@
       <article class="plan reveal" data-monthly="59" data-yearly="590">
         <h3>Pro</h3>
         <p class="for">For an engineer with a few clusters.</p>
-        <div class="price"><b data-price>$49.17</b><span>/ month</span></div>
-        <div class="billing-line"><span data-line>$590 billed yearly</span><span class="save" data-save>save $118</span></div>
+        <div class="price"><b data-price>$59</b><span>/ month</span></div>
+        <div class="billing-line"><span data-line>billed monthly</span><span class="save" data-save>yearly: two months free</span></div>
         <div class="cap">3 clusters in any 30 days</div>
         <ul>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Every finding, with its evidence and fix</li>
@@ -598,8 +599,8 @@
         <span class="tag">TEAMS</span>
         <h3>Team</h3>
         <p class="for">For a platform team and its pipeline.</p>
-        <div class="price"><b data-price>$249.17</b><span>/ month</span></div>
-        <div class="billing-line"><span data-line>$2,990 billed yearly</span><span class="save" data-save>save $598</span></div>
+        <div class="price"><b data-price>$299</b><span>/ month</span></div>
+        <div class="billing-line"><span data-line>billed monthly</span><span class="save" data-save>yearly: two months free</span></div>
         <div class="cap">20 clusters in any 30 days</div>
         <ul>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Everything in Pro</li>
@@ -613,8 +614,8 @@
       <article class="plan reveal" data-monthly="899" data-yearly="8990">
         <h3>Business</h3>
         <p class="for">For an organisation running many clusters.</p>
-        <div class="price"><b data-price>$749.17</b><span>/ month</span></div>
-        <div class="billing-line"><span data-line>$8,990 billed yearly</span><span class="save" data-save>save $1,798</span></div>
+        <div class="price"><b data-price>$899</b><span>/ month</span></div>
+        <div class="billing-line"><span data-line>billed monthly</span><span class="save" data-save>yearly: two months free</span></div>
         <div class="cap">100 clusters in any 30 days</div>
         <ul>
           <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Everything in Team</li>
@@ -721,7 +722,7 @@
       <a class="btn btn-lg" href="app-demo.html">Try it in your browser</a>
       <button class="btn btn-lg just-switch" type="button" data-just-output aria-pressed="false">Just the output</button>
     </div>
-    <p class="just-note">"Just the output" hides our sentences and keeps what the product printed — the reading being taken,
+    <p class="just-note">"Just the output" hides our sentences and keeps what the product printed — the reading shown,
       the terminals, the scene, the calculators, the video and the readings — with every caption that says what each rests on.</p>
   </div>
 </section>
