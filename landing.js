@@ -452,11 +452,30 @@
     var a2 = row('ans'), c2 = el('div', 'sq-card', null, a2);
     el('b', '', E.title, c2);
     el('span', 'sq-m', [E.owner, E.severity, usd(E.dollarImpactMonthly) + ' a month (' + E.priceBasis + ')', 'confidence ' + E.confidence].join(' · '), c2);
+    /* AND WHAT IT DOES NOT ESTABLISH — in the same answer as the claim, as explain_finding returns it. */
+    var nb = (E.claimBoundaries && E.claimBoundaries.lines) || [];
+    if (nb.length) {
+      var nbx = el('div', 'sq-nb', null, c2);
+      el('span', 'sq-nb-k', 'does not establish' + (nb.length > 1 ? ' · 1 of ' + nb.length : ''), nbx);
+      el('span', 'sq-nb-t', nb[0], nbx);
+    }
     // 3 · what changed since the reading before
     row('call', M[2].tool);
     var a3 = row('ans'), c3 = el('div', 'sq-card', null, a3);
     el('b', '', D.newCount + ' new · ' + D.noLongerInSetCount + ' no longer in the set · ' + D.notEvaluatedCount + ' not evaluated', c3);
     el('span', 'sq-m', (D.savingsDelta < 0 ? '−' : '+') + usd(D.savingsDelta) + ' a month identified against the reading before — what left is counted as missing, never as dealt with', c3);
+    /* THEN, EACH TEAM'S SHARE TO ITS TRACKER — the agent's next step, through the tracker's own MCP server. Not an
+       answer of shoalcheck-mcp's, and it says so; the counts are the ones list_findings returned above. */
+    var hand = el('div', 'sq-hand', null, sq);
+    el('span', 'sq-hand-k', 'Then your agent files each team\u2019s share in that team\u2019s tracker, through the tracker\u2019s own MCP server — one ticket a finding', hand);
+    var bins = el('div', 'sq-bins', null, hand);
+    L.groups.slice().sort(function (a, b) { return (a.key.charAt(0) === '(') - (b.key.charAt(0) === '(') || b.count - a.count; }).forEach(function (g, i) {
+      var bin = el('span', 'sq-bin' + (g.key.charAt(0) === '(' ? ' triage' : ''), null, bins);
+      bin.style.transitionDelay = (i * 90) + 'ms';
+      el('b', '', g.key === '(no owner resolved)' ? 'no owner — triage' : g.key, bin);
+      el('span', '', g.count + (g.count === 1 ? ' ticket' : ' tickets'), bin);
+    });
+    parts.push(hand);
     // the wall: what shoalcheck-mcp cannot do
     var wall = el('div', 'sq-wall', null, sq);
     el('span', 'sq-x', null, wall);

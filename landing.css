@@ -1029,7 +1029,7 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 .sq-l { grid-row: 1; grid-column: 1 / 3; justify-self: center; font: 500 13px var(--mono); color: var(--accent2); background: none; padding: 0; }
 .sq-read .sq-l { grid-column: 2 / 4; color: var(--faint); font-size: 12px; }
 .sq-card { grid-row: 3; grid-column: 1 / 3; margin: 0 12px; display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 9px;
-           background: rgba(220, 245, 240, .04); border: 1px solid var(--line); min-width: 0; }
+           background: linear-gradient(rgba(220, 245, 240, .04), rgba(220, 245, 240, .04)), var(--bg2); border: 1px solid var(--line); min-width: 0; }
 .sq-card b { font-size: 14px; font-weight: 600; color: var(--fg); }
 .sq-m { font: 12.5px/1.45 var(--mono); color: var(--dim); }
 .sq-bars { display: grid; grid-template-columns: max-content minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; font: 12.5px var(--mono); color: var(--dim); }
@@ -1045,6 +1045,19 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 .sq-x { width: 16px; height: 16px; position: relative; }
 .sq-x::before, .sq-x::after { content: ""; position: absolute; left: 7px; top: 0; width: 2px; height: 16px; background: var(--bad); }
 .sq-x::before { transform: rotate(45deg); } .sq-x::after { transform: rotate(-45deg); }
+.sq-nb { display: grid; gap: 2px; margin-top: 2px; padding: 8px 10px; border-left: 2px solid var(--warn); border-radius: 0 6px 6px 0; background: rgba(253, 176, 34, .05); }
+.sq-nb-k { font: 600 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--warn); }
+.sq-nb-t { font-size: 12.5px; line-height: 1.45; color: var(--dim); }
+.sq-hand { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border: 1px solid var(--line2); border-radius: 10px; opacity: 0; transition: opacity .25s var(--ease); }
+.sq-hand.on { opacity: 1; }
+.sq-hand-k { font-size: 13px; color: var(--dim); }
+.sq-bins { display: flex; flex-wrap: wrap; gap: 8px; }
+.sq-bin { display: flex; flex-direction: column; gap: 1px; min-width: 104px; padding: 7px 10px; border-radius: 8px; border: 1px solid rgba(45, 212, 191, .4);
+          opacity: 0; transform: translateX(-10px); transition: opacity .3s var(--ease), transform .3s var(--ease); }
+.sq-hand.on .sq-bin { opacity: 1; transform: none; }
+.sq-bin b { font: 600 13px var(--mono); color: var(--fg); }
+.sq-bin span { font: 12px var(--mono); color: var(--dim); }
+.sq-bin.triage { border-color: var(--line2); border-style: dashed; }
 /* a narrow scene reads as a list: who asks whom on each line, the answer under it */
 @container (width < 560px) {
   .sq-heads { display: none; }
@@ -1057,7 +1070,7 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
   .sq-wall { grid-template-columns: auto minmax(0, 1fr); }
   .sq-wall > span:last-child { grid-column: 1 / -1; }
 }
-@media (prefers-reduced-motion: reduce) { .sq-rows > li, .sq-arrow, .sq-t i, .sq-wall { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .sq-rows > li, .sq-arrow, .sq-t i, .sq-wall, .sq-hand, .sq-bin { transition: none; } }
 /* the pipeline: a real pull request, one run per commit — its steps lit in order, the gate's own output, and what
    GitHub said about merging at that commit (D59) */
 .isc-links { margin: 0; font-size: 13px; color: var(--faint); }
