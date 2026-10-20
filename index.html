@@ -340,41 +340,49 @@
     </div>
     <div class="panes">
       <div class="pane-q" role="tabpanel" id="t-drain" aria-labelledby="tab-drain">
-        <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight drain assay-e2e-worker2
-<span class="bad">✗ assay-e2e-worker2 cannot be evacuated: 1 thing stops the drain</span>
+        <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight drain shoalcheck-e2e-worker2
+<span class="bad">✗ shoalcheck-e2e-worker2 cannot be evacuated: 1 thing stops the drain</span>
 
-1. Drain of assay-e2e-worker2 is blocked by budget e2e-demo/drain-blocked-pdb
-   Evacuating node assay-e2e-worker2 requires evicting 1 pod covered by PodDisruptionBudget
+1. Drain of shoalcheck-e2e-worker2 is blocked by budget e2e-demo/drain-blocked-pdb
+   Evacuating node shoalcheck-e2e-worker2 requires evicting 2 pods covered by PodDisruptionBudget
    e2e-demo/drain-blocked-pdb.
    · …
    · PodDisruptionBudget e2e-demo/drain-blocked-pdb reports status.disruptionsAllowed=0 with
-     spec.maxUnavailable=0, … The eviction API would reject that eviction, so `kubectl drain
-     assay-e2e-worker2` would not complete; finishing it requires force-deletion, which bypasses the
-     budget entirely.
+     spec.maxUnavailable=0, … The eviction API would reject each of those 2 evictions, so `kubectl
+     drain shoalcheck-e2e-worker2` would not complete; finishing it requires force-deletion, which
+     bypasses the budget entirely.
    · …
    · A PodDisruptionBudget constrains only the voluntary eviction path. It gives no protection against
      this node failing, …
    · …
 
-<span class="dim">basis: 12 kinds read · 16 requests, 0 object writes · checks: k8s.reliability.node-drain-budget, … · 55ms</span>   <span class="exit">exit 2</span></pre>
+<span class="dim">basis: 12 kinds read · 16 requests, 0 object writes · checks: k8s.reliability.node-drain-budget, … · 47ms</span>   <span class="exit">exit 2</span></pre>
       </div>
       <div class="pane-q" role="tabpanel" id="t-zone" aria-labelledby="tab-zone" hidden>
-        <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight zone eu-central-1a --context kind-assay-mesh
+        <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight zone eu-central-1a --context kind-shoalcheck-mesh
 <span class="ok">✓ zone eu-central-1a: every pod this model can place has somewhere else to go</span>
 
 <span class="dim">basis: 11 kinds read · 15 requests, 0 object writes · checks: k8s.reliability.zone-loss-feasibility,</span>
-<span class="dim">k8s.reliability.zone-pinned-volume · 53ms</span>
+<span class="dim">k8s.reliability.zone-pinned-volume · 91ms</span>
 <span class="dim">this model checks a subset of what the scheduler checks: it can say a change will stop, and it cannot</span>
 <span class="dim">promise one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
       </div>
       <div class="pane-q" role="tabpanel" id="t-upgrade" aria-labelledby="tab-upgrade" hidden>
         <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight upgrade 1.37
-<span class="ok">✓ upgrading to 1.37: nothing this model checks stops it</span>
+<span class="bad">✗ upgrading to 1.37: 1 thing stops it</span>
 
-<span class="dim">basis: 8 kinds read · 12 requests, 0 object writes · checks: k8s.upgrade.node-pool-cannot-roll,</span>
+1. A node roll meets 1 of 3 nodes it cannot evacuate
+   A node-image upgrade replaces nodes one at a time, and each replacement needs the node drained first.
+   · …
+   · 1 of 3 nodes: shoalcheck-e2e-worker2
+   · each is reported by the drain's own rules, findings f-24babd7b4c77 — the evidence is there and is
+     deliberately not repeated here, so one problem is not counted twice
+   · …
+
+<span class="dim">basis: 9 kinds read · 13 requests, 0 object writes · checks: k8s.upgrade.node-pool-cannot-roll,</span>
 <span class="dim">k8s.upgrade.crd-conversion-webhook-unbacked, api-removals@2026-08-30 · 26ms</span>
 <span class="dim">this model checks a subset of what the scheduler checks: it can say a change will stop, and it cannot</span>
-<span class="dim">promise one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
+<span class="dim">promise one will succeed.</span>   <span class="exit">exit 2</span></pre>
       </div>
     </div>
   </div>
