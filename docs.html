@@ -191,7 +191,7 @@ shoalcheck audit --context prod --output report.html --json reading.json   <span
           <tr data-cmd="fleet" data-plan="Team"><td>fleet</td><td><span class="dc-plan">Team</span></td><td>Several clusters in one reading, and what they declare differently; a context that cannot be read is named, never counted as a cluster with no problems.</td></tr>
           <tr data-cmd="gate" data-plan="Team"><td>gate</td><td><span class="dc-plan">Team</span></td><td>For CI: compares a reading with a baseline and fails on what you choose — new findings at a severity, regressions, unreadable kinds.</td></tr>
           <tr data-cmd="schedule" data-plan="Team"><td>schedule</td><td><span class="dc-plan">Team</span></td><td>Scheduled readings through launchd or systemd, or a CI job (<code>schedule render --ci github|gitlab</code>).</td></tr>
-          <tr data-cmd="ticket" data-plan="Team"><td>ticket push</td><td><span class="dc-plan">Team</span></td><td>Files findings as Linear issues, deduplicated, so the same finding is not filed twice; <code>--dry-run</code> contacts nothing. A reading's Export &amp; act also opens a filled-in Jira or Linear issue form in your own browser.</td></tr>
+          <tr data-cmd="ticket" data-plan="Team"><td>ticket push</td><td><span class="dc-plan">Team</span></td><td>Files findings as Linear or Jira Cloud issues, deduplicated, so the same finding is not filed twice; <code>--dry-run</code> contacts nothing. Both are written from the trackers' published APIs and tested against fakes of them — no push has reached a real Linear or Jira site yet. A reading's Export &amp; act also opens a filled-in Jira or Linear issue form in your own browser.</td></tr>
         </tbody>
       </table></div>
     </div>
