@@ -10,7 +10,15 @@
 .gh a:hover { text-decoration: underline; }
 /* each page its own frame: on a desk the job's beside the other three, which run in the order it happened */
 .gh-pane { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 0 16px 16px; border: 1px solid var(--hl); border-radius: 12px; background: var(--hb); }
-.gh-pr.a { grid-area: 1 / 1; } .gh-secp { grid-area: 2 / 1; } .gh-pr.b { grid-area: 3 / 1; } .gh-job { grid-area: 1 / 2 / 4; }
+.gh-pr.a { grid-area: 1 / 1; } .gh-secp { grid-area: 2 / 1; } .gh-pr.b { grid-area: 3 / 1; }
+.gh-job { grid-area: 1 / 2 / 4; --logh: 0px; position: relative; isolation: isolate; border-color: transparent; background: none; }
+/* THE JOB PAGE'S FRAME ENDS WHERE ITS STEPS DO. The Gate's log room is held in the layout from the start, so nothing
+   below moves when the log opens, and the steps under the Gate stand over that room, moved up, until it does. The
+   frame enclosed the room too, so until the log opened a phone showed a tall empty box (2026-10-21 tour). The frame is
+   drawn behind the page and stops short of the room until the Gate opens; the layout is unchanged. */
+.gh-job::before { content: ""; position: absolute; inset: 0 0 var(--room, 0px) 0; z-index: -1; border: 1px solid var(--hl);
+                  border-radius: 12px; background: var(--hb); transition: bottom .32s var(--ease); }
+.gh-job:has(.gh-step.gate:not(.open)) { --room: var(--logh); }
 .gh-nav { display: flex; justify-content: space-between; gap: 12px; min-height: 40px; margin: 0 -16px; padding: 0 16px; border-bottom: 1px solid var(--hl); font-size: 13px; }
 .gh-repo { align-self: center; min-width: 0; overflow-wrap: anywhere; }
 .gh-tab { position: relative; display: flex; flex: none; align-items: center; margin-right: -8px; padding: 0 8px; font-weight: 600; }
@@ -102,7 +110,6 @@
 .gh .gh-jobname { font-weight: 600; }
 .gh-jobst { min-height: 18px; font-size: 12px; line-height: 18px; color: var(--hm); }
 .gh-search { align-self: center; flex: 0 1 200px; margin-left: auto; padding: 4px 10px; border: 1px solid var(--hl); border-radius: 6px; background: var(--hb); color: var(--hm); font-size: 12px; line-height: 18px; }
-.gh-steps { --logh: 0px; }
 .gh-shead { display: grid; grid-template-columns: 16px 16px minmax(0, 1fr) auto; align-items: center; gap: 0 8px; min-height: 28px; padding: 0 16px 0 8px; font-size: 13px; }
 .gh-step:first-child .gh-shead { min-height: 32px; padding-top: 4px; }
 .gh-chev, .gh-fold-t .gh-i { transition: transform var(--ht); }

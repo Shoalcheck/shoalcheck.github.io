@@ -196,8 +196,9 @@ window.ghScene = function (box, G, playWhenSeen) {
     });
   });
   el('div', 'gh-jobfoot', null, sl);
-  /* the steps under the Gate stand over its log's room, moved up by its height, until it opens */
-  if (log && 'ResizeObserver' in window) new ResizeObserver(function () { sl.style.setProperty('--logh', log.offsetHeight + 'px'); }).observe(log);
+  /* the steps under the Gate stand over its log's room, moved up by its height, until it opens; the page's frame
+     stops short of the room until then (gh-scene.css) */
+  if (log && 'ResizeObserver' in window) new ResizeObserver(function () { job.style.setProperty('--logh', log.offsetHeight + 'px'); }).observe(log);
 
   /* the alert the red run's upload opened, on the page GitHub lists it on. The pull request's code-scanning check says
      "No new alerts in code changed by this pull request", and the alert is still there on the pull request's ref: the

@@ -405,12 +405,14 @@
          scene runs 2,000–3,000 px: at most 844/2,959 of it fits a 390×844 screen, 0.29, and the GitHub pipeline's own
          card header pushes its top down so under 60% of a short 700 px screen is covered when it is parked at the
          card's top (it is the last section, so the page cannot scroll its top to zero). The third clause is the
-         honest one for a tall scene: its top is above the screen's middle and its bottom below it, so it dominates
-         the view — which is exactly when a reader is looking at it. */
+         honest one for a tall scene: it fills the screen's lower half and its top has come up past 80% of the screen.
+         That clause used to wait for the top to pass the middle; a tall scene's first beats are at its top, and a
+         phone reader reaching its lower pages before the run did met them empty (2026-10-21), so it now starts as
+         it comes in and the run stays ahead of the reader. */
       var rb = e.rootBounds, cr = e.boundingClientRect;
       var seen = e.intersectionRatio >= 0.4
         || (rb && e.intersectionRect.height >= rb.height * 0.6)
-        || (rb && cr.height > rb.height && cr.top < rb.height * 0.5 && cr.bottom > rb.height * 0.5);
+        || (rb && cr.height > rb.height && cr.top < rb.height * 0.8 && cr.bottom > rb.height * 0.5);
       if (seen && !playing) {
         playing = true;
         box.classList.add('played');
@@ -738,7 +740,11 @@
       z.nodes.forEach(function (n, ni) {
         var ny = Y0 + 4 + ni * (NH + GAP);
         var rect = el('rect', { x: x + 10, y: ny, width: ZW - 20, height: NH, rx: 9, 'class': 'node' }, gBack);
-        var t = el('text', { x: x + 20, y: ny + 18, 'class': 'node-lbl' }, gBack); t.textContent = n.n + ' · ' + n.t;
+        // the node's name, then its type: on a phone the drawing is a little over half its size, and only the name is
+        // kept, drawn larger (landing.css), so it can still be read
+        var t = el('text', { x: x + 20, y: ny + 18, 'class': 'node-lbl' }, gBack);
+        el('tspan', {}, t).textContent = n.n;
+        el('tspan', { 'class': 'node-t' }, t).textContent = ' · ' + n.t;
         var node = { x: x + 10, y: ny, rect: rect, used: n.p.length, base: n.p.length, lost: lost, name: n.n, zone: z.z };
         allNodes.push(node);
         if (!lost) survivors.push(node);
@@ -766,7 +772,12 @@
       p.tx = n.x + 14 + n.used * 15 - p.cx + 0; p.ty = n.y + 38 - p.cy;
       p.tx += 0; n.used++;
     });
-    stranded.forEach(function (p, k) { p.sx = X0 + 120 + k * 22 - p.cx; p.sy = floorY - 4 - p.cy; });
+    // the floor's pods stand just past its label, measured when drawn: the label is larger on a phone (landing.css)
+    var floorAt = function (k) {
+      var w = 0; try { w = floor.getComputedTextLength(); } catch (e) { /* not laid out yet */ }
+      return Math.max(X0 + 120, X0 + 4 + w + 18) + k * 22;
+    };
+    stranded.forEach(function (p, k) { p.k = k; p.sy = floorY - 4 - p.cy; });
     stranded.forEach(function (p) {
       var row = document.createElement('div');
       row.className = 't-row';
@@ -797,7 +808,7 @@
            been lost; each now dims with its node until the story says where it goes — moved, gone or stranded. */
         p.c.classList.toggle('dark', p.lost && s >= 1 && !move && !strand && !(p.bare && s >= 2));
         p.c.style.transform = move ? 'translate(' + p.tx + 'px,' + p.ty + 'px)'
-          : strand ? 'translate(' + p.sx + 'px,' + p.sy + 'px)' : '';
+          : strand ? 'translate(' + (floorAt(p.k) - p.cx) + 'px,' + p.sy + 'px)' : '';
         if (p.row) p.row.classList.toggle('in', !!strand);
       });
       floor.style.opacity = s >= 3 ? 1 : 0;
@@ -926,7 +937,7 @@
             if (blockedBy[p.key]) { cls = 'held'; addRow(p.key, blockedBy[p.key], 'held'); }
             else if (strandedBy[p.key]) {
               cls = 'stranded'; addRow(p.key, strandedBy[p.key]);
-              tf = 'translate(' + (X0 + 120 + floorK * 22 - p.cx) + 'px,' + (floorY - 4 - p.cy) + 'px)'; floorK++;
+              tf = 'translate(' + (floorAt(floorK) - p.cx) + 'px,' + (floorY - 4 - p.cy) + 'px)'; floorK++;
             } else if (p.bare) { cls = 'gone'; }
             else if (rest.length) {
               var n = rest[k++ % rest.length];
