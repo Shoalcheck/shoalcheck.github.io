@@ -30,6 +30,7 @@
 <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
+<div class="stage" aria-hidden="true"><i class="key"></i><i class="rim"></i></div>
 <a class="skip" href="#main">Skip to the content</a>
 
 <header class="top" id="top">
@@ -60,12 +61,11 @@
 
 <!-- ═══ HERO ═══ -->
 <section class="hero" aria-labelledby="hero-title">
-  <div class="glow" aria-hidden="true"></div>
-  <div class="wrap hero-grid">
+    <div class="wrap hero-grid">
     <div class="hero-copy">
-      <span class="eyebrow">Read-only Kubernetes audit · nothing installed</span>
+      <span class="eyebrow hero-name">Shoalcheck <em>Read-only Kubernetes audit · nothing installed</em></span>
       <h1 id="hero-title">Find what's unsafe, overpriced, or breaking <span class="hl">— before it bites.</span></h1>
-      <p class="lede">A <b>read-only audit you run from your laptop</b> — <b>get</b> and <b>list</b>, nothing installed. It names every risk, every wasted dollar, and what blocks your next change, with the object it rests on, and a patch where one is safe to give.</p>
+      <p class="lede">A read-only audit you run from your laptop: <b>get</b> and <b>list</b>, nothing installed. Every risk, every wasted dollar and what blocks your next change, each with the object it rests on.</p>
       <div class="cta">
         <a class="btn btn-primary btn-lg" href="index.html#download" data-os-cta>
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 16.5h12"/></svg>
@@ -77,10 +77,6 @@
         </a>
       </div>
       <p class="price-anchor">Free: any reading's size and its five most serious kinds. Every finding is Pro: <b>$59 a month</b> — <a href="index.html#pricing">plans and prices</a>.</p>
-      <a class="ov-open" href="index.html#flow">
-        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z"/></svg>
-        Watch the whole flow <span class="ov-len">three real screens, from the reading to the fix</span>
-      </a>
       <ul class="trust">
         <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>No account</li>
         <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Nothing installed in the cluster</li>
@@ -88,6 +84,10 @@
       </ul>
     </div>
 
+    <!-- The sample reading, on the screen of the machine it runs on: the lid turns toward the reader as the page is
+         scrolled (motion.js). The reading inside is drawn from its own figures (#hero-reading, written by make site-data). -->
+    <div class="device">
+      <div class="dv-lid"><div class="dv-screen">
     <!-- The sample reading shown, drawn from its own figures (#hero-reading, written by make site-data). -->
     <figure class="rd reveal" id="hero-rd" aria-labelledby="rd-cap">
       <div class="rd-bar"><b class="rd-cl"></b><span class="rd-where"></span><span class="rd-chip">Illustrative sample</span></div>
@@ -101,52 +101,9 @@
       <noscript><img src="assets/shot-reading.png" width="1440" height="900" alt="The overview of the sample reading of acme-pay-prod."></noscript>
       <figcaption id="rd-cap">The sample reading, acme-pay-prod — a fictional cluster run through the real engine. Every figure here is that reading's own.</figcaption>
     </figure>
-  </div>
-</section>
-
-<!-- ═══ PROOF STRIP ═══ -->
-<section class="strip" aria-label="What it does, in numbers">
-  <div class="wrap strip-grid">
-    <div class="stat reveal"><b>103</b><span>rules in every reading, each naming what it rests on</span></div>
-    <div class="stat reveal"><b>47</b><span>resource types its read-only role may read — get and list, nothing else</span></div>
-    <div class="stat reveal"><b>0</b><span>object writes — counted, not promised</span></div>
-    <div class="stat reveal"><b>3</b><span>systems: macOS, Windows, Linux</span></div>
-  </div>
-</section>
-
-<!-- ═══ THE FLOW ═══
-     From a reading to a fix, in three screens it zooms through: a terminal, a real agent session that routes it to each
-     team, and a pull request's checks closing on the reading taken again. Every screen is drawn by flow.js from captured
-     output — #flow-data (testdata/site/flow.json: the CLI's output, a real Claude Code session over shoalcheck-mcp, the
-     ticket payloads), #gate-demo (a real pull request) and #film-mcp — each held to the product by a gate. Without the
-     script the steps read as text. -->
-<section class="flow" id="flow" aria-labelledby="fl-title">
-  <div class="wrap flow-head">
-    <span class="eyebrow">The whole flow · real screens</span>
-    <h2 id="fl-title">From a reading to a fix your team ships.</h2>
-    <p class="flow-lede">Three screens, each one the tool’s own output over the sample reading of acme-pay-prod — a fictional cluster run through the real engine: the reading in a terminal, a real agent session that routes it to each team, and a pull request’s checks closing on the same reading taken again. Captured, never typed by hand.</p>
-  </div>
-  <div class="flow-railbar">
-    <nav class="flow-rail wrap" aria-label="Steps of the flow">
-      <button type="button" data-i="0"><b>01</b> Read</button>
-      <button type="button" data-i="1"><b>02</b> Review &amp; route</button>
-      <button type="button" data-i="2"><b>03</b> Gate</button>
-    </nav>
-  </div>
-  <ol class="flow-stage wrap">
-    <li class="fs" data-step="read">
-      <div class="fs-cap"><span class="fs-n">01 · Read</span><h3>The reading, worst first.</h3><p><code>shoalcheck audit</code> reads the cluster with <b>get</b> and <b>list</b> and keeps the reading. Ask it for the worst: <span data-f="read-rows">7</span> kinds of problem, <span data-f="read-of">11</span> of its <span data-f="total">141</span> findings, each named with the object it rests on.</p></div>
-    </li>
-    <li class="fs" data-step="review">
-      <div class="fs-cap"><span class="fs-n">02 · Review &amp; route</span><h3>Your agent reviews the reading, then routes it — one ticket per team.</h3><p>A real Claude Code session — model <span data-f="model">claude-opus-5-5</span> — with shoalcheck-mcp’s tools and nothing else: <span data-f="calls">8</span> calls, every answer from the reading. It grouped the findings by team and picked each team’s first fix; those picks become <span data-f="tickets">4</span> tickets, one per team, as <code>shoalcheck ticket push</code> assembles them. It cannot reach the cluster.</p></div>
-    </li>
-    <li class="fs" data-step="gate">
-      <div class="fs-cap"><span class="fs-n">03 · Gate</span><h3>Every change, read in a cluster before it merges. Then read again.</h3><p>A real pull request: red at exit <span data-f="gate-red">2</span> on a new cluster-admin grant, green at exit <span data-f="gate-green">0</span> once it was narrowed. The sample read an hour after the patch: <span data-f="gone">1</span> finding no longer in the set, <span data-f="new">0</span> new, <span data-f="delta">−$300</span> a month identified — what left is counted as missing, never as dealt with. <a href="#integrations">The whole run, step by step</a></p></div>
-    </li>
-  </ol>
-  <div class="wrap flow-end">
-    <p>All of it from one sample reading of a fictional cluster, through the real engine. Open it and work in it.</p>
-    <div class="cta"><a class="btn btn-primary" href="sample-report.html">Open the sample reading</a><a class="btn" href="index.html#download">Download</a></div>
+      </div></div>
+      <div class="dv-base"><i></i></div>
+    </div>
   </div>
 </section>
 
@@ -154,168 +111,124 @@
 <section class="band" id="finds" aria-labelledby="c-title">
   <div class="wrap">
     <div class="band-head reveal">
-      <span class="eyebrow">All in one</span>
-      <h2 id="c-title">Five audits in one read-only pass.</h2>
-      <p>Security, reliability, money, compliance and topology from one read of your cluster — and from the same read, what stands in the way of a change and how a fleet has moved. Each figure below is the sample reading's own — a fictional cluster through the real engine — and each opens the part of it that says why.</p>
+      <span class="eyebrow">Get the highlights</span>
+      <h2 id="c-title" class="grad">Five audits. One read-only pass.</h2>
+      <p>Each figure is the sample reading's own, and each opens the part of it that says why.</p>
     </div>
+  </div>
+  <div class="gallery" data-gallery>
     <div class="caps">
       <a class="cap-card reveal" href="sample-report.html#v=eyJ3cyI6ImFjY2VzcyJ9">
         <div class="cap-scene" data-scene="security"></div>
         <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 4 5v4.6c0 3.7 2.6 6.6 6 7.9 3.4-1.3 6-4.2 6-7.9V5z"/><path d="m7.5 10 1.8 1.8L12.8 8"/></svg></span><h3>Security &amp; access</h3></div>
         <b class="cap-fig" data-cap="security">3 grants rated critical · 2 reach <span class="nb">cluster-admin</span></b>
-        <p>Who can reach what: every binding traced from its subject to the role it grants, rated by what that role can do.</p>
+        <p>Every binding traced to the role it grants, rated by what that role can do.</p>
         <span class="cap-go">Trace it in the sample</span>
       </a>
       <a class="cap-card reveal" href="sample-report.html#v=eyJ3cyI6ImJsYXN0In0">
         <div class="cap-scene" data-scene="reliability"></div>
         <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 10h3l2-5 3 10 2-5h5"/></svg></span><h3>Reliability</h3></div>
         <b class="cap-fig" data-cap="reliability">5 nodes cannot be evacuated</b>
-        <p>Budgets at zero, pods no controller manages, volumes pinned to one zone — each node named with the pod that stops it.</p>
+        <p>Each node named with the pod that stops it.</p>
         <span class="cap-go">See the blast radius</span>
       </a>
       <a class="cap-card reveal" href="sample-report.html#v=eyJ3cyI6ImNvc3QifQ">
         <div class="cap-scene" data-scene="money"></div>
         <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="M12.4 7.4c-.4-.8-1.3-1.3-2.4-1.3-1.5 0-2.5.8-2.5 1.9 0 2.6 5 1.4 5 4 0 1.1-1 1.9-2.5 1.9-1.1 0-2.1-.5-2.5-1.3M10 4.6v1.5M10 13.9v1.5"/></svg></span><h3>Money</h3></div>
         <b class="cap-fig" data-cap="money">$1,659 a month identified</b>
-        <p>Rightsizing from a week of Prometheus usage, where one is reachable; idle load balancers; old instance generations — every dollar with its rate.</p>
+        <p>From a week of Prometheus usage — every dollar with its rate.</p>
         <span class="cap-go">Follow the money</span>
       </a>
       <a class="cap-card reveal" href="sample-report.html#v=eyJ3cyI6ImNvbXBsaWFuY2UifQ">
         <div class="cap-scene" data-scene="compliance"></div>
         <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="12" height="15" rx="2"/><path d="M7.5 3V2h5v1"/><path d="m7 11 2 2 4-4"/></svg></span><h3>Compliance</h3></div>
         <b class="cap-fig" data-cap="compliance">26 of 28 checkable CIS controls fail</b>
-        <p>The CIS Kubernetes Benchmark 5.x controls the reading can check, each with its findings; every control it cannot is said so, and the evidence pack goes to your auditor.</p>
+        <p>CIS Kubernetes Benchmark 5.x — every control it cannot check is said so.</p>
         <span class="cap-go">Open the controls</span>
       </a>
       <a class="cap-card cap-wide reveal" href="sample-report.html#v=eyJ3cyI6InRvcG9sb2d5In0">
         <div class="cap-scene" data-scene="topology"></div>
         <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="4.5" cy="10" r="2"/><circle cx="15.5" cy="4.5" r="2"/><circle cx="15.5" cy="15.5" r="2"/><path d="m6.3 9.1 7.4-3.7M6.3 10.9l7.4 3.7"/></svg></span><h3>Topology</h3></div>
         <b class="cap-fig" data-cap="topology">6 observed flows · 14 references point at nothing</b>
-        <p>What is reachable from outside, what talks to what as the telemetry saw it, and the Services that publish no ready address.</p>
+        <p>What talks to what, as the telemetry saw it.</p>
         <span class="cap-go">Open the map</span>
       </a>
       <a class="cap-card cap-wide reveal" href="index.html#questions">
         <div class="cap-scene" data-scene="preflight"></div>
         <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15.5 17 10 3 4.5 5.5 10z"/><path d="M5.5 10H11"/></svg></span><h3>Before a change</h3></div>
         <b class="cap-fig" data-cap="preflight">12 nodes and 3 zones, each answered</b>
-        <p>Free on every plan: which node will not drain, what a lost zone leaves stranded, what blocks the next version — with an exit code a pipeline can act on.</p>
+        <p>Free on every plan, with an exit code a pipeline can act on.</p>
         <span class="cap-go">Ask the three questions</span>
       </a>
       <a class="cap-card cap-wide reveal" href="sample-fleet.html">
         <div class="cap-scene" data-scene="fleet"></div>
         <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m10 2.5 7.5 4-7.5 4-7.5-4z"/><path d="m2.5 10 7.5 4 7.5-4"/><path d="m2.5 13.5 7.5 4 7.5-4"/></svg></span><h3>Fleets and history</h3></div>
         <b class="cap-fig" data-cap="fleet">3 clusters · 7 things they declare differently</b>
-        <p>Every cluster in one file with what they declare differently, and each reading compared with the one before — a finding that goes missing is counted as missing, never as dealt with.</p>
+        <p>Every cluster in one file; a finding that goes missing is counted as missing.</p>
         <span class="cap-go">Open the sample fleet</span>
       </a>
     </div>
-  </div>
-</section>
-
-<!-- ═══ INTEGRATIONS ═══
-     Every card is a command that ships in the download, named as it is typed. -->
-<section class="band band-alt" id="integrations" aria-labelledby="in-title">
-  <div class="wrap">
-    <div class="band-head reveal">
-      <span class="eyebrow">Works where your team works</span>
-      <h2 id="in-title">One reading. Every tool your team already runs.</h2>
-      <p>The reading feeds your tracker, your AI agent, your pipeline and your security tab. Every card is a command in the download — no account, and no server of ours in between.</p>
-    </div>
-    <div class="int-scenes">
-      <article class="isc-card reveal" aria-labelledby="isc-ci-t">
-        <span class="int-k">GitHub Actions · GitLab CI · any pipeline</span>
-        <h3 id="isc-ci-t">A pull request grants cluster-admin. The build goes red, and says why.</h3>
-        <div class="isc" data-isc="ci" role="group" aria-label="GitHub's pages for a real pull request: the gate's required check fails on the cluster-admin grant and merging is blocked; once the grant is narrowed every check passes and the pull request is merged"></div>
-        <p class="isc-note" id="ci-note">GitHub, as it showed <a href="https://github.com/ilya776/shoalcheck-gate-demo/pull/1" target="_blank" rel="noopener">pull request #1</a> of ilya776/shoalcheck-gate-demo at each of its commits — a public repository, a kind cluster inside the runner, the published v0.1.0-rc.11; the code-scanning alert as GitHub shows it to the repository’s owner. Every check, step, second and log line is from GitHub’s record of the runs: <a href="https://github.com/ilya776/shoalcheck-gate-demo/actions/runs/39424600120" target="_blank" rel="noopener">the red one</a>, <a href="https://github.com/ilya776/shoalcheck-gate-demo/actions/runs/39424845123" target="_blank" rel="noopener">the green one</a>.</p>
-        <code>shoalcheck gate --baseline baseline.json --fail-on new:high,regressed,unreadable</code>
-        <p class="isc-links">The job, ready to copy: <a href="ci/github-actions.yml">GitHub Actions</a> · <a href="ci/gitlab-ci.yml">GitLab CI</a></p>
-      </article>
-      <article class="isc-card reveal" aria-labelledby="isc-agent-t">
-        <span class="int-k">Claude · Cursor · any MCP client</span>
-        <h3 id="isc-agent-t">Your agent reads the whole reading. It cannot touch the cluster.</h3>
-        <div class="isc" data-isc="agent" aria-label="An agent's three calls to shoalcheck-mcp over the sample, and the answers it got"></div>
-        <p class="isc-note">The calls and their answers are shoalcheck-mcp's, over the sample — trimmed, never changed.</p>
-        <code>shoalcheck-mcp</code>
-      </article>
-    </div>
-    <div class="ints">
-      <article class="int reveal"><span class="int-k">Linear · Jira</span><h3>A ticket for the findings you pick. Filed once.</h3><p>Each with its evidence, its basis and — where one exists — its patch; a marker lets a second push find the first. Tested against the trackers' published APIs.</p><code>shoalcheck ticket push --from reading.json --tracker linear --project OPS</code></article>
-      <article class="int reveal"><span class="int-k">GitHub Issues · any tracker</span><h3>Routed to the team that owns it.</h3><p>Each finding carries its team from your namespace labels; your agent files every team's share through that tracker's own MCP server.</p><code>shoalcheck audit --owner-label team</code></article>
-      <article class="int reveal"><span class="int-k">GitHub and GitLab code scanning</span><h3>Findings in your security tab.</h3><p>SARIF 2.1.0: every result with its rule, its severity and the object it rests on.</p><code>shoalcheck audit --export-sarif findings.sarif</code></article>
-      <article class="int reveal"><span class="int-k">kubectl · spreadsheets · docs</span><h3>Right where you already type.</h3><p>A kubectl plugin, and every finding as CSV or Markdown for whoever lives in a spreadsheet or a wiki.</p><code>kubectl shoalcheck · --export-csv · --export-md</code></article>
+    <div class="gal-ctl wrap" aria-label="The highlights">
+      <div class="gal-dots" role="tablist"></div>
+      <button class="gal-play" type="button" aria-label="Pause the highlights" aria-pressed="false"></button>
     </div>
   </div>
 </section>
 
-<!-- ═══ THE READING ═══ -->
-<section class="band band-alt" id="reading" aria-labelledby="r-title">
-  <div class="wrap">
-    <div class="band-head reveal">
-      <span class="eyebrow">Work in it</span>
-      <h2 id="r-title">A reading you can work in, not a PDF you scroll.</h2>
-      <p><code>shoalcheck audit</code> reads reliability, security, cost and topology and writes one self-contained file: every finding with the object it rests on, every dollar with its rate, and what could not be read named as such — never counted as clean. Filter it, slice it, open any finding, hand it off.</p>
-    </div>
-    <figure class="live-main reveal">
-      <div class="live-frame" id="live-frame" data-w="1440" data-h="900">
-        <img class="live-poster" src="assets/shot-reading.png" width="1440" height="900" loading="lazy" alt="The overview of the sample reading of acme-pay-prod, labelled Illustrative sample: 141 findings, 11 critical or high, $1,659 a month identified, the four claims it leads with, a severity by category grid and findings by namespace.">
-        <iframe data-src="sample-report.html" title="The sample reading, live" tabindex="-1" aria-hidden="true"></iframe>
-        <a class="live-open" href="sample-report.html">Open it — the whole reading</a>
-      </div>
-      <figcaption><b>The sample reading itself, live in the page</b> — the same single file <code>shoalcheck audit --output reading.html</code> writes for your cluster on a Pro licence, not a recording: what it found first, how bad and of what kind, where — 141 findings on the sample cluster. Open it: Findings, Blast radius, Access, Cost, Topology, Compliance, Method and every other workspace, each one working.</figcaption>
-    </figure>
-    <div class="reading-cta reveal">
-      <a class="btn btn-primary" href="sample-report.html">Open the sample reading</a>
-      <span class="note">A fictional cluster run through the real engine — every panel, filter and finding works. Labelled as a sample on every screen.</span>
-    </div>
-    <div class="compare compare-flip reveal">
-      <div class="compare-copy">
-        <span class="eyebrow">Read them all</span>
-        <h3>A fleet is one file: every cluster, and what they declare differently.</h3>
-        <p>The sample company's three clusters — production, staging and disaster recovery — each read by the engine and put together the way <code>shoalcheck fleet</code> does. Each name opens that cluster's full reading. Staging declares Pod Security levels, a NetworkPolicy and a quota that production does not yet; the recovery cluster runs without monitoring and serves Velero's API. So the evidence differs too, and each reading says which it had: production and staging read a week of usage from their own Prometheus and the traffic Hubble saw, where staging's policy drops a call production lets through; the recovery cluster has one moment of metrics.k8s.io and no traffic at all.</p>
-        <p class="note">What the clusters declare differently is listed side by side, and no value is marked as the right one. A context that could not be read is named, never counted as a cluster with no problems. Like the sample reading, it is labelled as a sample on every screen.</p>
-        <a class="btn" href="sample-fleet.html">Open the sample fleet</a>
-      </div>
-      <figure>
-        <div class="live-frame" data-w="1440" data-h="900">
-          <iframe data-src="sample-fleet.html" title="The sample fleet, live" tabindex="-1" aria-hidden="true"></iframe>
-          <a class="live-open" href="sample-fleet.html">Open the sample fleet</a>
+<!-- ═══ PROOF STRIP ═══ -->
+<section class="strip" aria-label="What it does, in numbers">
+  <div class="wrap strip-grid">
+    <div class="stat reveal"><b>103</b><span>rules in every reading, each naming what it rests on</span></div>
+    <div class="stat reveal"><b>47</b><span>resource types it may read — get and list, nothing else</span></div>
+    <div class="stat reveal"><b>0</b><span>object writes — counted, not promised</span></div>
+    <div class="stat reveal"><b>3</b><span>systems: macOS, Windows, Linux</span></div>
+  </div>
+</section>
+
+<!-- ═══ THE FLOW ═══
+     From a reading to a fix, told the way a product film is: one window held on the screen while the page scrolls, and
+     inside it the three real interfaces in turn — the terminal, a Claude Code session over shoalcheck-mcp handing each
+     team a Linear ticket, and GitHub's pull request closing on the reading taken again. The scroll is the playhead
+     (flow.js): every line arrives at its own point of the scroll and leaves again on the way back. Every line drawn is
+     the capture's own — #flow-data (testdata/site/flow.json), #gate-demo, #film-mcp — trimmed, never changed. Without the
+     script, or with reduced motion, the three steps are drawn whole, one under the other. -->
+<section class="flow" id="flow" aria-labelledby="fl-title">
+  <div class="wrap flow-head">
+    <span class="eyebrow">The whole flow · real screens</span>
+    <h2 id="fl-title" class="grad">From a reading to a fix.</h2>
+    <p class="flow-lede">Three real screens over one sample reading: the terminal, an agent routing it to each team, a pull request closing on it. Captured, never typed by hand.</p>
+  </div>
+  <div class="flow-run">
+    <div class="flow-pin">
+      <div class="wrap flow-grid">
+        <ol class="flow-copy">
+          <li class="fc" data-step="read"><span class="fc-n">01 · Read</span><h3>The reading, worst first.</h3><p>Ask the reading for the worst: <span data-f="read-rows">7</span> kinds of problem, <span data-f="read-of">11</span> of its <span data-f="total">141</span> findings, each named with the object it rests on.</p></li>
+          <li class="fc" data-step="review"><span class="fc-n">02 · Review &amp; route</span><h3>Your agent routes it. One ticket per team.</h3><p>A real Claude Code session, model <span data-f="model">claude-opus-5-5</span>, with shoalcheck-mcp’s tools and nothing else: <span data-f="calls">8</span> calls, every answer from the reading, <span data-f="tickets">4</span> tickets. It cannot reach the cluster.</p></li>
+          <li class="fc" data-step="gate"><span class="fc-n">03 · Gate</span><h3>Every change, read before it merges.</h3><p>A real pull request: red at exit <span data-f="gate-red">2</span> on a new cluster-admin grant, green at exit <span data-f="gate-green">0</span> once narrowed. Read again an hour later: <span data-f="gone">1</span> finding no longer in the set, <span data-f="new">0</span> new, <span data-f="delta">−$300</span> a month — counted as missing, never as dealt with. <a href="#integrations">The whole run, step by step</a></p></li>
+        </ol>
+        <div class="flow-bar" aria-hidden="true"><i data-step="read"></i><i data-step="review"></i><i data-step="gate"></i></div>
+        <div class="flow-device" role="group" aria-label="The three screens of the flow, drawn from what was captured">
+          <div class="fd" data-step="read"></div>
+          <div class="fd" data-step="review"></div>
+          <div class="fd" data-step="gate"></div>
         </div>
-        <figcaption>The sample fleet itself, live — Illustrative sample: acme-pay-prod 141 findings, acme-pay-staging 137, acme-pay-dr 122; $1,659 a month identified on production and on staging, read from their own Prometheus, and $1,647 on acme-pay-dr, from a metrics.k8s.io snapshot; 400 findings and $4,965 a month across the fleet; every context read.</figcaption>
-      </figure>
+      </div>
     </div>
+  </div>
+  <div class="wrap flow-end">
+    <p>One sample reading of a fictional cluster, through the real engine. Every line above is the capture's own, trimmed, never changed.</p>
+    <div class="cta"><a class="btn btn-primary" href="sample-report.html">Open the sample reading</a><a class="btn" href="index.html#download">Download</a></div>
   </div>
 </section>
 
-<!-- ═══ THE APP ═══ -->
-<section class="band" id="app" aria-labelledby="a-title">
-  <div class="wrap app-grid">
-    <div class="band-head reveal">
-      <span class="eyebrow">The desktop app</span>
-      <h2 id="a-title">A full application, not a script.</h2>
-      <p>Pick a cluster, ask a question, read the answer. Home with the three jobs, Preflight over your real nodes and zones, every reading kept and comparable, ⌘K to anything — and it tells you when a new version is out.</p>
-      <div class="cta">
-        <a class="btn btn-primary" href="app-demo.html"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z"/></svg>Try the interactive demo</a>
-        <a class="btn" href="index.html#download">Download</a>
-      </div>
-      <p class="note">The demo is the real window replaying a session recorded against our kind test cluster. Nothing in it talks to a cluster.</p>
-    </div>
-    <figure class="app-live reveal">
-      <div class="live-frame" data-w="1280" data-h="800">
-        <iframe data-src="app-demo.html" title="The desktop app's window, replaying a recorded session" tabindex="-1" aria-hidden="true"></iframe>
-        <a class="live-open" href="app-demo.html">Open the interactive demo</a>
-      </div>
-      <figcaption>The app's real window in the page, not a recording of it: the same HTML the app draws, replaying a session recorded against our kind test cluster. Open it to click through Home, a reading, Preflight and Plan.</figcaption>
-    </figure>
-  </div>
-</section>
 
 <!-- ═══ THE SCENE: LOSE A ZONE ═══ -->
-<section class="scene" id="zone" aria-labelledby="z-title">
+<section class="scene" id="zone" aria-labelledby="z-title" data-pin>
   <div class="scene-pin">
     <div class="wrap scene-grid">
       <div class="scene-copy">
-        <span class="eyebrow">Before a change — lose a zone on paper first</span>
-        <h2 id="z-title">Watch a zone go down before it does.</h2>
+        <span class="eyebrow">Before a change</span>
+        <h2 id="z-title" class="grad">Lose a zone on paper first.</h2>
         <ol class="scene-steps" id="scene-steps">
           <li data-step="0"><b>A real-shaped cluster.</b> <span class="sd"><span>Three zones, twelve nodes, thirty-three pods — the sample cluster, acme-pay-prod.</span></span></li>
           <li data-step="1"><b>eu-central-1a goes dark.</b> <span class="sd"><span>Four nodes and thirteen pods with it.</span></span></li>
@@ -323,19 +236,23 @@
           <li data-step="3"><b>Two have nowhere to go.</b> <span class="sd"><span>A database whose volume is pinned to the lost zone, and an ETL worker, one pod of a StatefulSet, whose placement rules no surviving node satisfies — each named, each with its reason.</span></span></li>
           <li data-step="4"><b>One command, before the outage.</b> <span class="sd"><span><code>shoalcheck preflight zone eu-central-1a</code> — exit <b>2</b>.</span></span></li>
         </ol>
-        <p class="scene-note">Illustrative sample: a fictional cluster run through the real engine. The verdict and its reasons are the reading's own.</p>
-        <div class="scene-try" id="scene-try">
-          <p class="st-cap">Ask it yourself. Every answer below was computed by <code>shoalcheck preflight</code> for each zone and each node of the sample.</p>
-          <div class="st-row"><span class="st-l">Lose a zone</span><span class="st-zones" id="st-zones"></span></div>
-          <div class="st-row"><label class="st-l" for="st-node">Drain a node</label><select id="st-node"><option value="">choose a node</option></select></div>
-          <p class="st-verdict" id="st-verdict" aria-live="polite" hidden></p>
+        <div class="st-answer" id="st-answer">
+          <p class="st-verdict" id="st-verdict" aria-live="polite"></p>
           <button class="st-back" type="button" id="st-back" hidden>Back to the story</button>
         </div>
+        <p class="scene-note">Illustrative sample: a fictional cluster run through the real engine. The verdict and its reasons are the reading's own.</p>
       </div>
       <div class="scene-art">
         <svg id="scene" viewBox="0 0 640 520" role="img" aria-labelledby="scene-desc">
           <desc id="scene-desc">Three availability zones of the sample cluster. When eu-central-1a is lost, nothing the model checks stops eleven of its thirteen pods — where they are drawn on surviving nodes is illustrative — and two are stranded, each with the reason the reading gives.</desc>
         </svg>
+        <div class="scene-try" id="scene-try">
+          <p class="st-cap"><b>Ask it yourself.</b> Lose any zone or drain any node — each answer is <code>shoalcheck preflight</code>'s own, run on the sample.</p>
+          <div class="st-dock">
+            <div class="st-zones" id="st-zones" role="group" aria-label="Lose a zone"><span class="st-ind" aria-hidden="true"></span></div>
+            <select id="st-node" aria-label="Drain a node"><option value="">Drain a node</option></select>
+          </div>
+        </div>
         <div class="tray" id="tray" aria-live="polite"></div>
       </div>
     </div>
@@ -347,8 +264,8 @@
   <div class="wrap">
     <div class="band-head reveal">
       <span class="eyebrow">Preflight — free on every plan</span>
-      <h2 id="q-title">Three questions, answered before you touch anything.</h2>
-      <p>Each one reads only the kinds it needs and answers with an exit code a pipeline can act on: <b>0</b> nothing stops it, <b>2</b> something does, <b>1</b> the answer is partial and says what was refused.</p>
+      <h2 id="q-title">Three questions. Answered before you touch anything.</h2>
+      <p>An exit code a pipeline can act on: <b>0</b> nothing stops it, <b>2</b> something does, <b>1</b> partial, and it says what was refused.</p>
     </div>
     <div class="tabs reveal" role="tablist" aria-label="Preflight questions">
       <button class="tab" role="tab" aria-selected="true" aria-controls="t-drain" id="tab-drain">Will this node drain?</button>
@@ -405,13 +322,145 @@
   </div>
 </section>
 
+<!-- ═══ THE BREAK ═══ -->
+<section class="break" aria-labelledby="ai-title">
+  <div class="break-pin">
+    <div class="wrap">
+      <h2 id="ai-title" class="say"><span class="sw">No</span> <em class="sw">AI</em> <span class="sw">in the</span> <span class="sw">reading.</span></h2>
+      <p class="lit">Rules, not guesses: the same cluster gives the same findings, every time, each naming the object it rests on.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ READ-ONLY ═══
+     The headline held while the page scrolls, the counts it rests on taken one after another (motion.js); without it,
+     or with reduced motion, all four stand in a column. -->
+<section class="band ro" id="readonly" aria-labelledby="ro-title">
+  <div class="ro-pin">
+    <div class="wrap ro-grid">
+      <div class="band-head reveal">
+        <span class="eyebrow">Read-only, provably</span>
+        <h2 id="ro-title">It cannot change your cluster. It counts every request to show it.</h2>
+        <p>A recorder wraps the only transport the binary has and counts every request it makes. <b>Secret values, pod logs and node shells are never read at all.</b></p>
+        <a class="btn" href="read-only.html">What it reads, line by line</a>
+      </div>
+      <ol class="ro-stats" aria-label="What a reading does to a cluster, counted">
+        <li class="ro-stat"><b>0</b><span>object writes, counted on every run</span></li>
+        <li class="ro-stat"><b>16</b><span>requests to drain-check a node — all of them reads</span></li>
+        <li class="ro-stat"><b>32</b><span>requests to read our 3-node kind test cluster</span></li>
+        <li class="ro-stat"><b>47</b><span>resource types it may read — get and list, nothing else</span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ INTEGRATIONS ═══
+     Every card is a command that ships in the download, named as it is typed. -->
+<section class="band band-alt" id="integrations" aria-labelledby="in-title">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <span class="eyebrow">Works where your team works</span>
+      <h2 id="in-title" class="grad">Works where your team works.</h2>
+      <p>Your pipeline, your agent, your tracker, your security tab. Every card is a command in the download; no server of ours in between.</p>
+    </div>
+    <div class="int-scenes">
+      <article class="isc-card reveal" aria-labelledby="isc-ci-t">
+        <span class="int-k">GitHub Actions · GitLab CI · any pipeline</span>
+        <h3 id="isc-ci-t">A pull request grants cluster-admin. The build goes red, and says why.</h3>
+        <div class="isc" data-isc="ci" role="group" aria-label="GitHub's pages for a real pull request: the gate's required check fails on the cluster-admin grant and merging is blocked; once the grant is narrowed every check passes and the pull request is merged"></div>
+        <p class="isc-note" id="ci-note">GitHub, as it showed <a href="https://github.com/ilya776/shoalcheck-gate-demo/pull/1" target="_blank" rel="noopener">pull request #1</a> of ilya776/shoalcheck-gate-demo at each of its commits — a public repository, a kind cluster inside the runner, the published v0.1.0-rc.11; the code-scanning alert as GitHub shows it to the repository’s owner. Every check, step, second and log line is from GitHub’s record of the runs: <a href="https://github.com/ilya776/shoalcheck-gate-demo/actions/runs/39424600120" target="_blank" rel="noopener">the red one</a>, <a href="https://github.com/ilya776/shoalcheck-gate-demo/actions/runs/39424845123" target="_blank" rel="noopener">the green one</a>.</p>
+        <code>shoalcheck gate --baseline baseline.json --fail-on new:high,regressed,unreadable</code>
+        <p class="isc-links">The job, ready to copy: <a href="ci/github-actions.yml">GitHub Actions</a> · <a href="ci/gitlab-ci.yml">GitLab CI</a></p>
+      </article>
+      <article class="isc-card reveal" aria-labelledby="isc-agent-t">
+        <span class="int-k">Claude · Cursor · any MCP client</span>
+        <h3 id="isc-agent-t">Your agent reads the whole reading. It cannot touch the cluster.</h3>
+        <div class="isc" data-isc="agent" aria-label="An agent's three calls to shoalcheck-mcp over the sample, and the answers it got"></div>
+        <p class="isc-note">The calls and their answers are shoalcheck-mcp's, over the sample — trimmed, never changed.</p>
+        <code>shoalcheck-mcp</code>
+      </article>
+    </div>
+    <div class="ints">
+      <article class="int reveal"><span class="int-k">Linear · Jira</span><h3>A ticket for the findings you pick. Filed once.</h3><p>Each with its evidence and patch; a second push finds the first.</p><code>shoalcheck ticket push --from reading.json --tracker linear --project OPS</code></article>
+      <article class="int reveal"><span class="int-k">GitHub Issues · any tracker</span><h3>Routed to the team that owns it.</h3><p>Each finding carries its team from your namespace labels.</p><code>shoalcheck audit --owner-label team</code></article>
+      <article class="int reveal"><span class="int-k">GitHub and GitLab code scanning</span><h3>Findings in your security tab.</h3><p>SARIF 2.1.0, every result with the object it rests on.</p><code>shoalcheck audit --export-sarif findings.sarif</code></article>
+      <article class="int reveal"><span class="int-k">kubectl · spreadsheets · docs</span><h3>Right where you already type.</h3><p>A kubectl plugin, and every finding as CSV or Markdown.</p><code>kubectl shoalcheck · --export-csv · --export-md</code></article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ THE READING ═══ -->
+<section class="band band-alt" id="reading" aria-labelledby="r-title">
+  <div class="wrap">
+    <div class="band-head reveal">
+      <span class="eyebrow">Work in it</span>
+      <h2 id="r-title" class="grad">A reading you work in, not a PDF you scroll.</h2>
+      <p>One self-contained file: every finding with its object, every dollar with its rate, and what could not be read named as such — never counted as clean.</p>
+    </div>
+    <figure class="live-main reveal">
+      <div class="live-frame" id="live-frame" data-w="1440" data-h="900">
+        <img class="live-poster" src="assets/shot-reading.png" width="1440" height="900" loading="lazy" alt="The overview of the sample reading of acme-pay-prod, labelled Illustrative sample: 141 findings, 11 critical or high, $1,659 a month identified, the four claims it leads with, a severity by category grid and findings by namespace.">
+        <iframe data-src="sample-report.html" title="The sample reading, live" tabindex="-1" aria-hidden="true"></iframe>
+        <a class="live-open" href="sample-report.html">Open it — the whole reading</a>
+      </div>
+      <figcaption><b>The sample reading, live in the page</b> — the file <code>shoalcheck audit --output reading.html</code> writes on a Pro licence: 141 findings on the sample cluster, every workspace working.</figcaption>
+    </figure>
+    <div class="reading-cta reveal">
+      <a class="btn btn-primary" href="sample-report.html">Open the sample reading</a>
+      <span class="note">A fictional cluster through the real engine, labelled as a sample on every screen.</span>
+    </div>
+    <div class="compare compare-flip reveal">
+      <div class="compare-copy">
+        <span class="eyebrow">Read them all</span>
+        <h3>A fleet is one file.</h3>
+        <p>Production, staging and recovery, read by the engine and put together the way <code>shoalcheck fleet</code> does: what they declare differently, side by side, and no value marked as the right one.</p>
+        <p class="note">A context that could not be read is named, never counted as a cluster with no problems.</p>
+        <a class="btn" href="sample-fleet.html">Open the sample fleet</a>
+      </div>
+      <figure>
+        <div class="live-frame" data-w="1440" data-h="900">
+          <iframe data-src="sample-fleet.html" title="The sample fleet, live" tabindex="-1" aria-hidden="true"></iframe>
+          <a class="live-open" href="sample-fleet.html">Open the sample fleet</a>
+        </div>
+        <figcaption>The sample fleet itself, live — Illustrative sample: acme-pay-prod 141 findings, acme-pay-staging 137, acme-pay-dr 122; $1,659 a month identified on production and on staging, read from their own Prometheus, and $1,647 on acme-pay-dr, from a metrics.k8s.io snapshot; 400 findings and $4,965 a month across the fleet; every context read.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ THE APP ═══ -->
+<section class="band" id="app" aria-labelledby="a-title">
+  <div class="wrap app-grid">
+    <div class="band-head reveal">
+      <span class="eyebrow">The desktop app</span>
+      <h2 id="a-title">A full application, not a script.</h2>
+      <p>Pick a cluster, ask a question, read the answer. Every reading kept and comparable, ⌘K to anything.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="app-demo.html"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.5 4.5v11l9-5.5z"/></svg>Try the interactive demo</a>
+        <a class="btn" href="index.html#download">Download</a>
+      </div>
+      <p class="note">The demo is the real window replaying a session recorded against our kind test cluster. Nothing in it talks to a cluster.</p>
+    </div>
+    <figure class="app-live reveal">
+      <div class="live-frame" data-w="1280" data-h="800">
+        <iframe data-src="app-demo.html" title="The desktop app's window, replaying a recorded session" tabindex="-1" aria-hidden="true"></iframe>
+        <a class="live-open" href="app-demo.html">Open the interactive demo</a>
+      </div>
+      <figcaption>The app's real window in the page, not a recording of it: the same HTML the app draws, replaying a session recorded against our kind test cluster. Open it to click through Home, a reading, Preflight and Plan.</figcaption>
+    </figure>
+  </div>
+</section>
+
+
+
+
 <!-- ═══ DEADLINES ═══ -->
 <section class="band" id="deadlines" aria-labelledby="dl-title">
   <div class="wrap">
     <div class="band-head reveal">
       <span class="eyebrow">Deadlines</span>
-      <h2 id="dl-title">When does your version stop being supported — and what does the extra time cost?</h2>
-      <p>The dates every reading uses to place a cluster's version, and the rate it prices extended support at. Pick yours.</p>
+      <h2 id="dl-title">When your version stops being supported.</h2>
+      <p>The dates every reading places a version by, and what the extra time costs. Pick yours.</p>
     </div>
     <div class="calc deadline reveal" id="dl-calc">
       <div class="calc-in">
@@ -440,22 +489,6 @@
 </section>
 
 
-<!-- ═══ READ-ONLY ═══ -->
-<section class="band" id="readonly" aria-labelledby="ro-title">
-  <div class="wrap ro-grid">
-    <div class="band-head reveal">
-      <span class="eyebrow">Read-only, provably</span>
-      <h2 id="ro-title">It cannot change your cluster — and it counts every request to show it.</h2>
-      <p>The audit path issues <b>get</b> and <b>list</b>. A recorder wraps the only transport the binary has and counts every request it makes; the figure you see is that count. Secret and ConfigMap values, pod logs and node shells are never read at all; of an environment variable the audit reads that it is declared and where it comes from, never the value it holds.</p>
-      <a class="btn" href="read-only.html">What it reads, line by line</a>
-    </div>
-    <div class="counter reveal" aria-label="Object writes across a reading: zero">
-      <span class="c-num">0</span>
-      <span class="c-lbl">object writes</span>
-      <span class="c-sub">16 requests to drain-check a node · 32 to read our 3-node kind test cluster · all of them reads</span>
-    </div>
-  </div>
-</section>
 
 <!-- ═══ HOW IT COMPARES ═══
      A sourced matrix: eleven capabilities down, Shoalcheck and six tools across. The body is drawn by landing.js
@@ -467,8 +500,8 @@
   <div class="wrap">
     <div class="band-head reveal">
       <span class="eyebrow">How it compares</span>
-      <h2 id="cmp-title">What one read-only pass does — and what the others do.</h2>
-      <p>Eleven capabilities, each read off the tool's own documentation on 2026-10-20. Tap or hover a mark for the basis; every competitor's mark links to the page it came from. Three capabilities sit in no competitor's docs — those rows are marked.</p>
+      <h2 id="cmp-title">What it does, and what the others do.</h2>
+      <p>Eleven capabilities, each read off the tool's own documentation on 2026-10-20. Tap or hover a mark for its source.</p>
     </div>
     <div class="cmp reveal" data-compare aria-labelledby="cmp-title">
       <p class="cmp-fallback">Shoalcheck against Kubescape, Trivy, Popeye, Kubecost, Komodor and Chkk across eleven capabilities, each read from that tool's own documentation on 2026-10-20. Three are in none of their docs that day: what a finding does <b>not</b> establish, drain / zone / upgrade preflight, and one signed offline report.</p>
@@ -477,7 +510,7 @@
 </section>
 
 <!-- ═══ PRICING ═══ -->
-<section class="band band-alt" id="pricing" aria-labelledby="p-title">
+<section class="band" id="pricing" aria-labelledby="p-title">
   <div class="wrap">
     <div class="band-head center reveal">
       <span class="eyebrow">Pricing</span>
@@ -554,7 +587,7 @@
     <div class="band-head reveal">
       <span class="eyebrow">Download</span>
       <h2 id="d-title">macOS, Windows and Linux.</h2>
-      <p>The command line and the desktop app read the same way and accept the same licence key. Nothing goes into your cluster; the binary needs only the kubeconfig you already use.</p>
+      <p>The command line and the app read the same way and take the same licence key. They need only the kubeconfig you already use.</p>
     </div>
     <div class="dl">
       <article class="os reveal" data-os="mac">
@@ -609,11 +642,11 @@
 </section>
 
 <!-- ═══ FAQ ═══ -->
-<section class="band band-alt" id="faq" aria-labelledby="f-title">
+<section class="band" id="faq" aria-labelledby="f-title">
   <div class="wrap">
     <div class="band-head reveal">
       <span class="eyebrow">Questions</span>
-      <h2 id="f-title">What people ask before they run it on production.</h2>
+      <h2 id="f-title">Before you run it on production.</h2>
     </div>
     <div class="faq">
       <div>
@@ -634,17 +667,26 @@
 
 <!-- ═══ FINAL CTA ═══ -->
 <section class="final" aria-labelledby="fin-title">
+  <div class="finale" aria-hidden="true">
+    <div class="finale-pin">
+      <p class="fin-line">Kubernetes auditing,</p>
+      <p class="fin-word" data-word="re-engineered.">re-engineered.</p>
+      <div class="fin-lock">
+        <svg class="fin-mark" viewBox="0 0 24 24"><defs><filter id="fm-glow" filterUnits="userSpaceOnUse" x="-6" y="-6" width="36" height="36"><feGaussianBlur stdDeviation=".9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#fm-glow)"><path class="fm-a" pathLength="1" d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0"/><path class="fm-b" pathLength="1" d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5"/><path class="fm-ha" pathLength="1" d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0"/><path class="fm-hb" pathLength="1" d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5"/></g></svg>
+        <span class="fin-name">Shoalcheck</span>
+      </div>
+    </div>
+  </div>
   <div class="wrap final-in reveal">
     <h2 id="fin-title">Read your own cluster next.</h2>
-    <p>No account, nothing installed in the cluster. The download shows the size of any reading and its five most serious kinds, and preflight in full, free. The whole reading — every finding with its evidence and fix, kept, compared and exported — is Pro: <b>$59 a month</b>, or $590 a year.</p>
+    <p>Preflight and the size of any reading are free, with no account. Every finding with its evidence and fix is Pro: <b>$59 a month</b>, or $590 a year.</p>
     <div class="cta">
       <a class="btn btn-primary btn-lg" href="index.html#download">Download</a>
       <a class="btn btn-lg" href="index.html#pricing">Plans and prices</a>
       <a class="btn btn-lg" href="app-demo.html">Try it in your browser</a>
       <button class="btn btn-lg just-switch" type="button" data-just-output aria-pressed="false">Just the output</button>
     </div>
-    <p class="just-note">"Just the output" hides our sentences and keeps what the product printed — the reading shown,
-      the terminals, the scene, the calculators, the video and the readings — with every caption that says what each rests on.</p>
+    <p class="just-note">"Just the output" hides our sentences and keeps what the product printed — the reading, the terminals, the scenes, the calculator — with every caption that says what each rests on.</p>
   </div>
 </section>
 
@@ -681,5 +723,6 @@
 <script src="landing.js" defer></script>
 <script src="flow.js" defer></script>
 <script src="nav.js" defer></script>
+<script src="motion.js" defer></script>
 </body>
 </html>

@@ -193,7 +193,8 @@
       new IntersectionObserver(function (es) {
         if (started || !es[0].isIntersecting) return;
         started = true; setTimeout(play, 350);
-      }, { threshold: 0.3 }).observe(rdEl);
+      // the reading sits under the promise, rising into view: it starts as soon as a sliver of it is on the screen
+      }, { threshold: 0.08 }).observe(rdEl);
     }
   }
   })();
@@ -422,6 +423,33 @@
       }
     }, { threshold: [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4] }).observe(box);
   };
+  /* REVEALED AS READ, NOT ON A CLOCK. A tall scene played on a timer kept its own height empty for the seconds it took
+     — a reader scrolling at reading pace met a box with one line at its top and 600 px of nothing (2026-10-21 tour).
+     Here a part is drawn when its top comes up past 86% of the screen, those arriving together a beat apart, so what
+     is on the screen is always filled; all of it clears once the scene is wholly below the screen again. */
+  var revealAsRead = function (box, parts) {
+    var put = function (p, on, delay) { p.style.transitionDelay = on ? delay + 'ms' : ''; p.classList[on ? 'add' : 'remove']('on'); };
+    if (reduce) { box.classList.add('played'); parts.forEach(function (p) { put(p, true, 0); }); return; }
+    var ticking = false;
+    var check = function () {
+      ticking = false;
+      var b = box.getBoundingClientRect();
+      if (b.top > innerHeight) {
+        if (box.classList.contains('played')) { box.classList.remove('played'); parts.forEach(function (p) { put(p, false); }); }
+        return;
+      }
+      if (b.bottom < -innerHeight) return;
+      var k = 0;
+      parts.forEach(function (p) {
+        if (p.classList.contains('on')) return;
+        if (p.getBoundingClientRect().top < innerHeight * 0.86) { box.classList.add('played'); put(p, true, 120 * k++); }
+      });
+    };
+    var onScroll = function () { if (!ticking) { ticking = true; requestAnimationFrame(check); } };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    check();
+  };
   (function () {
     var box = $('.isc[data-isc="agent"]'), src = $('#film-mcp');
     var M = src ? JSON.parse(src.textContent || 'null') : null;
@@ -434,24 +462,41 @@
       return n;
     };
     var usd = function (n) { return '$' + Math.round(Math.abs(n)).toLocaleString('en-US'); };
-    var sq = el('div', 'sq', null, box), parts = [];
-    var heads = el('div', 'sq-heads', null, sq);
+    /* A CONVERSATION A READER CAN FOLLOW (2026-10-21: "ця графа незрозуміла користувачу"). It was drawn as a sequence
+       diagram — lifelines and arrows — which only an engineer reads. Now each of the three calls is an exchange: what the
+       agent asked, in plain words, with the call it made beside it as it was made; then shoalcheck-mcp's answer, its
+       own figures. The plain words are ours and say what the call asks; the call and every figure are the server's. */
+    var sq = el('div', 'sq sq-talk', null, box), parts = [];
+    var path = el('div', 'sq-path', null, sq);
     [['Your agent', 'Claude · Cursor · any MCP client'], ['shoalcheck-mcp', 'on your machine'], ['The readings', 'kept and signed on this machine']]
-      .forEach(function (h, i) { var d = el('div', 'sq-h' + (i === 1 ? ' mcp' : ''), null, heads); el('b', '', h[0], d); el('span', '', h[1], d); });
+      .forEach(function (h, i) {
+        if (i) el('span', 'sq-link', null, path);
+        var d = el('div', 'sq-node' + (i === 1 ? ' mcp' : ''), null, path); el('b', '', h[0], d); el('span', '', h[1], d);
+      });
     var rows = el('ol', 'sq-rows', null, sq);
-    var row = function (kind, label) {
-      var li = el('li', 'sq-' + kind, null, rows);
-      el('span', 'sq-arrow', null, li);
-      if (label) el('code', 'sq-l', label, li);
+    var args = function (a) { return Object.keys(a || {}).map(function (k) { return k + ': ' + a[k]; }).join(', '); };
+    var ask = function (plain, call) {
+      var li = el('li', 'sq-q', null, rows);
+      el('span', 'sq-who', 'Your agent asks', li);
+      el('b', 'sq-plain', plain, li);
+      el('code', 'sq-l', call, li);
       parts.push(li);
       return li;
     };
-    var args = function (a) { return Object.keys(a || {}).map(function (k) { return k + ': ' + a[k]; }).join(', '); };
-    // 1 · what is there, by the team that owns it
+    var answer = function () {
+      var li = el('li', 'sq-a', null, rows);
+      el('span', 'sq-who', 'shoalcheck-mcp answers, from the reading', li);
+      var c = el('div', 'sq-card', null, li);
+      parts.push(li);
+      return c;
+    };
     var L = M[0].answer, E = M[1].answer.finding, D = M[2].answer.diff;
-    row('call', M[0].tool + (args(M[0].args) ? ' · ' + args(M[0].args) : ''));
-    row('read', 'the latest reading');
-    var a1 = row('ans'), c1 = el('div', 'sq-card', null, a1);
+    var intro = el('li', 'sq-intro', null, rows);
+    el('span', '', 'Three of the calls an agent makes over the sample — trimmed, never changed', intro);
+    parts.push(intro);
+    // 1 · who owns what
+    ask('Who owns what, and how much of it?', M[0].tool + (args(M[0].args) ? ' · ' + args(M[0].args) : ''));
+    var c1 = answer();
     el('b', '', L.envelope.total + ' findings · ' + usd(L.envelope.totalDollars) + ' a month identified, by owner', c1);
     var max = L.groups.reduce(function (m, g) { return Math.max(m, g.count); }, 1);
     var bars = el('div', 'sq-bars', null, c1);
@@ -462,12 +507,11 @@
       el('i', '', null, t).style.setProperty('--w', (g.count / max * 100).toFixed(1) + '%');
       el('span', 'sq-n', String(g.count), r);
     });
-    // 2 · one finding, with what it rests on
-    row('call', M[1].tool + ' · ' + (M[1].args.id || ''));
-    var a2 = row('ans'), c2 = el('div', 'sq-card', null, a2);
+    // 2 · one finding, with what it rests on and what it does not establish
+    ask('Explain this one — and what it does not prove.', M[1].tool + ' · ' + (M[1].args.id || ''));
+    var c2 = answer();
     el('b', '', E.title, c2);
     el('span', 'sq-m', [E.owner, E.severity, usd(E.dollarImpactMonthly) + ' a month (' + E.priceBasis + ')', 'confidence ' + E.confidence].join(' · '), c2);
-    /* AND WHAT IT DOES NOT ESTABLISH — in the same answer as the claim, as explain_finding returns it. */
     var nb = (E.claimBoundaries && E.claimBoundaries.lines) || [];
     if (nb.length) {
       var nbx = el('div', 'sq-nb', null, c2);
@@ -475,8 +519,8 @@
       el('span', 'sq-nb-t', nb[0], nbx);
     }
     // 3 · what changed since the reading before
-    row('call', M[2].tool);
-    var a3 = row('ans'), c3 = el('div', 'sq-card', null, a3);
+    ask('What changed since the last reading?', M[2].tool);
+    var c3 = answer();
     el('b', '', D.newCount + ' new · ' + D.noLongerInSetCount + ' no longer in the set · ' + D.notEvaluatedCount + ' not evaluated', c3);
     el('span', 'sq-m', (D.savingsDelta < 0 ? '−' : '+') + usd(D.savingsDelta) + ' a month identified against the reading before — what left is counted as missing, never as dealt with', c3);
     /* THEN, EACH TEAM'S SHARE TO ITS TRACKER — the agent's next step, through the tracker's own MCP server. Not an
@@ -497,7 +541,7 @@
     el('b', '', 'Your cluster', wall);
     el('span', '', 'shoalcheck-mcp has no kubeconfig and no client-go: it answers from readings, and cannot reach the cluster', wall);
     parts.push(wall);
-    playWhenSeen(box, parts, 360);
+    revealAsRead(box, parts);
   })();
 
   /* THE PIPELINE IS GITHUB (D64): its pages are drawn by gh-scene.js with gh-scene.css from #gate-demo — 29 KB the first
@@ -758,24 +802,24 @@
       });
       floor.style.opacity = s >= 3 ? 1 : 0;
     };
-    var sec = $('#zone'), copyEl = $('#zone .scene-copy'), pinEl = $('#zone .scene-pin');
+    var sec = $('#zone'), copyEl = $('#zone .scene-copy'), artEl = $('#zone .scene-art'), pinEl = $('#zone .scene-pin');
     /* PIN IT ONLY WHERE IT FITS (landing.css): the copy measured with every step's description folded, plus the
        tallest of them open — the most it ever needs while the story is told — against the frame under the bar. */
     var fit = function () {
       sec.classList.remove('pinned');
       sec.style.removeProperty('--copy-max');
-      // THE FLOW IS THE PAGE'S ONE PINNED SCENE. This one pinned for 3,060 px of scroll and was the page's only
-      // cinematic moment — on the free preflight, while the product is the reading (D50 site review). It plays
-      // through once in view instead; the pinning below stays for a page that wants it back.
+      // PINNED AGAIN (2026-10-21). D50 unpinned it while it was the page's only cinematic moment; the founder then
+      // asked for the page to move like a product page throughout ("все всюди роби паралакс як на сайті епл"), and
+      // the flow, the break, the counts and the finale are all pinned now, so this one is told by the scroll too.
       if (reduce || window.innerWidth <= 980 || !sec.hasAttribute('data-pin')) return;
-      var asking = copyEl.classList.contains('asking');
-      copyEl.classList.remove('asking');
+      var asking = sec.classList.contains('asking');
+      sec.classList.remove('asking');
       sec.classList.add('pinned', 'measuring');
       var open = Math.max.apply(null, $$('#scene-steps .sd > span').map(function (s) { return s.scrollHeight; }));
       var need = copyEl.offsetHeight + open;
       sec.classList.remove('measuring');
-      if (asking) copyEl.classList.add('asking');
-      if (need > pinEl.clientHeight - 24) { sec.classList.remove('pinned'); return; }
+      if (asking) sec.classList.add('asking');
+      if (Math.max(need, artEl.offsetHeight) > pinEl.clientHeight - 24) { sec.classList.remove('pinned'); return; }
       sec.style.setProperty('--copy-max', need + 'px');
     };
     var pinned = function () { return sec.classList.contains('pinned'); };
@@ -813,16 +857,29 @@
     var verEl = $('#scene-verdicts'), tryBox = $('#scene-try');
     var V = verEl ? JSON.parse(verEl.textContent || '{}') : {};
     if (tryBox && V.zones && V.nodes) {
-      var zBox = $('#st-zones'), nSel = $('#st-node'), vLine = $('#st-verdict'), back = $('#st-back');
+      var zBox = $('#st-zones'), ind = $('.st-ind'), nSel = $('#st-node'), vLine = $('#st-verdict'), back = $('#st-back');
+      var answer = $('#st-answer'), note = $('#zone .scene-note');
       V.zones.forEach(function (a) {
-        var b = document.createElement('button');
-        b.type = 'button'; b.className = 'st-z'; b.textContent = a.target; b.setAttribute('data-zone', a.target);
-        b.setAttribute('aria-pressed', 'false');
+        var b = document.createElement('button'), dash = a.target.lastIndexOf('-');
+        b.type = 'button'; b.className = 'st-z'; b.setAttribute('data-zone', a.target);
+        b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', 'Lose ' + a.target);
+        var pre = document.createElement('span'); pre.className = 'z-pre'; pre.textContent = a.target.slice(0, dash + 1);
+        b.appendChild(pre); b.appendChild(document.createTextNode(a.target.slice(dash + 1)));
         zBox.appendChild(b);
       });
+      zBox.style.setProperty('--n', V.zones.length);
       V.nodes.forEach(function (a) {
         var o = document.createElement('option'); o.value = a.target; o.textContent = a.target; nSel.appendChild(o);
       });
+      /* Where the answer is told. Beside the drawing the story's column takes it, in the story's place; stacked, it
+         goes under the dock that asked, so nothing above the reader's finger changes height when they tap. */
+      var stacked = window.matchMedia('(max-width: 980px)');
+      var placeAnswer = function () {
+        if (stacked.matches) tryBox.parentNode.insertBefore(answer, tryBox.nextSibling);
+        else copyEl.insertBefore(answer, note);
+      };
+      placeAnswer();
+      if (stacked.addEventListener) stacked.addEventListener('change', placeAnswer);
       var addRow = function (key, why, cls) {
         var row = document.createElement('div');
         row.className = 't-row in' + (cls ? ' ' + cls : '');
@@ -831,13 +888,21 @@
         row.querySelector('.why').textContent = why;
         tray.appendChild(row);
       };
+      var span = function (cls, text) { var e = document.createElement('span'); e.className = cls; e.textContent = text; return e; };
       var play = function (kind, target) {
         var ans = (kind === 'zone' ? V.zones : V.nodes).filter(function (a) { return a.target === target; })[0];
         if (!ans) return;
         manual = true; shown = -1;
-        tryBox.parentNode.classList.add('asking');
+        sec.classList.add('asking');
         steps.forEach(function (li) { li.classList.remove('on'); });
-        $$('.st-z').forEach(function (b) { b.setAttribute('aria-pressed', String(kind === 'zone' && b.getAttribute('data-zone') === target)); });
+        var zk = -1;
+        $$('.st-z').forEach(function (b, i) {
+          var on = kind === 'zone' && b.getAttribute('data-zone') === target;
+          b.setAttribute('aria-pressed', String(on)); if (on) zk = i;
+        });
+        zBox.classList.toggle('on', zk >= 0);
+        if (zk >= 0) ind.style.setProperty('--k', zk);
+        nSel.classList.toggle('on', kind !== 'zone');
         if (kind === 'zone') nSel.value = '';
         var lost = allNodes.filter(function (n) { return kind === 'zone' ? n.zone === target : n.name === target; });
         var isLost = function (n) { return lost.indexOf(n) >= 0; };
@@ -850,7 +915,9 @@
           var dark = kind === 'zone' && z.z === target;
           z.box.classList.toggle('lost', dark); z.lbl.classList.toggle('lost', dark);
         });
-        allNodes.forEach(function (n) { n.rect.classList.toggle('dark', isLost(n)); });
+        allNodes.forEach(function (n) {
+          n.rect.classList.toggle('dark', isLost(n)); n.rect.classList.toggle('drained', kind !== 'zone' && isLost(n));
+        });
         tray.innerHTML = '';
         var k = 0, floorK = 0;
         pods.forEach(function (p) {
@@ -874,11 +941,16 @@
           p.c.style.transform = tf;
         });
         floor.style.opacity = floorK ? 1 : 0;
-        vLine.hidden = false; back.hidden = false;
-        vLine.innerHTML = '';
-        var h = document.createElement('b'); h.textContent = ans.headline; h.className = ans.exit === 0 ? 'ok' : 'bad';
-        var c = document.createElement('code'); c.textContent = 'shoalcheck preflight ' + kind + ' ' + target + ' — exit ' + ans.exit;
-        vLine.appendChild(h); vLine.appendChild(document.createElement('br')); vLine.appendChild(c);
+        back.hidden = false;
+        // the headline verbatim; only its leading mark is coloured, and the exit code is the command's own
+        var tone = ans.exit === 0 ? 'ok' : 'bad', mark = /^[✓✗] /.test(ans.headline) ? ans.headline.slice(0, 2) : '';
+        var h = span('sv-h', '');
+        if (mark) { var m = document.createElement('i'); m.className = tone; m.textContent = mark; h.appendChild(m); }
+        h.appendChild(document.createTextNode(ans.headline.slice(mark.length)));
+        vLine.textContent = '';
+        vLine.appendChild(span('sv-k', 'shoalcheck preflight ' + kind + ' ' + target));
+        vLine.appendChild(h);
+        vLine.appendChild(span('sv-x ' + tone, 'exit ' + ans.exit));
       };
       zBox.addEventListener('click', function (e) {
         var b = e.target.closest('[data-zone]'); if (b) play('zone', b.getAttribute('data-zone'));
@@ -886,10 +958,11 @@
       nSel.addEventListener('change', function () { if (nSel.value) play('drain', nSel.value); });
       back.addEventListener('click', function () {
         manual = false; shown = -1;
-        tryBox.parentNode.classList.remove('asking');
-        vLine.hidden = true; back.hidden = true; nSel.value = '';
+        sec.classList.remove('asking');
+        vLine.textContent = ''; back.hidden = true; nSel.value = '';
+        nSel.classList.remove('on'); zBox.classList.remove('on');
         $$('.st-z').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
-        allNodes.forEach(function (n) { n.used = n.base; });
+        allNodes.forEach(function (n) { n.used = n.base; n.rect.classList.remove('drained'); });
         pods.forEach(function (p) { p.c.classList.remove('held'); });
         tray.innerHTML = ''; storyRows.forEach(function (r) { tray.appendChild(r); });
         if (pinned() && !reduce) onSceneScroll(); else paint(4);
@@ -998,7 +1071,7 @@
           x.style.transitionDelay = (i * 45 + 220) + 'ms'; tr.appendChild(x); parts.push(x);
         }
         var sw = document.createElement('span'); sw.className = 'dl-s'; sw.textContent = WORD[st]; b.appendChild(sw);
-        b.addEventListener('click', function () { picked[p] = i; select(); });
+        b.addEventListener('click', function () { picked[p] = i; showWindow(); });
         li.appendChild(b); rowsEl.appendChild(li);
       });
       /* The version first shown is the newest one on the paid extension — the case that costs money — or else the
@@ -1008,10 +1081,11 @@
         rows.forEach(function (w, i) { var st = stateOf(w); if (st === 'extended') ext = i; if (st === 'ordinary' && ord < 0) ord = i; });
         picked[p] = ext >= 0 ? ext : ord >= 0 ? ord : rows.length - 1;
       }
-      select();
+      showWindow();
       if (timeEl.classList.contains('on')) parts.forEach(function (q) { q.classList.add('on'); });
     };
-    var select = function () {
+    // not `select`: a var in this block is the whole script's, and `select` is the preflight tabs' (an `if` is no scope)
+    var showWindow = function () {
       var p = chosen(pSel), i = picked[p], w = rows[i], n = Number(nIn.value), name = NAMES[p];
       $('#o-dl-n').textContent = n;
       [].forEach.call(rowsEl.querySelectorAll('.dl-row'), function (b, j) { b.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });
@@ -1043,7 +1117,7 @@
         T.rateAsOf + '; 730 hours to a month. These are the tables a reading uses to place your cluster\'s version.';
     };
     pSel.addEventListener('change', draw);
-    nIn.addEventListener('input', select);
+    nIn.addEventListener('input', showWindow);
     draw();
     /* THE BARS DRAW WHEN THE BLOCK IS SEEN, each version after the one before, and again when it returns. */
     if (reduce || !('IntersectionObserver' in window)) { timeEl.classList.add('on'); parts.forEach(function (q) { q.classList.add('on'); }); }
