@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Shoalcheck — read-only Kubernetes audit from your laptop</title>
-<meta name="description" content="Shoalcheck reads a Kubernetes cluster read-only from your laptop: reliability, security, cost, topology and compliance in one reading you can work in — and, before a change, which node won't drain and what a lost zone leaves stranded. Every finding names what it rests on.">
+<meta name="description" content="Read-only Kubernetes audit from your laptop: reliability, security, cost and compliance in one reading you can work in, every finding with its basis.">
 <meta name="theme-color" content="#06090a">
 <meta property="og:title" content="Shoalcheck — read-only Kubernetes audit from your laptop">
 <meta property="og:description" content="A read-only Kubernetes audit from your laptop: reliability, security, cost, topology and compliance in one reading, every finding with the objects it rests on — and preflight for drains, zones and upgrades.">
@@ -22,6 +22,7 @@
      say keys are not on sale yet, rather than sending anyone to an address nobody reads. -->
 <meta name="shoalcheck:contact" content="">
 <link rel="canonical" href="https://shoalcheck.github.io/">
+<script type="application/ld+json" id="ld">[{"@context":"https://schema.org","@type":"SoftwareApplication","applicationCategory":"DeveloperApplication","description":"Read-only Kubernetes audit from your laptop: reliability, security, cost and compliance in one reading you can work in, every finding with its basis.","image":"https://shoalcheck.github.io/assets/og-card.jpg","name":"Shoalcheck","offers":{"@type":"Offer","description":"The free line: preflight in full and the size of any reading.","price":"0","priceCurrency":"USD"},"operatingSystem":"macOS, Windows, Linux","publisher":{"@type":"Organization","logo":"https://shoalcheck.github.io/brand/shoalcheck-icon.svg","name":"Shoalcheck","url":"https://shoalcheck.github.io/"},"url":"https://shoalcheck.github.io/"},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"No. It is a binary on your machine that talks to the Kubernetes API with your kubeconfig, issuing get and list. There is no agent, operator, CRD or webhook, and nothing to uninstall."},"name":"Does it install anything in my cluster?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Read access to the kinds it lists — shoalcheck audit --show-permissions prints them before it connects. With less, it still runs, and says which kinds it could not read and why. A refused read is never reported as a clean one."},"name":"What access does it need?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Nothing about your clusters. The binary talks to your API server and, when one is reachable, to Prometheus. Two other requests, both yours to make: the update check — shoalcheck upgrade, or the desktop app once a day if you leave that switch on — which asks github.com for the newest release; and, only when you run ticket push, the finding's text and object names to your own Jira or Linear."},"name":"Does any data leave my machine?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Any conformant Kubernetes cluster it can reach. Costs are priced from bundled list prices for EKS, AKS and GKE; on any other cluster a figure says “unpriced” rather than inventing a rate."},"name":"Which clusters does it work with?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"A distinct cluster, by its kube-system UID, read with a licence in any 30 days — counted on your machine. Reading the same cluster again costs nothing, and preflight is never counted."},"name":"What counts as a cluster on my plan?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Offline. A key is a signed document naming your plan, its expiry and its cluster cap, and the binary verifies the signature without phoning home. Paste it into the app under Plan \u0026 licence, or run shoalcheck licence install."},"name":"How is the licence checked?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Preflight in full, and the size of any reading: how many problems, how serious, of what kind, what they would cost, and the five most serious kinds. Which objects, the evidence and the fix for each are what a licence adds. Nothing is saved, written or exported."},"name":"What does the free plan include?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"The first releases are not yet notarized by Apple or code-signed for Windows. Each release publishes the archives' SHA-256 sums, signed with cosign, so you can check what you downloaded with cosign verify-blob and the public key beside the releases."},"name":"Why does my computer warn me when I open it?"}]}]</script>
 <link rel="icon" href="brand/shoalcheck-icon.svg" type="image/svg+xml">
 <link rel="preload" href="fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts.css">
@@ -64,7 +65,7 @@
     <div class="hero-copy">
       <span class="eyebrow">Read-only Kubernetes audit · nothing installed</span>
       <h1 id="hero-title">Find what's unsafe, overpriced, or breaking <span class="hl">— before it bites.</span></h1>
-      <p class="lede">A <b>read-only audit you run from your laptop</b> — <b>get</b> and <b>list</b>, nothing installed. It names every risk, every wasted dollar, and what blocks your next change, with the object and the fix.</p>
+      <p class="lede">A <b>read-only audit you run from your laptop</b> — <b>get</b> and <b>list</b>, nothing installed. It names every risk, every wasted dollar, and what blocks your next change, with the object it rests on, and a patch where one is safe to give.</p>
       <div class="cta">
         <a class="btn btn-primary btn-lg" href="index.html#download" data-os-cta>
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 16.5h12"/></svg>
@@ -106,7 +107,7 @@
 <!-- ═══ PROOF STRIP ═══ -->
 <section class="strip" aria-label="What it does, in numbers">
   <div class="wrap strip-grid">
-    <div class="stat reveal"><b>103</b><span>rules in every reading, each naming the object it rests on</span></div>
+    <div class="stat reveal"><b>103</b><span>rules in every reading, each naming what it rests on</span></div>
     <div class="stat reveal"><b>47</b><span>resource types its read-only role may read — get and list, nothing else</span></div>
     <div class="stat reveal"><b>0</b><span>object writes — counted, not promised</span></div>
     <div class="stat reveal"><b>3</b><span>systems: macOS, Windows, Linux</span></div>
@@ -140,7 +141,7 @@
       <div class="fs-cap"><span class="fs-n">02 · Review &amp; route</span><h3>Your agent reviews the reading, then routes it — one ticket per team.</h3><p>A real Claude Code session — model <span data-f="model">claude-opus-5-5</span> — with shoalcheck-mcp’s tools and nothing else: <span data-f="calls">8</span> calls, every answer from the reading. It grouped the findings by team and picked each team’s first fix; those picks become <span data-f="tickets">4</span> tickets, one per team, as <code>shoalcheck ticket push</code> assembles them. It cannot reach the cluster.</p></div>
     </li>
     <li class="fs" data-step="gate">
-      <div class="fs-cap"><span class="fs-n">03 · Gate</span><h3>Every pull request, read before it merges. Then read again.</h3><p>A real pull request: red at exit <span data-f="gate-red">2</span> on a new cluster-admin grant, green at exit <span data-f="gate-green">0</span> once it was narrowed. The sample read an hour after the patch: <span data-f="gone">1</span> finding no longer in the set, <span data-f="new">0</span> new, <span data-f="delta">−$300</span> a month identified — what left is counted as missing, never as dealt with. <a href="#integrations">The whole run, step by step</a></p></div>
+      <div class="fs-cap"><span class="fs-n">03 · Gate</span><h3>Every change, read in a cluster before it merges. Then read again.</h3><p>A real pull request: red at exit <span data-f="gate-red">2</span> on a new cluster-admin grant, green at exit <span data-f="gate-green">0</span> once it was narrowed. The sample read an hour after the patch: <span data-f="gone">1</span> finding no longer in the set, <span data-f="new">0</span> new, <span data-f="delta">−$300</span> a month identified — what left is counted as missing, never as dealt with. <a href="#integrations">The whole run, step by step</a></p></div>
     </li>
   </ol>
   <div class="wrap flow-end">
@@ -161,7 +162,7 @@
       <a class="cap-card reveal" href="sample-report.html#v=eyJ3cyI6ImFjY2VzcyJ9">
         <div class="cap-scene" data-scene="security"></div>
         <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 4 5v4.6c0 3.7 2.6 6.6 6 7.9 3.4-1.3 6-4.2 6-7.9V5z"/><path d="m7.5 10 1.8 1.8L12.8 8"/></svg></span><h3>Security &amp; access</h3></div>
-        <b class="cap-fig" data-cap="security">3 critical grants · 2 reach <span class="nb">cluster-admin</span></b>
+        <b class="cap-fig" data-cap="security">3 grants rated critical · 2 reach <span class="nb">cluster-admin</span></b>
         <p>Who can reach what: every binding traced from its subject to the role it grants, rated by what that role can do.</p>
         <span class="cap-go">Trace it in the sample</span>
       </a>
@@ -176,7 +177,7 @@
         <div class="cap-scene" data-scene="money"></div>
         <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><path d="M12.4 7.4c-.4-.8-1.3-1.3-2.4-1.3-1.5 0-2.5.8-2.5 1.9 0 2.6 5 1.4 5 4 0 1.1-1 1.9-2.5 1.9-1.1 0-2.1-.5-2.5-1.3M10 4.6v1.5M10 13.9v1.5"/></svg></span><h3>Money</h3></div>
         <b class="cap-fig" data-cap="money">$1,659 a month identified</b>
-        <p>Rightsizing from a week of the cluster's own usage, idle load balancers, old instance generations — every dollar with its rate.</p>
+        <p>Rightsizing from a week of Prometheus usage, where one is reachable; idle load balancers; old instance generations — every dollar with its rate.</p>
         <span class="cap-go">Follow the money</span>
       </a>
       <a class="cap-card reveal" href="sample-report.html#v=eyJ3cyI6ImNvbXBsaWFuY2UifQ">
@@ -238,7 +239,7 @@
       </article>
     </div>
     <div class="ints">
-      <article class="int reveal"><span class="int-k">Linear · Jira</span><h3>Every finding a ticket. Never a duplicate.</h3><p>Filed with its evidence, its basis and its patch; a marker in the ticket stops a second push from filing it again.</p><code>shoalcheck ticket push --tracker jira</code></article>
+      <article class="int reveal"><span class="int-k">Linear · Jira</span><h3>A ticket for the findings you pick. Filed once.</h3><p>Each with its evidence, its basis and — where one exists — its patch; a marker lets a second push find the first. Tested against the trackers' published APIs.</p><code>shoalcheck ticket push --from reading.json --tracker linear --project OPS</code></article>
       <article class="int reveal"><span class="int-k">GitHub Issues · any tracker</span><h3>Routed to the team that owns it.</h3><p>Each finding carries its team from your namespace labels; your agent files every team's share through that tracker's own MCP server.</p><code>shoalcheck audit --owner-label team</code></article>
       <article class="int reveal"><span class="int-k">GitHub and GitLab code scanning</span><h3>Findings in your security tab.</h3><p>SARIF 2.1.0: every result with its rule, its severity and the object it rests on.</p><code>shoalcheck audit --export-sarif findings.sarif</code></article>
       <article class="int reveal"><span class="int-k">kubectl · spreadsheets · docs</span><h3>Right where you already type.</h3><p>A kubectl plugin, and every finding as CSV or Markdown for whoever lives in a spreadsheet or a wiki.</p><code>kubectl shoalcheck · --export-csv · --export-md</code></article>
@@ -445,13 +446,13 @@
     <div class="band-head reveal">
       <span class="eyebrow">Read-only, provably</span>
       <h2 id="ro-title">It cannot change your cluster — and it counts every request to show it.</h2>
-      <p>The audit path issues <b>get</b> and <b>list</b>. A recorder wraps the only transport the binary has and counts every request it makes; the figure you see is that count. Secret and ConfigMap values, environment variables, logs and node shells are never read at all.</p>
+      <p>The audit path issues <b>get</b> and <b>list</b>. A recorder wraps the only transport the binary has and counts every request it makes; the figure you see is that count. Secret and ConfigMap values, pod logs and node shells are never read at all; of an environment variable the audit reads that it is declared and where it comes from, never the value it holds.</p>
       <a class="btn" href="read-only.html">What it reads, line by line</a>
     </div>
     <div class="counter reveal" aria-label="Object writes across a reading: zero">
       <span class="c-num">0</span>
       <span class="c-lbl">object writes</span>
-      <span class="c-sub">16 requests to drain-check a node · 32 to read a whole cluster · all of them reads</span>
+      <span class="c-sub">16 requests to drain-check a node · 32 to read our 3-node kind test cluster · all of them reads</span>
     </div>
   </div>
 </section>
@@ -600,7 +601,7 @@
       <div>
         <h3>Staying current</h3>
         <code>shoalcheck upgrade</code>
-        <p>The app tells you when a new version is out and installs it after checking its signature; Homebrew and krew copies upgrade through them.</p>
+        <p>The app tells you when a new version is out and installs it after checking its signature; a Homebrew install upgrades through it.</p>
       </div>
     </div>
     <p class="release-line" data-release-line>Every release publishes SHA-256 sums, signed with cosign.</p>
@@ -618,7 +619,7 @@
       <div>
         <details><summary>Does it install anything in my cluster?</summary><p>No. It is a binary on your machine that talks to the Kubernetes API with your kubeconfig, issuing get and list. There is no agent, operator, CRD or webhook, and nothing to uninstall.</p></details>
         <details><summary>What access does it need?</summary><p>Read access to the kinds it lists — <code>shoalcheck audit --show-permissions</code> prints them before it connects. With less, it still runs, and says which kinds it could not read and why. A refused read is never reported as a clean one.</p></details>
-        <details><summary>Does any data leave my machine?</summary><p>Nothing about your clusters. The binary talks to your API server and, when one is reachable, to Prometheus. The only other request is the update check — <code>shoalcheck upgrade</code>, or the desktop app once a day if you leave that switch on — which asks github.com for the newest release and carries nothing about a cluster.</p></details>
+        <details><summary>Does any data leave my machine?</summary><p>Nothing about your clusters. The binary talks to your API server and, when one is reachable, to Prometheus. Two other requests, both yours to make: the update check — <code>shoalcheck upgrade</code>, or the desktop app once a day if you leave that switch on — which asks github.com for the newest release; and, only when you run <code>ticket push</code>, the finding's text and object names to your own Jira or Linear.</p></details>
         <details><summary>Which clusters does it work with?</summary><p>Any conformant Kubernetes cluster it can reach. Costs are priced from bundled list prices for EKS, AKS and GKE; on any other cluster a figure says “unpriced” rather than inventing a rate.</p></details>
       </div>
       <div>

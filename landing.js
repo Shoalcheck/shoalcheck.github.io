@@ -1217,7 +1217,8 @@
   fetch('https://api.github.com/repos/' + repo + '/releases?per_page=10', { headers: { Accept: 'application/vnd.github+json' } })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (list) {
-      var rel = (list || []).filter(function (x) { return !x.draft; })[0];
+      var rel = (list || []).filter(function (x) { return !x.draft && x.published_at; })
+        .sort(function (a, b) { return a.published_at < b.published_at ? 1 : -1; })[0];
       if (!rel) return;
       useRelease({ tag: rel.tag_name, prerelease: rel.prerelease, published: (rel.published_at || '').slice(0, 10),
         url: rel.html_url, assets: (rel.assets || []).map(function (x) { return { name: x.name, url: x.browser_download_url }; }) });

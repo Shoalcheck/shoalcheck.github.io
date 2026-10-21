@@ -223,8 +223,8 @@ streams  0      <span class="cm">watches and long-lived connections</span></div>
       <div class="eyebrow">Where the data goes</div>
       <h2>To a file on the machine that ran the command</h2>
       <p>
-        The audit talks to your API server, and to a Prometheus if you point it at one — that is the whole
-        list. The reading is written to disk beside its snapshot. Nothing is uploaded, and there is no
+        The audit talks to your API server, and — if a Prometheus is running in the cluster — to it through the
+        API server's service proxy (<code>get services/proxy</code>), or to one you name with <code>--prometheus-url</code>. The reading is written to disk beside its snapshot. Nothing is uploaded, and there is no
         account to create before the tool works.
       </p>
 
@@ -234,8 +234,7 @@ streams  0      <span class="cm">watches and long-lived connections</span></div>
         <p class="b"><em>gate:</em> the browser corpus opens every rendered document offline<br><em>including:</em> both typefaces, embedded</p>
       </div>
       <div class="ro-claim">
-        <p class="c">Beyond your cluster and your Prometheus, a default build makes one request, and no audit
-          makes it: the update check. <code>shoalcheck upgrade</code> — or the desktop app once a day, if you
+        <p class="c">Beyond your cluster and your Prometheus, a default build makes one request that no audit makes — the update check — and sends nothing else unless you run <code>ticket push</code>, which carries a finding's text and object names to your tracker. <code>shoalcheck upgrade</code> — or the desktop app once a day, if you
           leave that switch on — asks GitHub for the releases of Shoalcheck/shoalcheck. It carries nothing
           about a cluster, and an update installs only if its manifest verifies under the release key and the
           download's digest and version match.</p>
@@ -249,9 +248,6 @@ streams  0      <span class="cm">watches and long-lived connections</span></div>
         <p class="b"><em>source:</em> internal/refdata/fetch.go — empty by default; a build with no source refuses rather than fetches<br><em>gate:</em> TestFetch_ACallerCannotSupplyAURL</p>
       </div>
       <div class="ro-claim">
-        <p class="c">Cloud billing reconciliation, where it is used at all, is a second trust boundary you
-          cross deliberately with your own credential. It is off unless you turn it on.</p>
-        <p class="b"><em>package:</em> internal/billing, opt-in</p>
       </div>
     </div>
   </section>

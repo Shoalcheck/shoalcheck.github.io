@@ -159,7 +159,7 @@ shoalcheck audit --context prod --output report.html --json reading.json   <span
         <thead><tr><th>Code</th><th>Means</th></tr></thead>
         <tbody>
           <tr><td>0</td><td>Done; for preflight, nothing this model checks stops the change.</td></tr>
-          <tr><td>2</td><td>Preflight: something stops the change, and the answer names it.</td></tr>
+          <tr><td>2</td><td>Preflight stops the change, or the gate’s policy fired — the answer names it.</td></tr>
           <tr><td>1</td><td>The answer is partial — a kind it needed could not be read, and it says which — or the command failed.</td></tr>
           <tr><td>3</td><td>The report was written, and its wording broke the copy policy: a defect in the words, reported rather than swallowed.</td></tr>
           <tr><td>4</td><td>The licence on this machine does not cover the command; it says which plan does.</td></tr>
