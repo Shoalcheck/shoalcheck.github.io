@@ -127,11 +127,10 @@
       <div class="dc-wrap"><table class="dc-table">
         <thead><tr><th>File</th><th>What it is</th></tr></thead>
         <tbody>
-          <tr><td>Shoalcheck_&lt;v&gt;_macos_universal.dmg</td><td>The desktop app for macOS 12 and later. It is not notarized by Apple yet: the first
-            time macOS stops it, open System Settings → Privacy &amp; Security and choose Open Anyway, or run
-            <code>xattr -dr com.apple.quarantine /Applications/Shoalcheck.app</code>. The disk image's "Read me first" says the same.</td></tr>
-          <tr><td>shoalcheck_&lt;v&gt;_&lt;os&gt;_&lt;arch&gt;</td><td>The command line (<code>.zip</code> on Windows). On macOS, if the binary is refused,
-            <code>xattr -d com.apple.quarantine ./shoalcheck</code>; on Windows, SmartScreen may warn once (More info → Run anyway).</td></tr>
+          <tr><td>Shoalcheck_&lt;v&gt;_macos_universal.dmg</td><td>The desktop app for macOS 12 and later, signed with a Developer ID and checked by Apple's notary service from
+            0.1.0-rc.12.</td></tr>
+          <tr><td>shoalcheck_&lt;v&gt;_&lt;os&gt;_&lt;arch&gt;</td><td>The command line (<code>.zip</code> on Windows). On macOS it is signed and checked by Apple's notary service from
+            0.1.0-rc.12; on Windows, SmartScreen may warn once (More info → Run anyway).</td></tr>
           <tr><td>shoalcheck-app_&lt;v&gt;_&lt;os&gt;_&lt;arch&gt;</td><td>The desktop app for Windows and Linux: it serves the window on this machine and opens it in your browser.</td></tr>
           <tr><td>kubectl-shoalcheck_&lt;v&gt;_&lt;os&gt;_&lt;arch&gt;</td><td>The same command line as a kubectl plugin, run as <code>kubectl shoalcheck …</code>.</td></tr>
           <tr><td>shoalcheck-mcp_&lt;v&gt;_&lt;os&gt;_&lt;arch&gt;</td><td>An MCP server that hands an assistant the readings already on this machine. It has no kubeconfig and cannot read a cluster.</td></tr>
@@ -192,6 +191,7 @@ shoalcheck audit --context prod --output report.html --json reading.json   <span
           <tr data-cmd="gate" data-plan="Team"><td>gate</td><td><span class="dc-plan">Team</span></td><td>For CI: compares a reading with a baseline and fails on what you choose — new findings at a severity, regressions, unreadable kinds.</td></tr>
           <tr data-cmd="schedule" data-plan="Team"><td>schedule</td><td><span class="dc-plan">Team</span></td><td>Scheduled readings through launchd or systemd, or a CI job (<code>schedule render --ci github|gitlab</code>).</td></tr>
           <tr data-cmd="ticket" data-plan="Team"><td>ticket push</td><td><span class="dc-plan">Team</span></td><td>Files findings as Linear or Jira Cloud issues, deduplicated, so the same finding is not filed twice; <code>--dry-run</code> contacts nothing. Both are written from the trackers' published APIs and tested against fakes of them — no push has reached a real Linear or Jira site yet. A reading's Export &amp; act also opens a filled-in Jira or Linear issue form in your own browser.</td></tr>
+          <tr data-cmd="team" data-plan="Team"><td>team</td><td><span class="dc-plan">Team</span></td><td>A team space in a folder your team already shares — a git repository or a synced folder: a signed roster, decisions about findings merged across members, published readings, the gate's baseline and CI runs. Nothing is sent anywhere, and Shoalcheck never runs or configures version control: the folder is synchronised with whatever your team already trusts, and <code>team sync</code> lists what changed.</td></tr>
         </tbody>
       </table></div>
     </div>
@@ -258,6 +258,9 @@ shasum -a 256 --ignore-missing -c checksums.txt</pre>
       <li><a href="read-only.html">What it reads</a></li>
       <li><a href="docs.html" aria-current="page">Docs</a></li>
       <li><a href="https://github.com/shoalcheck/shoalcheck/releases">Changelog and releases</a></li>
+      <li><a href="terms.html">Terms</a></li>
+      <li><a href="privacy.html">Privacy</a></li>
+      <li><a href="refunds.html">Refunds</a></li>
     </ul>
   </div>
 </footer>

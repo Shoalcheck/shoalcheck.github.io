@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://shoalcheck.github.io/</loc></url>
-  <url><loc>https://shoalcheck.github.io/docs.html</loc></url>
-  <url><loc>https://shoalcheck.github.io/read-only.html</loc></url>
-  <url><loc>https://shoalcheck.github.io/sample-report.html</loc></url>
-  <url><loc>https://shoalcheck.github.io/sample-compare.html</loc></url>
-  <url><loc>https://shoalcheck.github.io/sample-fleet.html</loc></url>
-  <url><loc>https://shoalcheck.github.io/app-demo.html</loc></url>
+  <url><loc>https://shoalcheck.com/</loc></url>
+  <url><loc>https://shoalcheck.com/docs.html</loc></url>
+  <url><loc>https://shoalcheck.com/read-only.html</loc></url>
+  <url><loc>https://shoalcheck.com/sample-report.html</loc></url>
+  <url><loc>https://shoalcheck.com/sample-compare.html</loc></url>
+  <url><loc>https://shoalcheck.com/sample-fleet.html</loc></url>
+  <url><loc>https://shoalcheck.com/app-demo.html</loc></url>
+  <url><loc>https://shoalcheck.com/terms.html</loc></url>
+  <url><loc>https://shoalcheck.com/privacy.html</loc></url>
+  <url><loc>https://shoalcheck.com/refunds.html</loc></url>
 </urlset>

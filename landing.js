@@ -1209,8 +1209,10 @@
   });
 
   /* ── billing period ───────────────────────────────────────────────────── */
-  var billB = $$('[data-bill]');
+  var billB = $$('[data-bill]'), curBill = 'month', setPlanLinks = null;
   var setBill = function (b) {
+    curBill = b;
+    if (setPlanLinks) setPlanLinks();
     billB.forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-bill') === b ? 'true' : 'false'); });
     $$('.plan[data-monthly]').forEach(function (p) {
       var mo = Number(p.getAttribute('data-monthly')), yr = Number(p.getAttribute('data-yearly'));
@@ -1258,11 +1260,18 @@
     var card = $('.os[data-os="' + os + '"]');
     if (card) { card.classList.add('here'); var t = $('.here-tag', card); if (t) t.hidden = false; }
   }
-  /* Plan buttons: a contact sells and issues keys. Without one, nothing is on sale yet, and the page says so
-     instead of sending anyone to an address nobody reads. */
-  $$('[data-plan-cta]').forEach(function (a) {
+  /* Plan buttons: the shop sells and issues keys. Its buy page takes the plan and the period the cards show, so a
+     button follows the Yearly/Monthly switch. A contact that is an address gets a mail; without one, nothing is on
+     sale yet, and the page says so instead of sending anyone to an address nobody reads. */
+  var ctas = $$('[data-plan-cta]');
+  if (/^https?:/.test(contact)) {
+    setPlanLinks = function () {
+      ctas.forEach(function (a) { a.href = contact + '?plan=' + a.getAttribute('data-plan') + '&term=' + (curBill === 'year' ? 'yearly' : 'monthly'); });
+    };
+    setPlanLinks();
+  } else ctas.forEach(function (a) {
     if (contact) {
-      a.href = /^https?:/.test(contact) ? contact : 'mailto:' + contact + '?subject=' + encodeURIComponent('Shoalcheck ' + a.textContent.trim());
+      a.href = 'mailto:' + contact + '?subject=' + encodeURIComponent('Shoalcheck ' + a.textContent.trim());
       return;
     }
     var p = document.createElement('div');

@@ -10,13 +10,20 @@
 # WHAT IT NEEDS. A `KUBECONFIG` secret with the read-only access `shoalcheck audit --show-permissions` prints; a
 # Team licence key in the `SHOALCHECK_LICENCE` secret (the gate is a Team command, and without the key it exits 4
 # naming the plan); and the release to pin in the `SHOALCHECK_VERSION` variable, without the leading v
-# (e.g. 0.1.0-rc.11). A pipeline should not change under you, so this never asks for "latest".
+# (e.g. 0.1.0-rc.12). A pipeline should not change under you, so this never asks for "latest".
+#
+# A RUN WITHOUT THE SECRETS DOES NOT GATE, AND SAYS SO. GitHub gives a pull request from a fork no secrets. Such a run
+# reads nothing, compares nothing, warns "shoalcheck did not gate this run" and skips every step after it -- not exit
+# 4, and not a pass. Exit codes: 0 the policy is satisfied, 2 it fired, 1 the run or the comparison could not be
+# made, 4 the licence does not cover the gate.
 name: shoalcheck gate
 
 on:
   schedule:
     - cron: '17 6 * * 1-5'   # weekday mornings, before anyone deploys
   workflow_dispatch:
+  # A PULL REQUEST RUN reads the cluster as it is, against the baseline on the branch it merges into, AND judges the
+  # request's rendered manifests laid over that reading in memory (--with) -- before anything is applied.
   pull_request:
     paths: ['deploy/**', 'charts/**', 'k8s/**']
 
@@ -30,9 +37,25 @@ jobs:
     env:
       VERSION: ${{ vars.SHOALCHECK_VERSION }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Secrets present
+        id: secrets
+        env:
+          SHOALCHECK_LICENCE: ${{ secrets.SHOALCHECK_LICENCE }}
+          KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG }}
+        run: |
+          if [ -n "$SHOALCHECK_LICENCE" ] && [ -n "$KUBECONFIG_CONTENT" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          msg="shoalcheck did not gate this run: it has no licence or no cluster credentials (a pull request from a fork is given neither). Nothing was read and nothing was compared, so this is not a pass."
+          echo "::warning title=shoalcheck did not gate this run::$msg"
+          echo "$msg" >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: sigstore/cosign-installer@v3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        if: steps.secrets.outputs.present == 'true'
+
+      - uses: sigstore/cosign-installer@7e8b541eb2e61bf99390e1afd4be13a184e9ebc5 # v3.10.1
+        if: steps.secrets.outputs.present == 'true'
         with:
           cosign-release: v2.5.2
 
@@ -42,6 +65,7 @@ jobs:
       # archive against its checksum: a binary that is not the one that was signed has no business reading a
       # production cluster.
       - name: Install shoalcheck
+        if: steps.secrets.outputs.present == 'true'
         run: |
           base="https://github.com/Shoalcheck/shoalcheck/releases/download/v${VERSION}"
           archive="shoalcheck_${VERSION}_linux_amd64.tar.gz"
@@ -59,17 +83,48 @@ jobs:
           sudo tar xz -C /usr/local/bin -f "$archive" shoalcheck
           shoalcheck version
 
+      # THE BASELINE COMES FROM THE BRANCH BEING MERGED INTO, never from the pull request: a pull request that edits
+      # .shoalcheck/baseline.json could otherwise record its own finding as already known and pass its own gate.
+      - name: Baseline from the base branch
+        if: steps.secrets.outputs.present == 'true' && github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE_REF"
+          mkdir -p .shoalcheck
+          if git show "FETCH_HEAD:.shoalcheck/baseline.json" > .shoalcheck/baseline.target 2>/dev/null; then
+            mv .shoalcheck/baseline.target .shoalcheck/baseline.json
+          else
+            rm -f .shoalcheck/baseline.target .shoalcheck/baseline.json
+            echo "the target branch has no .shoalcheck/baseline.json yet, so there is nothing to compare with"
+          fi
+
       # Your own credential step. shoalcheck needs a kubeconfig with the read-only access it prints:
       #   shoalcheck audit --show-permissions
       - name: Authenticate to the cluster
+        if: steps.secrets.outputs.present == 'true'
         env:
           KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG }}
         run: printf '%s\n' "$KUBECONFIG_CONTENT" > "$RUNNER_TEMP/kubeconfig"
 
+      # THE CHANGE, RENDERED: --with judges what would be applied, so it takes the rendered manifests, never the
+      # sources. Swap in your renderer -- for a chart: helm template <release> charts/<chart> -f values.yaml.
+      - name: Render the pull request's manifests
+        if: steps.secrets.outputs.present == 'true' && github.event_name == 'pull_request'
+        run: |
+          mkdir -p "$RUNNER_TEMP/change"
+          kubectl kustomize deploy/ > "$RUNNER_TEMP/change/rendered.yaml"
+
       # The verdict in the job log and in the run's summary, and the exit code the job ends on: 0 the policy is
       # satisfied, 2 it fired, 1 the run or the comparison could not be made, 4 the licence does not cover the gate.
-      # --json keeps the reading the gate judged, for the steps after it.
+      # --json keeps the reading the gate judged, for the steps after it; the summary is rendered from that file.
+      # THE PULL REQUEST, BEFORE IT LANDS: its rendered manifests go to the gate with --with, which lays them over the
+      # reading in memory and judges them -- nothing is applied. not-evaluated is in its policy, so an object the gate
+      # could not judge (a kind it does not read, a Secret, a ConfigMap) fails the run rather than passing unexamined;
+      # drop it if your changes carry ConfigMaps you accept as unjudged. A binding at an API version the gate does not
+      # judge is refused (exit 1).
       - name: Gate
+        if: steps.secrets.outputs.present == 'true'
         env:
           KUBECONFIG: ${{ runner.temp }}/kubeconfig
           # The store lives here so the run leaves nothing in the runner's home.
@@ -77,31 +132,48 @@ jobs:
           SHOALCHECK_LICENCE: ${{ secrets.SHOALCHECK_LICENCE }}
         run: |
           set +e
-          shoalcheck gate \
-            --context staging \
-            --baseline .shoalcheck/baseline.json \
-            --fail-on new:high,regressed,unreadable \
-            --output "$RUNNER_TEMP/report.html" \
-            --json shoalcheck-reading.json \
-            -o text > gate.txt
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            shoalcheck gate \
+              --context staging \
+              --baseline .shoalcheck/baseline.json \
+              --with "$RUNNER_TEMP/change" \
+              --fail-on new:high,regressed,unreadable,not-evaluated \
+              --output "$RUNNER_TEMP/report.html" \
+              --json shoalcheck-reading.json \
+              -o text > gate.txt
+          else
+            shoalcheck gate \
+              --context staging \
+              --baseline .shoalcheck/baseline.json \
+              --fail-on new:high,regressed,unreadable \
+              --output "$RUNNER_TEMP/report.html" \
+              --json shoalcheck-reading.json \
+              -o text > gate.txt
+          fi
           code=$?
           set -e
           cat gate.txt
-          { echo '### shoalcheck gate'; echo '```'; cat gate.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          if [ -s shoalcheck-reading.json ]; then
+            shoalcheck findings --input shoalcheck-reading.json -o md-summary --baseline .shoalcheck/baseline.json > shoalcheck-summary.md
+            cat shoalcheck-summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+          { echo '<details><summary>the gate, as it printed</summary>'; echo; echo '```'; cat gate.txt; echo '```'; echo '</details>'; } >> "$GITHUB_STEP_SUMMARY"
           exit $code
 
       # The findings in the dashboard the team already reads, from the reading the gate judged, so the alert and the
-      # red build cannot disagree; `always()` because a failing gate is exactly when they are wanted.
+      # red build cannot disagree; `always()` because a failing gate is exactly when they are wanted. Not on a pull
+      # request: that reading is simulated -- a change laid over the cluster in memory -- and code scanning would file
+      # its findings as the cluster's. The pull request's verdict is in the log, the summary and the report.
       - name: Findings as SARIF
-        if: always() && hashFiles('shoalcheck-reading.json') != ''
+        if: always() && github.event_name != 'pull_request' && hashFiles('shoalcheck-reading.json') != ''
         env:
           SHOALCHECK_HOME: ${{ runner.temp }}/shoalcheck
           SHOALCHECK_LICENCE: ${{ secrets.SHOALCHECK_LICENCE }}
         run: shoalcheck findings --input shoalcheck-reading.json -o sarif > "$RUNNER_TEMP/shoalcheck.sarif"
 
       - name: Upload to code scanning
-        if: always() && hashFiles('shoalcheck-reading.json') != ''
-        uses: github/codeql-action/upload-sarif@v3
+        if: always() && github.event_name != 'pull_request' && hashFiles('shoalcheck-reading.json') != ''
+        uses: github/codeql-action/upload-sarif@ce5e7eeac396d720fe2d802714996c8ce561e311 # v3.39.0
         with:
           sarif_file: ${{ runner.temp }}/shoalcheck.sarif
           category: shoalcheck
@@ -110,13 +182,19 @@ jobs:
       # requests, so it renders from the artifact download exactly as it renders locally.
       - name: Keep the report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: shoalcheck-report
           path: |
             ${{ runner.temp }}/report.html
             shoalcheck-reading.json
+            shoalcheck-summary.md
           if-no-files-found: ignore
+
+      # To post the same summary on the pull request, add `pull-requests: write` to the permissions above and a step:
+      #   - if: always() && github.event_name == 'pull_request' && hashFiles('shoalcheck-summary.md') != ''
+      #     env: { GH_TOKEN: '${{ github.token }}', PR: '${{ github.event.pull_request.number }}' }
+      #     run: gh pr comment "$PR" --body-file shoalcheck-summary.md
 
 # Recording a baseline the first time (or after a deliberate change):
 #   shoalcheck gate --context staging --baseline .shoalcheck/baseline.json --update-baseline
@@ -127,3 +205,25 @@ jobs:
 # comparison fails the job with exit 1. Record the baseline from the cluster this job reads. A cluster made new for
 # every run (kind, a preview environment) records its baseline in the same run: apply the manifests the change starts
 # from, run the gate with --update-baseline, apply the change, run the gate again.
+#
+# NO KUBECONFIG IN CI? If the pull request job may not hold a cluster credential, a job that may -- the scheduled run
+# inside your network, never a pull request -- keeps a capture of what it read, signed with that install's key:
+#   shoalcheck audit --context staging --output report.html --capture "$RUNNER_TEMP/capture.json"
+# It writes capture.json and capture.json.sig and prints the key it signed with: put that key in the
+# SHOALCHECK_CAPTURE_KEY repository variable, and publish both files where pull requests can read them and never write
+# them -- an artifact store only your CI reads, or the base branch through a bot. (A capture committed to the
+# repository is the cluster's internals, readable by everyone who can read the repository; prefer the artifact.)
+# The pull request job then takes the capture from the BASE BRANCH or that artifact, NEVER from its own checkout --
+# the request could have edited the file there -- and the gate refuses a capture the pinned key does not verify:
+#   git fetch --no-tags --depth=1 origin "$BASE_REF"
+#   git show "FETCH_HEAD:.shoalcheck/capture.json" > "$RUNNER_TEMP/capture.json"
+#   git show "FETCH_HEAD:.shoalcheck/capture.json.sig" > "$RUNNER_TEMP/capture.json.sig"
+#   shoalcheck gate --capture "$RUNNER_TEMP/capture.json" --max-age 48h --with "$RUNNER_TEMP/change.yaml"
+# with SHOALCHECK_CAPTURE_KEY: ${{ vars.SHOALCHECK_CAPTURE_KEY }} in the step's env -- the key itself, never a path. The verdict says "as captured at"
+# and how long ago, and a capture older than --max-age is refused (exit 1) rather than judged against.
+#
+# NO CLUSTER AND NO CAPTURE? A repository of manifests can still be gated on what they say, over an empty cluster:
+#   shoalcheck gate --manifests-only --with "$RUNNER_TEMP/change.yaml"
+# Nodes, endpoints, volumes and usage are not read and the verdict names every rule that therefore did not run; by
+# default anything the change carries that cannot be judged fails the run. Never a fallback for an unreachable
+# cluster, which stays an error.

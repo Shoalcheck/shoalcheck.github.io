@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shoalcheck — privacy policy</title>
+<meta name="description" content="Shoalcheck privacy policy: sold through Paddle, the merchant of record." />
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#08080a" />
+<link rel="icon" href="brand/shoalcheck-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="landing.css" />
+
+<style>
+/* This page is prose and tables, not the landing's stage: no scroll choreography and no scene. It wears the
+   landing's stylesheet, header and footer — it had kept the old site's, a second design one click away — and
+   adds only what a reference page needs, named here in the landing's own tokens. */
+:root { --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 56px; --s-8: 80px;
+        --t-xs: 12.5px; --t-sm: 14px; --t-lg: 18px; --t-xl: clamp(1.4rem, 2.6vw, 1.9rem);
+        --fg-muted: var(--dim); --fg-soft: var(--fg2); --fg-faint: var(--faint); --border: var(--line2);
+        --border-subtle: var(--line); --font-mono: var(--mono); --primary: var(--accent); --bg-sunk: var(--surface); }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent2); }
+.ro-head { padding: var(--s-8) 0 var(--s-6); }
+.ro-title { font-size: clamp(1.9rem, 4vw, 3rem); line-height: 1.08; letter-spacing: -0.02em; margin: var(--s-4) 0 0; }
+.ro-deck { margin-top: var(--s-5); font-size: var(--t-lg); line-height: 1.55; color: var(--fg-muted); max-width: 62ch; }
+.ro-deck strong { color: var(--fg-soft); font-weight: 600; }
+
+.ro-sec { padding: var(--s-7) 0; border-top: 1px solid var(--border); }
+.ro-sec > .wrap > h2 { font-size: var(--t-xl); letter-spacing: -0.012em; margin: var(--s-3) 0 0; }
+.ro-sec p { max-width: 68ch; line-height: 1.6; color: var(--fg-muted); }
+.ro-sec p strong { color: var(--fg-soft); font-weight: 600; }
+
+/* A claim and the thing that holds it, on one line. The basis is not a footnote:
+   it is the reason the sentence beside it is worth reading. */
+.ro-claim { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 22rem); gap: var(--s-5);
+            padding: var(--s-5) 0; border-bottom: 1px solid var(--border-subtle); align-items: start; }
+.ro-claim:last-child { border-bottom: none; }
+.ro-claim .c { margin: 0; color: var(--fg-soft); line-height: 1.55; }
+.ro-claim .b { margin: 0; font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1.6;
+               color: var(--fg-faint); }
+.ro-claim .b em { font-style: normal; color: var(--fg-muted); }
+@media (max-width: 780px) { .ro-claim { grid-template-columns: 1fr; gap: var(--s-2); } }
+
+.ro-kinds { column-width: 12rem; column-gap: var(--s-6); margin: var(--s-5) 0 0; padding: 0; list-style: none;
+            font-family: var(--font-mono); font-size: var(--t-xs); color: var(--fg-muted); }
+.ro-kinds li { padding: 2px 0; break-inside: avoid; }
+
+.ro-never { margin: var(--s-5) 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--s-3); }
+.ro-never li { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: var(--s-4);
+               font-size: var(--t-sm); line-height: 1.55; color: var(--fg-muted); }
+.ro-never .k { font-family: var(--font-mono); font-size: var(--t-xs); color: var(--fg-soft); }
+@media (max-width: 700px) { .ro-never li { grid-template-columns: 1fr; gap: 2px; } }
+
+.ro-code { margin: var(--s-5) 0 0; padding: var(--s-5); border: 1px solid var(--border);
+           border-radius: 6px; background: var(--bg-sunk, rgba(255,255,255,.02));
+           font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1.7;
+           color: var(--fg-soft); overflow-x: auto; white-space: pre; }
+.ro-code .cm { color: var(--fg-faint); }
+.ro-cap { margin-top: var(--s-2); font-size: 13px; color: var(--fg-faint); }
+
+.ro-note { margin-top: var(--s-6); padding: var(--s-5); border: 1px solid var(--border);
+           border-left: 3px solid var(--primary); border-radius: 6px; }
+.ro-note p { margin: 0; max-width: 74ch; }
+.ro-note p + p { margin-top: var(--s-3); }
+/* the legal pages: the founder's text as prose, in the docs page's measure */
+.lg h2 { font-size: var(--t-lg); letter-spacing: -0.01em; margin: var(--s-6) 0 var(--s-2); }
+.lg-list { max-width: 68ch; margin: var(--s-3) 0; padding-left: 1.2em; line-height: 1.6; color: var(--fg-muted); }
+.lg-list li { margin: 6px 0; } .lg-list strong { color: var(--fg-soft); font-weight: 600; }
+</style>
+<style>
+.dc-table { width: 100%; border-collapse: collapse; margin-top: var(--s-5); font-size: var(--t-sm); }
+.dc-table th { text-align: left; font: 600 11px var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
+               color: var(--fg-faint); padding: 0 var(--s-3) var(--s-2) 0; border-bottom: 1px solid var(--border); }
+.dc-table td { padding: var(--s-3) var(--s-3) var(--s-3) 0; border-bottom: 1px solid var(--border-subtle);
+               vertical-align: top; line-height: 1.55; color: var(--fg-muted); }
+.dc-table td:first-child { font-family: var(--font-mono); font-size: var(--t-xs); color: var(--fg-soft); white-space: nowrap; }
+.dc-plan { display: inline-block; padding: 1px 8px; border: 1px solid var(--border); border-radius: 999px;
+           font: 500 11px var(--font-mono); color: var(--fg-soft); white-space: nowrap; }
+.dc-plan.free { color: var(--accent2); border-color: rgba(45, 212, 191, .4); }
+.dc-wrap { overflow-x: auto; }
+.dc-toc { display: flex; flex-wrap: wrap; gap: var(--s-3) var(--s-5); margin-top: var(--s-5); font-size: var(--t-sm); }
+.dc-toc a { color: var(--fg-soft); }
+@media (max-width: 700px) { .dc-table td:first-child { white-space: normal; overflow-wrap: anywhere; min-width: 7rem; } }
+</style>
+</head>
+<body>
+
+<header class="top" id="top">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="Shoalcheck, home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0b1417"/><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g></svg>
+      Shoalcheck
+    </a>
+    <button class="menu" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Sections">
+      <a href="index.html#flow">The flow</a>
+      <a href="index.html#finds">What it finds</a>
+      <a href="index.html#integrations">Integrations</a>
+      <a href="index.html#zone">Before a change</a>
+      <a href="index.html#pricing">Pricing</a>
+      <a href="index.html#faq">FAQ</a>
+      <a href="docs.html" aria-current="page">Docs</a>
+    </nav>
+    <div class="top-cta">
+      <a class="btn btn-ghost" href="app-demo.html">Live demo</a>
+      <a class="btn btn-primary" href="index.html#download">Download</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="ro-head">
+    <div class="wrap">
+      <div class="eyebrow">Legal</div>
+      <h1 class="ro-title">Privacy Policy</h1>
+      <p class="ro-deck">Last updated: 22 October 2026. Controller: Illia Bilous (Bilous Illia Oleksandrovych), individual entrepreneur (FOP) registered in Rivne, Ukraine; contact <a href="mailto:support@shoalcheck.com">support@shoalcheck.com</a>.</p>
+    </div>
+  </section>
+  <section class="ro-sec lg">
+    <div class="wrap">
+      <h2>The software</h2>
+      <p>Shoalcheck runs on your machine. Nothing about your cluster leaves it unless you send it, for example by pushing tickets to your own Jira or Linear. There is no account and no analytics. The only automatic outbound request is an update check to github.com (releases of Shoalcheck); it carries nothing about a cluster and can be switched off.</p>
+      <h2>Purchase data we process</h2>
+      <ul class="lg-list"><li>Email address</li><li>Plan</li><li>Cluster fingerprints (a one-way hash of the kube-system UID) for Pro bindings</li><li>Transaction IDs</li></ul>
+      <p>Purpose: issue and email your licence key, bind it, handle support and refunds. Legal basis: contract. Retention: for as long as the licence is active, then up to six years for accounting and dispute records; support email for up to two years.</p>
+      <h2>Processors</h2>
+      <ul class="lg-list"><li>Paddle (merchant of record): collects payment details and billing data under its own privacy policy; we never see card numbers.</li><li>Cloudflare (D1 database, hosting of the sales Worker): stores the data above.</li><li>Resend: sends the key email.</li></ul>
+      <h2>Your rights</h2>
+      <p>Access, correction, deletion and objection, as applicable under your law (e.g. GDPR). Contact: <a href="mailto:support@shoalcheck.com">support@shoalcheck.com</a> (privacy questions). Transfers outside your region: our processors (Paddle, Cloudflare, Resend, Google Workspace) transfer data under the European Commission's Standard Contractual Clauses or an equivalent safeguard.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <span class="brand small"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0b1417"/><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g></svg>Shoalcheck</span>
+    <ul>
+      <li><a href="sample-report.html">The sample reading</a></li>
+      <li><a href="sample-compare.html">A real comparison</a></li>
+      <li><a href="sample-fleet.html">The sample fleet</a></li>
+      <li><a href="sample-evidence-pack.zip" download>The sample evidence pack (zip)</a></li>
+      <li><a href="app-demo.html">The interactive demo</a></li>
+      <li><a href="read-only.html">What it reads</a></li>
+      <li><a href="docs.html" aria-current="page">Docs</a></li>
+      <li><a href="https://github.com/shoalcheck/shoalcheck/releases">Changelog and releases</a></li>
+      <li><a href="terms.html">Terms</a></li>
+      <li><a href="privacy.html">Privacy</a></li>
+      <li><a href="refunds.html">Refunds</a></li>
+    </ul>
+  </div>
+</footer>
+<script src="nav.js"></script>
+</body>
+</html>

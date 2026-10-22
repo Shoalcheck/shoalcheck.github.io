@@ -3615,8 +3615,8 @@ function settleRun(d) {
     /* THE WAY TO UNLOCK THIS READING, when the build names a shop: the server opens it with this cluster's
        fingerprint attached, so the key sold is bound to the cluster just read. No shop, no button. */
     (d.freeLine && d.shop ? '<div class="job-go"><button class="cta" id="unlock-reading" data-fp="' +
-      esc(d.fingerprint || '') + '">Unlock this reading</button><span class="note" id="unlock-note">Audit Pass · ' +
-      'for this cluster only</span></div>' : '') +
+      esc(d.fingerprint || '') + '">Unlock this reading</button><span class="note" id="unlock-note">Pro · ' +
+      'from $59 a month</span></div>' : '') +
     /* THE FREE RESULT ENDS IN A WAY ON, not in a sentence that points at the sidebar. */
     (d.freeLine ? '<div class="job-go"><button class="btn2" data-go="plan">See what a licence adds</button>' +
       '<button class="btn2" id="free-enter-key">Enter a licence key</button></div>' : '') +
@@ -5306,7 +5306,7 @@ function applyLicense() {
    Home, Preflight, Plan & licence, updates, the welcome, ⌘K and Help. Each draws only what a route answered;
    each says what it is waiting for while it waits. */
 
-function planName(p) { return p === 'pass' ? 'Audit Pass' : p ? String(p).charAt(0).toUpperCase() + String(p).slice(1) : 'Free'; }
+function planName(p) { return p ? String(p).charAt(0).toUpperCase() + String(p).slice(1) : 'Free'; }
 function when(iso) {
   var t = Date.parse(iso);
   if (isNaN(t)) return '';
@@ -6078,7 +6078,7 @@ document.addEventListener('click', function (ev) {
   if (t.closest('#free-enter-key')) { go('plan'); setTimeout(function () { $('lic-input').focus(); }, 60); return; }
   var unlock = t.closest('#unlock-reading');
   if (unlock) {
-    api('/api/plans/buy', { plan: 'pass', fingerprint: unlock.getAttribute('data-fp') || '' }).then(function (res) {
+    api('/api/plans/buy', { plan: 'pro', fingerprint: unlock.getAttribute('data-fp') || '' }).then(function (res) {
       $('unlock-note').textContent = res.opened ? 'Opened in your browser: ' + res.url
         : 'Open this address in a browser: ' + res.url;
     }, function (e) { $('unlock-note').textContent = e.message || String(e); });

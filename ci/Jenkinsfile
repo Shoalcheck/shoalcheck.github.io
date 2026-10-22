@@ -1,0 +1,187 @@
+// `shoalcheck gate` on Jenkins -- the job that reads the cluster and fails on what changed. Declarative pipeline.
+//
+// THE CONTRACT. Exit 0 the policy is satisfied, 2 it fired, 1 the run or the comparison could not be made, 4 the
+// licence does not cover the gate -- and a comparison the gates refuse is never a pass. The findings land in the
+// build's test results (the junit step) and its artifacts (the report, the reading, a Markdown summary, SARIF).
+//
+// WHAT IT NEEDS. A Linux amd64 agent with bash, curl, tar, git and sha256sum. Plugins: Pipeline, Credentials Binding,
+// JUnit (all in the suggested set). Two credentials: `shoalcheck-kubeconfig`, a Secret file holding a kubeconfig with
+// the read-only access `shoalcheck audit --show-permissions` prints, whose context is the one named below; and
+// `shoalcheck-licence`, a Secret text holding a Team licence key (the gate is a Team command). SHOALCHECK_VERSION, the
+// release to pin without the leading v (e.g. 0.1.0-rc.12), as a global or folder environment variable -- a pipeline
+// should not change under you, so this never asks for "latest".
+//
+// TWO RUNS FROM ONE FILE, in a multibranch job. The cron reads the cluster from main every weekday against the
+// committed baseline: drift, with nobody having opened anything. A pull request (a change request) reads the
+// cluster as it is, against the baseline on the branch it merges into, and judges the request's rendered manifests
+// laid over that reading in memory (--with) -- before anything is applied. Nothing is applied by the gate.
+//
+// A RUN WITHOUT THE LICENCE DOES NOT GATE, AND SAYS SO: an empty licence reads nothing, compares nothing, prints
+// "shoalcheck did not gate this run" and ends without failing -- not exit 4, and not a pass. Jenkins hands
+// credentials to every build it runs, fork or not; what keeps a fork's pull request from reading your cluster is
+// the branch source's Trust setting (by default a fork's request runs the target branch's Jenkinsfile). Keep it.
+//
+// THE BASELINE IS A READING OF THIS SAME CLUSTER. shoalcheck refuses to compare readings of two different clusters --
+// it knows a cluster by its kube-system namespace, not by a context name a rebuilt cluster can reuse -- and a refused
+// comparison fails the job with exit 1. Record the baseline once from the cluster this job reads, with
+// --update-baseline, and commit it. A cluster made new for every run records its baseline in the same run: apply the
+// manifests the change starts from, run the gate with --update-baseline, apply the change, run the gate again.
+
+pipeline {
+  agent any
+
+  options {
+    timeout(time: 30, unit: 'MINUTES')
+    buildDiscarder(logRotator(numToKeepStr: '60'))
+  }
+
+  // Weekday mornings, before anyone deploys -- on main only; every other branch gets no schedule.
+  triggers {
+    cron(env.BRANCH_NAME == 'main' ? 'H 6 * * 1-5' : '')
+  }
+
+  environment {
+    // The store lives in the workspace's temp directory so the run leaves nothing in the agent's home.
+    SHOALCHECK_HOME = "${env.WORKSPACE}@tmp/shoalcheck"
+  }
+
+  stages {
+    // CHECKED THE WAY IT IS SIGNED. cosign itself is pinned and checked against the sha256 its release publishes
+    // (cosign_checksums.txt, v2.5.2). Then the signature over checksums.txt with the release key, then the archive
+    // against its checksum: a binary that is not the one that was signed has no business reading a production
+    // cluster. The key is written here, not downloaded: a key fetched from the release it vouches for proves
+    // nothing. It is the cosign.pub the releases repository publishes.
+    stage('Install shoalcheck') {
+      steps {
+        sh label: 'install', script: '''#!/bin/bash
+          set -euo pipefail
+          : "${SHOALCHECK_VERSION:?set SHOALCHECK_VERSION to the release to pin, without the leading v}"
+          bin="${WORKSPACE}@tmp/bin"
+          export PATH="$bin:$PATH"
+          mkdir -p "$bin"
+          curl -fsSL -o "$bin/cosign" https://github.com/sigstore/cosign/releases/download/v2.5.2/cosign-linux-amd64
+          echo "bcfeae05557a9f313ee4392d2f335d0ff69ebbfd232019e3736fb04999fe1734  $bin/cosign" | sha256sum -c -
+          chmod +x "$bin/cosign"
+          base="https://github.com/Shoalcheck/shoalcheck/releases/download/v${SHOALCHECK_VERSION}"
+          archive="shoalcheck_${SHOALCHECK_VERSION}_linux_amd64.tar.gz"
+          cd "${WORKSPACE}@tmp"
+          for f in "$archive" checksums.txt checksums.txt.sigstore.json; do
+            curl -fsSLO "$base/$f"
+          done
+          printf '%s\\n' '-----BEGIN PUBLIC KEY-----' \\
+            'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE69u2ja9r2k/Vy8lSibowBdCnCD3P' \\
+            'OVzmcbjHVIvMgoOfkEzEwOY/b8kyjTVJcwrJ89+qC5bjW4XzLqz1S/AryQ==' \\
+            '-----END PUBLIC KEY-----' > cosign.pub
+          cosign verify-blob --key cosign.pub --bundle checksums.txt.sigstore.json checksums.txt
+          awk -v f="$archive" '$2 == f' checksums.txt | sha256sum -c -
+          tar xz -C "$bin" -f "$archive" shoalcheck
+          shoalcheck version
+        '''
+      }
+    }
+
+    // THE BASELINE COMES FROM THE BRANCH BEING MERGED INTO, never from the pull request: a pull request that edits
+    // .shoalcheck/baseline.json could otherwise record its own finding as already known and pass its own gate.
+    stage('Baseline from the target branch') {
+      when { changeRequest() }
+      steps {
+        sh label: 'baseline', script: '''#!/bin/bash
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "$CHANGE_TARGET"
+          mkdir -p .shoalcheck
+          if git show "FETCH_HEAD:.shoalcheck/baseline.json" > .shoalcheck/baseline.target 2>/dev/null; then
+            mv .shoalcheck/baseline.target .shoalcheck/baseline.json
+          else
+            rm -f .shoalcheck/baseline.target .shoalcheck/baseline.json
+            echo "the target branch has no .shoalcheck/baseline.json yet, so there is nothing to compare with"
+          fi
+        '''
+      }
+    }
+
+    // The verdict in the console, and the exit code the build ends on. --json keeps the reading the gate judged;
+    // every output after it is rendered from that file, so the test results, the summary and the red build cannot
+    // disagree.
+    stage('Gate') {
+      steps {
+        withCredentials([file(credentialsId: 'shoalcheck-kubeconfig', variable: 'KUBECONFIG'),
+                         string(credentialsId: 'shoalcheck-licence', variable: 'SHOALCHECK_LICENCE')]) {
+          script {
+            int code = sh(label: 'shoalcheck gate', returnStatus: true, script: '''#!/bin/bash
+              set -uo pipefail
+              export PATH="${WORKSPACE}@tmp/bin:$PATH"
+              if [ -z "${SHOALCHECK_LICENCE:-}" ]; then
+                echo "shoalcheck did not gate this run: it has no licence. Nothing was read and nothing was compared, so this is not a pass."
+                exit 0
+              fi
+              mkdir -p .shoalcheck shoalcheck-out
+              # THE PULL REQUEST, BEFORE IT LANDS: its rendered manifests go to the gate with --with, which lays them
+              # over the reading in memory and judges them -- nothing is applied. not-evaluated is in its policy, so
+              # an object the gate could not judge (a kind it does not read, a Secret, a ConfigMap) fails the run
+              # rather than passing unexamined; drop it if your changes carry ConfigMaps you accept as unjudged. A
+              # binding at an API version the gate does not judge is refused (exit 1).
+              code=0
+              if [ -n "${CHANGE_ID:-}" ]; then
+                # THE CHANGE, RENDERED: --with judges what would be applied, so it takes the rendered manifests, never the
+                # sources. Swap in your renderer -- for a chart: helm template <release> charts/<chart> -f values.yaml.
+                # The image's kubectl when it has one; otherwise a pinned release, checked against its published sha256.
+                change="$(mktemp -d)"
+                k="$(command -v kubectl || true)"
+                if [ -z "$k" ]; then
+                  k="$(mktemp -d)/kubectl"
+                  curl -fsSLo "$k" https://dl.k8s.io/release/v1.31.4/bin/linux/amd64/kubectl
+                  echo "$(curl -fsSL https://dl.k8s.io/release/v1.31.4/bin/linux/amd64/kubectl.sha256)  $k" | sha256sum -c -
+                  chmod +x "$k"
+                fi
+                "$k" kustomize deploy/ > "$change/rendered.yaml"
+                shoalcheck gate \
+                  --context staging \
+                  --baseline .shoalcheck/baseline.json \
+                  --with "$change" \
+                  --fail-on new:high,regressed,unreadable,not-evaluated \
+                  --output shoalcheck-out/report.html \
+                  --json shoalcheck-out/reading.json || code=$?
+              else
+                shoalcheck gate \
+                  --context staging \
+                  --baseline .shoalcheck/baseline.json \
+                  --fail-on new:high,regressed,unreadable \
+                  --output shoalcheck-out/report.html \
+                  --json shoalcheck-out/reading.json || code=$?
+              fi
+              if [ -s shoalcheck-out/reading.json ]; then
+                shoalcheck findings --input shoalcheck-out/reading.json -o junit > shoalcheck-out/junit.xml
+                shoalcheck findings --input shoalcheck-out/reading.json -o md-summary --baseline .shoalcheck/baseline.json > shoalcheck-out/summary.md
+                shoalcheck findings --input shoalcheck-out/reading.json -o sarif > shoalcheck-out/shoalcheck.sarif
+              fi
+              exit $code
+            ''')
+            switch (code) {
+              case 0: break
+              case 2: error('shoalcheck gate: the policy fired (exit 2) — the reasons are in the log above'); break
+              case 4: error('shoalcheck gate: the licence does not cover the gate (exit 4)'); break
+              default: error("shoalcheck gate: the run or the comparison could not be made (exit ${code}) — this is not a pass")
+            }
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      // Every finding as a test: a failure at high or above, a skipped test below it (never a pass), and a skipped
+      // test per kind the run could not read. The gate's exit code is the verdict, so the test results do not
+      // also mark the build unstable; they are what the team reads beside it.
+      junit testResults: 'shoalcheck-out/junit.xml', allowEmptyResults: true, skipMarkingBuildUnstable: true
+      // The report is the artifact a human opens when the gate fails: a single file with no external requests.
+      archiveArtifacts artifacts: 'shoalcheck-out/**', allowEmptyArchive: true
+      // With the Warnings Next Generation plugin, the SARIF file becomes an issues view of its own:
+      //   recordIssues tool: sarif(pattern: 'shoalcheck-out/shoalcheck.sarif')
+    }
+  }
+}
+
+// Recording a baseline the first time (or after a deliberate change):
+//   shoalcheck gate --context staging --baseline .shoalcheck/baseline.json --update-baseline
+// It compares first and writes afterwards, so the run that records still reports what moved.

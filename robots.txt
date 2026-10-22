@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://shoalcheck.github.io/sitemap.xml
+Sitemap: https://shoalcheck.com/sitemap.xml

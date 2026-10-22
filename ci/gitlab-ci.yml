@@ -4,7 +4,14 @@
 #
 # WHAT IT NEEDS (CI/CD variables): KUBECONFIG_FILE, a kubeconfig with the read-only access
 # `shoalcheck audit --show-permissions` prints; SHOALCHECK_LICENCE, a masked variable holding a Team licence key (the
-# gate is a Team command); SHOALCHECK_VERSION, the release to pin without the leading v (e.g. 0.1.0-rc.11).
+# gate is a Team command); SHOALCHECK_VERSION, the release to pin without the leading v (e.g. 0.1.0-rc.12).
+#
+# WHERE THE FINDINGS LAND: the merge request's test report (JUnit) and Code Quality widget, which list what is new
+# against the target branch's own pipeline; a short Markdown verdict in the job log and the artifacts; the report.
+#
+# A RUN WITHOUT THE SECRETS DOES NOT GATE, AND SAYS SO. A merge request from a fork runs without the project's
+# variables. Such a run reads nothing, compares nothing, prints "shoalcheck did not gate this run" and ends without
+# failing -- not exit 4, and not a pass.
 #
 # THE BASELINE IS A READING OF THIS SAME CLUSTER. shoalcheck refuses to compare readings of two different clusters --
 # it knows a cluster by its kube-system namespace, not by a context name a rebuilt cluster can reuse -- and a refused
@@ -13,11 +20,18 @@
 # manifests the change starts from, run the gate with --update-baseline, apply the change, run the gate again.
 shoalcheck-gate:
   stage: test
-  image: alpine:3.20
+  # Pinned by digest: the tag is for the reader, the digest is what is pulled.
+  image: alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
   variables:
     SHOALCHECK_HOME: "$CI_PROJECT_DIR/.shoalcheck-home"
   before_script:
-    - apk add --no-cache curl tar coreutils
+    # before_script and script run in one shell, so this ends the job before anything is installed or read.
+    - |
+      if [ -z "${SHOALCHECK_LICENCE:-}" ] || [ -z "${KUBECONFIG_FILE:-}" ]; then
+        echo "shoalcheck did not gate this run: it has no licence or no cluster credentials (a merge request from a fork is given neither). Nothing was read and nothing was compared, so this is not a pass."
+        exit 0
+      fi
+    - apk add --no-cache curl tar coreutils git
     # cosign itself, pinned and checked against the sha256 its release publishes (cosign_checksums.txt, v2.5.2).
     - curl -fsSL -o /usr/local/bin/cosign https://github.com/sigstore/cosign/releases/download/v2.5.2/cosign-linux-amd64
     - echo "bcfeae05557a9f313ee4392d2f335d0ff69ebbfd232019e3736fb04999fe1734  /usr/local/bin/cosign" | sha256sum -c -
@@ -37,13 +51,91 @@ shoalcheck-gate:
     - echo "$KUBECONFIG_FILE" > "$CI_PROJECT_DIR/kubeconfig"
   script:
     - export KUBECONFIG="$CI_PROJECT_DIR/kubeconfig"
-    # SHOALCHECK_LICENCE reaches the gate from the CI/CD variables; --json keeps the reading the gate judged.
-    - shoalcheck gate --context staging --baseline .shoalcheck/baseline.json --fail-on new:high,regressed,unreadable --output report.html --json shoalcheck-reading.json
+    # THE BASELINE COMES FROM THE TARGET BRANCH on a merge request, never from the request itself: one that edits
+    # .shoalcheck/baseline.json could otherwise record its own finding as already known and pass its own gate.
+    - |
+      if [ -n "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" ]; then
+        git fetch --no-tags --depth=1 origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+        mkdir -p .shoalcheck
+        if git show "FETCH_HEAD:.shoalcheck/baseline.json" > .shoalcheck/baseline.target 2>/dev/null; then
+          mv .shoalcheck/baseline.target .shoalcheck/baseline.json
+        else
+          rm -f .shoalcheck/baseline.target .shoalcheck/baseline.json
+          echo "the target branch has no .shoalcheck/baseline.json yet, so there is nothing to compare with"
+        fi
+      fi
+    # SHOALCHECK_LICENCE reaches the gate from the CI/CD variables; --json keeps the reading the gate judged, and every
+    # output after it is rendered from that file, so the test report, the widget and the red job cannot disagree.
+    # THE MERGE REQUEST, BEFORE IT LANDS: its rendered manifests go to the gate with --with, which lays them over the
+    # reading in memory and judges them -- nothing is applied. not-evaluated is in its policy, so an object the gate
+    # could not judge (a kind it does not read, a Secret, a ConfigMap) fails the run rather than passing unexamined;
+    # drop it if your changes carry ConfigMaps you accept as unjudged. A binding at an API version the gate does not
+    # judge is refused (exit 1).
+    - |
+      code=0
+      if [ -n "${CI_MERGE_REQUEST_IID:-}" ]; then
+        # THE CHANGE, RENDERED: --with judges what would be applied, so it takes the rendered manifests, never the
+        # sources. Swap in your renderer -- for a chart: helm template <release> charts/<chart> -f values.yaml.
+        # The image's kubectl when it has one; otherwise a pinned release, checked against its published sha256.
+        change="$(mktemp -d)"
+        k="$(command -v kubectl || true)"
+        if [ -z "$k" ]; then
+          k="$(mktemp -d)/kubectl"
+          curl -fsSLo "$k" https://dl.k8s.io/release/v1.31.4/bin/linux/amd64/kubectl
+          echo "$(curl -fsSL https://dl.k8s.io/release/v1.31.4/bin/linux/amd64/kubectl.sha256)  $k" | sha256sum -c -
+          chmod +x "$k"
+        fi
+        "$k" kustomize deploy/ > "$change/rendered.yaml"
+        shoalcheck gate --context staging --baseline .shoalcheck/baseline.json --with "$change" --fail-on new:high,regressed,unreadable,not-evaluated --output report.html --json shoalcheck-reading.json || code=$?
+      else
+        shoalcheck gate --context staging --baseline .shoalcheck/baseline.json --fail-on new:high,regressed,unreadable --output report.html --json shoalcheck-reading.json || code=$?
+      fi
+      if [ -s shoalcheck-reading.json ]; then
+        shoalcheck findings --input shoalcheck-reading.json -o junit > shoalcheck-junit.xml
+        shoalcheck findings --input shoalcheck-reading.json -o codequality > shoalcheck-codequality.json
+        shoalcheck findings --input shoalcheck-reading.json -o md-summary --baseline .shoalcheck/baseline.json > shoalcheck-summary.md
+        cat shoalcheck-summary.md
+      fi
+      exit $code
+  # To post the same summary on the merge request, give the job a project access token with api scope (GITLAB_TOKEN),
+  # add glab to the image (apk add glab) and, at the end of the script above:
+  #   glab mr note "$CI_MERGE_REQUEST_IID" --message "$(cat shoalcheck-summary.md)"
   artifacts:
     when: always
-    paths: [report.html, shoalcheck-reading.json]
+    paths: [report.html, shoalcheck-reading.json, shoalcheck-summary.md]
+    reports:
+      # Every finding as a test: a failure at high or above, a skipped test below it (never a pass), and a skipped
+      # test per kind the run could not read. Code Quality files each finding under live-cluster/<cluster>/...
+      junit: shoalcheck-junit.xml
+      codequality: shoalcheck-codequality.json
     expire_in: 30 days
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_MERGE_REQUEST_ID
       changes: [deploy/**/*, charts/**/*, k8s/**/*]
+#
+# NO KUBECONFIG IN CI? If the merge request job may not hold a cluster credential, a job that may -- the scheduled run
+# inside your network, never a merge request -- keeps a capture of what it read, signed with that install's key:
+#   capdir="$(mktemp -d)"
+#   shoalcheck audit --context staging --output report.html --capture "$capdir/capture.json"
+# It writes capture.json and capture.json.sig and prints the key it signed with: put that key in a
+# SHOALCHECK_CAPTURE_KEY CI/CD variable, and publish both files where merge requests can read them and never write
+# them -- an artifact store only your CI reads, or the target branch through a bot. (A capture committed to the
+# repository is the cluster's internals, readable by everyone who can read the repository; prefer the artifact.)
+# The merge request job then takes the capture from the TARGET BRANCH or that artifact, NEVER from its own checkout --
+# the request could have edited the file there -- and the gate refuses a capture the pinned key does not verify:
+#   capdir="$(mktemp -d)"
+#   git fetch --no-tags --depth=1 origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+#   git show "FETCH_HEAD:.shoalcheck/capture.json" > "$capdir/capture.json"
+#   git show "FETCH_HEAD:.shoalcheck/capture.json.sig" > "$capdir/capture.json.sig"
+#   shoalcheck gate --capture "$capdir/capture.json" --max-age 48h --with change.yaml
+# (a directory made with mktemp -d, never a fixed /tmp path another process on the runner could plant first), with
+# SHOALCHECK_CAPTURE_KEY set from the masked CI/CD variable -- the key itself, never a path.
+# The verdict says "as captured at" and how long ago, and a capture older than --max-age is refused (exit 1) rather
+# than judged against.
+#
+# NO CLUSTER AND NO CAPTURE? A repository of manifests can still be gated on what they say, over an empty cluster:
+#   shoalcheck gate --manifests-only --with change.yaml
+# Nodes, endpoints, volumes and usage are not read and the verdict names every rule that therefore did not run; by
+# default anything the change carries that cannot be judged fails the run. Never a fallback for an unreachable
+# cluster, which stays an error.
