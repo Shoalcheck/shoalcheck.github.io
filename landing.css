@@ -300,10 +300,8 @@ p { margin: 0; }
 .rd-replay[hidden] + .rd-open { margin-left: auto; }
 .rd figcaption { padding: 0 14px 12px; font-size: 12px; line-height: 1.5; color: var(--faint); }
 html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not(.js) .rd-foot { display: none; }
-/* THE CARD'S OWN WIDTH DECIDES ITS COLUMNS. In three columns a laptop left the five severity heads about 20 px each,
-   and at 1024 px they ran into each other — "CRITHIGHMEDLOWINFO" (D56 by-eye pass). Under 620 px the card reads what
-   it read beside what it found, and what it identified is one line beneath them; under 420 px, one column. The card
-   is the container (container: rd, on .rd above). */
+/* THE CARD'S OWN WIDTH DECIDES ITS COLUMNS (container: rd): three columns ran the severity heads together at
+   1024 px (D56). Under 620 px two plus one line, under 420 px one column. */
 @container rd (420px <= width < 620px) {
   .rd-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); row-gap: 4px; }
   .rd-cost { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; padding-top: 10px; border-top: 1px solid var(--line); }
@@ -357,10 +355,8 @@ html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not
 .band-head.center { margin-left: auto; margin-right: auto; text-align: center; align-items: center; }
 
 /* ── the scene ──────────────────────────────────────────────────────────── */
-/* PINNED ONLY WHERE IT FITS. Pinned by the stylesheet alone, the scene grew taller than a 900-pixel screen: centred
-   in its frame it spilled up over the figures strip, and its heading slid under the navigation bar. landing.js
-   pins it (.pinned) when its copy — every step folded but the one being told, the tallest of them open — fits under
-   the bar; anywhere else it stays in the page and plays once when seen, as on a phone. */
+/* PINNED ONLY WHERE IT FITS: landing.js pins the scene (.pinned) when its copy fits under the bar; anywhere else
+   it stays in the page and plays once when seen. Pinned by CSS alone it spilled over the strip. */
 .scene { position: relative; border-top: 1px solid var(--line); }
 .scene-pin { padding: 72px 0; }
 .scene.pinned { height: 300vh; }
@@ -411,10 +407,8 @@ html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not
 #scene .pod.held { fill: var(--warn); }
 .tray .t-row.held { border-color: rgba(253, 176, 34, .35); background: rgba(30, 22, 8, .6); }
 .tray .t-row.held i { background: var(--warn); }
-/* ASK IT YOURSELF (2026-10-21 redesign). The founder: "тут хочу редизайн" — a form wedged under the story. Now a
-   product page's picker: one dock under the drawing (a segmented control whose light pill slides to the zone asked,
-   and the node select as a pill beside it), and the engine's answer told large where the story was, as a product
-   page swaps its copy when you pick a colour. The headline is the reading's own, verbatim, glyph included. */
+/* ASK IT YOURSELF (2026-10-21 redesign): one dock under the drawing (a segmented control and the node select as
+   pills); the engine's answer, verbatim, told large where the story was. */
 .scene.pinned.asking .scene-steps { display: none; }
 .scene.asking .scene-steps { opacity: .35; transition: opacity .4s var(--ease); }
 .scene-try { display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -723,10 +717,8 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 .just-note { font-size: 13px; color: var(--faint); max-width: 60ch; margin: 14px auto 0; }
 @media (max-width: 900px) { .top-cta .just-switch { display: none; } }
 
-/* ── the product, live ───────────────────────────────────────────────────
-   A product page in a frame — the sample reading, the sample fleet, the app's window — scaled from its own width;
-   a screenshot is its poster until it has loaded, where there is one. Opening it grows the frame to the window — a
-   view transition, named only on the frame that was opened — and then goes to the page it already shows. */
+/* ── the product, live ── A product page in a frame, scaled from its own width, its screenshot the poster until
+   loaded; opening it grows the frame to the window (a view transition) and goes there. */
 .live-frame { position: relative; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 14px; border: 1px solid var(--line2);
               background: var(--surface); box-shadow: 0 30px 60px -32px rgba(0, 0, 0, .8); }
 .live-frame.vt { view-transition-name: live-page; }
@@ -835,13 +827,8 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 /* A pod's name in the scene's list is one word too: "licensed-etl-0" broke at a hyphen. */
 .t-row b { white-space: nowrap; }
 
-/* ── how it compares: a sourced matrix (D63) ─────────────────────────────────
-   Eleven capabilities down, Shoalcheck and six tools across. The body is drawn by
-   landing.js from comparison.json, fetched as the section nears. One grid reflows
-   to a stack of cards on a phone — no 7-column table fits 390px. Colour is spent
-   only on a yes and on our own column, per the house rule; every other verdict is
-   told apart by the shape of its mark, not by colour. Each cell's source is its
-   chip (the Arrival Gap device), and its note opens on hover or focus. */
+/* ── how it compares: a sourced matrix (D63) ──
+   Cards on a phone. Colour only on a yes and our column; other verdicts differ by mark. A cell's chip is its source. */
 .cmp { margin-top: 4px; }
 .cmp-fallback { color: var(--fg2); font-size: 15px; line-height: 1.65; max-width: 70ch; }
 .cmp-fallback b { color: var(--fg); }
@@ -939,10 +926,8 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
   .cmp-v:hover .cmp-note, .cmp-v:focus-within .cmp-note { display: none; }
 }
 
-/* ═══ THE STAGE ═══════════════════════════════════════════════════════════
-   One room under the whole page, lit the way the product film is: a soft key light that breathes and drifts, a cool
-   rim from below in the accent, film grain and a vignette. Fixed and composited (transform and opacity only), so it
-   never repaints the page or moves its layout; the sections are transparent on it and the room carries through. */
+/* ═══ THE STAGE ═══ One lit room under the page, as in the product film: key light, accent rim, grain, vignette.
+   Fixed, transform and opacity only, so it never repaints the page. */
 .stage { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: var(--bg); }
 .stage::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 70% at 50% 45%, transparent 50%, rgba(0, 0, 0, .7) 100%); z-index: 2; }
 .stage::after { content: ""; position: absolute; inset: 0; z-index: 3; opacity: .045;
@@ -1011,10 +996,8 @@ main, .foot { position: relative; z-index: 1; }
   .split .w > i { transform: none; visibility: visible; transition: none; }
 }
 
-/* ═══ THE FLOW ═══════════════════════════════════════════════════════════
-   One window held on the screen while the page scrolls (flow.js is the playhead), the three real interfaces in it in
-   turn. Words on the left, the window on the right; on a phone the words above it. Every part is a .beat: drawn when
-   the scroll reaches it, gone again on the way back. Only transform and opacity move. */
+/* ═══ THE FLOW ═══ One window held while the page scrolls (flow.js is the playhead). Every part is a .beat,
+   drawn when the scroll reaches it, gone on the way back; only transform and opacity move. */
 /* clip, not hidden: the windows slide in from past the edge, and a scroll box would unpin the stage */
 .flow { position: relative; padding-top: clamp(80px, 10vw, 136px); overflow-x: clip; }
 .flow-head { display: flex; flex-direction: column; gap: 22px; max-width: 880px; margin-bottom: clamp(24px, 4vw, 48px); }
@@ -1306,11 +1289,11 @@ main, .foot { position: relative; z-index: 1; }
 @media (max-width: 600px) {
   .ph-only, .band-head > p.ph-only { display: block !important; }
   .ph-cut, .hero-copy .hl, .hero-copy .lede, .hero-copy .price-anchor, .hero-copy .trust, .hero .device,
-  .strip, #zone, #questions, .break, #integrations, #reading, #app, #deadlines, #compare, .final,
+  .strip, #zone, .break, #integrations, #app, #deadlines, #compare, .final,
   .band-head > p, .flow-lede, .flow-end, .flow-device, .flow-bar, .fc p, .ro-stats,
   #finds .gal-ctl, #finds .cap-scene, #finds .cap-card > p,
-  #finds .cap-card:not(:has([data-cap="security"], [data-cap="reliability"], [data-cap="money"])),
-  .bill, .plan .for, .plan ul, .plan .billing-line, .plans-note, .more-ways,
+  #questions .pane-q pre, #reading .live-main, #reading .reading-cta, #reading .compare,
+  .bill, .plan ul, .plan .billing-line, .plans-note, .more-ways,
   .faq > :nth-child(2) > details:nth-of-type(1), .faq > :nth-child(2) > details:nth-of-type(4) { display: none !important; }
   body { font-size: 16px; }
   .band, .flow { padding: 56px 0 8px; }
@@ -1319,7 +1302,7 @@ main, .foot { position: relative; z-index: 1; }
   .hero { padding-top: 32px; padding-bottom: 8px; min-height: 0; }
   .hero-copy h1 { font-size: 36px; line-height: 1.08; }
   .hero-copy .cta { margin-top: 20px; }
-  /* the proof: three cards stacked, each its figure and the way into the sample */
+  /* the proof: five cards stacked, each its figure and the way into the sample */
   #finds .caps { flex-direction: column; overflow: visible; scroll-snap-type: none; padding: 0 20px; gap: 12px; }
   #finds .cap-card { flex: none; min-height: 0; padding: 20px; gap: 8px; transform: none !important; opacity: 1 !important; }
   #finds .cap-fig { font-size: 22px; }
@@ -1336,7 +1319,7 @@ main, .foot { position: relative; z-index: 1; }
   .motion .ro-pin, .ro-pin { position: static; height: auto; display: block; }
   .ro-grid { display: block; }
   .ro .ph-only { color: var(--fg2); font-size: 16px; line-height: 1.5; }
-  /* prices: name, the monthly price, the year, the clusters, the button */
+  /* prices: name, who it is for, the monthly price, the year, the clusters, the button */
   .plans { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .plan { padding: 18px 20px; gap: 6px; }
   .ph-year { margin: 0; color: var(--dim); font-size: 15px; }
@@ -1345,14 +1328,16 @@ main, .foot { position: relative; z-index: 1; }
   .dl { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .os.shut .files, .os.shut .note, .os.shut .here-tag { display: none; }
   .os h3 > button { min-height: 44px; width: 100%; display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  #questions .band-head > p { display: block !important; }
   .os .files a { min-height: 44px; }
+  .tab { min-height: 44px; }
   .faq summary { min-height: 44px; }
   .foot-in ul { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
   .foot-in li a { min-height: 44px; display: flex; align-items: center; }
   /* one panel of the reading captured at a phone's own scale, never a desktop window shrunk */
   .ph-shot { margin: 20px auto 0; }
   .ph-shot img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line2); }
-  .ph-shot figcaption { margin-top: 10px; color: var(--dim); font-size: 14px; }
+  .ph-shot figcaption, .ph-note { margin-top: 10px; color: var(--dim); font-size: 14px; }
   .tag, .plan .tag { font-size: 13px; }
   header.top .brand, header.top .menu, header.top .btn { min-height: 44px; }
   .ro .btn { min-height: 44px; display: inline-flex; align-items: center; }

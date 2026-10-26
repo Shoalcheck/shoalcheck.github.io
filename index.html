@@ -22,8 +22,10 @@
      say keys are not on sale yet, rather than sending anyone to an address nobody reads. -->
 <meta name="shoalcheck:contact" content="https://shop.shoalcheck.com/buy">
 <link rel="canonical" href="https://shoalcheck.com/">
-<script type="application/ld+json" id="ld">[{"@context":"https://schema.org","@type":"SoftwareApplication","applicationCategory":"DeveloperApplication","description":"Read-only Kubernetes audit from your laptop: reliability, security, cost and compliance in one reading you can work in, every finding with its basis.","image":"https://shoalcheck.com/assets/og-card.jpg","name":"Shoalcheck","offers":{"@type":"Offer","description":"The free line: preflight in full and the size of any reading.","price":"0","priceCurrency":"USD"},"operatingSystem":"macOS, Windows, Linux","publisher":{"@type":"Organization","logo":"https://shoalcheck.com/brand/shoalcheck-icon.svg","name":"Shoalcheck","url":"https://shoalcheck.com/"},"url":"https://shoalcheck.com/"},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"No. It is a binary on your machine that talks to the Kubernetes API with your kubeconfig, issuing get and list. There is no agent, operator, CRD or webhook, and nothing to uninstall."},"name":"Does it install anything in my cluster?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Read access to the kinds it lists — shoalcheck audit --show-permissions prints them before it connects. With less, it still runs, and says which kinds it could not read and why. A refused read is never reported as a clean one."},"name":"What access does it need?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Nothing about your clusters. The binary talks to your API server and, when one is reachable, to Prometheus. Two other requests, both yours to make: the update check — shoalcheck upgrade, or the desktop app once a day if you leave that switch on — which asks github.com for the newest release; and, only when you run ticket push, the finding's text and object names to your own Jira or Linear."},"name":"Does any data leave my machine?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Any conformant Kubernetes cluster it can reach. Costs are priced from bundled list prices for EKS, AKS and GKE; on any other cluster a figure says “unpriced” rather than inventing a rate."},"name":"Which clusters does it work with?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"A distinct cluster, by its kube-system UID, read with a licence in any 30 days — counted on your machine. Reading the same cluster again costs nothing, and preflight is never counted."},"name":"What counts as a cluster on my plan?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Offline. A key is a signed document naming your plan, its expiry and its cluster cap, and the binary verifies the signature without phoning home. Paste it into the app under Plan \u0026 licence, or run shoalcheck licence install."},"name":"How is the licence checked?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Preflight in full, and the size of any reading: how many problems, how serious, of what kind, what they would cost, and the five most serious kinds. Which objects, the evidence and the fix for each are what a licence adds. Nothing is saved, written or exported."},"name":"What does the free plan include?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"From 0.1.0-rc.12 the macOS app and command line are signed with a Developer ID and checked by Apple's notary service, so macOS opens them without asking; the Windows builds are not code-signed yet, so SmartScreen asks once. Each release publishes the archives' SHA-256 sums, signed with cosign, so you can check what you downloaded with cosign verify-blob and the public key beside the releases."},"name":"Why does my computer warn me when I open it?"}]}]</script>
-<link rel="icon" href="brand/shoalcheck-icon.svg" type="image/svg+xml">
+<script type="application/ld+json" id="ld">[{"@context":"https://schema.org","@type":"SoftwareApplication","applicationCategory":"DeveloperApplication","description":"Read-only Kubernetes audit from your laptop: reliability, security, cost and compliance in one reading you can work in, every finding with its basis.","image":"https://shoalcheck.com/assets/og-card.jpg","name":"Shoalcheck","offers":{"@type":"Offer","description":"The free line: preflight in full and the size of any reading.","price":"0","priceCurrency":"USD"},"operatingSystem":"macOS, Windows, Linux","publisher":{"@type":"Organization","logo":"https://shoalcheck.com/icon-512.png","name":"Shoalcheck","url":"https://shoalcheck.com/"},"url":"https://shoalcheck.com/"},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"No. It is a binary on your machine that talks to the Kubernetes API with your kubeconfig, issuing get and list. There is no agent, operator, CRD or webhook, and nothing to uninstall."},"name":"Does it install anything in my cluster?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Read access to the kinds it lists — shoalcheck audit --show-permissions prints them before it connects. With less, it still runs, and says which kinds it could not read and why. A refused read is never reported as a clean one."},"name":"What access does it need?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Nothing about your clusters. The binary talks to your API server and, when one is reachable, to Prometheus. Two other requests, both yours to make: the update check — shoalcheck upgrade, or the desktop app once a day if you leave that switch on — which asks github.com for the newest release; and, only when you run ticket push, the finding's text and object names to your own Jira or Linear."},"name":"Does any data leave my machine?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Any conformant Kubernetes cluster it can reach. Costs are priced from bundled list prices for EKS, AKS and GKE; on any other cluster a figure says “unpriced” rather than inventing a rate."},"name":"Which clusters does it work with?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"A distinct cluster, by its kube-system UID, read with a licence in any 30 days — counted on your machine. Reading the same cluster again costs nothing, and preflight is never counted."},"name":"What counts as a cluster on my plan?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Offline. A key is a signed document naming your plan, its expiry and its cluster cap, and the binary verifies the signature without phoning home. Paste it into the app under Plan \u0026 licence, or run shoalcheck licence install."},"name":"How is the licence checked?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"Preflight in full, and the size of any reading: how many problems, how serious, of what kind, what they would cost, and the five most serious kinds. Which objects, the evidence and the fix for each are what a licence adds. Nothing is saved, written or exported."},"name":"What does the free plan include?"},{"@type":"Question","acceptedAnswer":{"@type":"Answer","text":"From 0.1.0-rc.12 the macOS app and command line are signed with a Developer ID and checked by Apple's notary service, so macOS opens them without asking; the Windows builds are not code-signed yet, so SmartScreen asks once. Each release publishes the archives' SHA-256 sums, signed with cosign, so you can check what you downloaded with cosign verify-blob and the public key beside the releases."},"name":"Why does my computer warn me when I open it?"}]}]</script>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="landing.css">
@@ -190,13 +192,8 @@
   </div>
 </section>
 
-<!-- ═══ THE FLOW ═══
-     From a reading to a fix, told the way a product film is: one window held on the screen while the page scrolls, and
-     inside it the three real interfaces in turn — the terminal, a Claude Code session over shoalcheck-mcp handing each
-     team a Linear ticket, and GitHub's pull request closing on the reading taken again. The scroll is the playhead
-     (flow.js): every line arrives at its own point of the scroll and leaves again on the way back. Every line drawn is
-     the capture's own — #flow-data (testdata/site/flow.json), #gate-demo, #film-mcp — trimmed, never changed. Without the
-     script, or with reduced motion, the three steps are drawn whole, one under the other. -->
+<!-- ═══ THE FLOW ═══ From a reading to a fix: one window held while the page scrolls, three real interfaces in it
+     in turn (flow.js is the playhead; every line verbatim from #flow-data, trimmed and saying so). -->
 <section class="flow" id="flow" aria-labelledby="fl-title">
   <div class="wrap flow-head">
     <span class="eyebrow">The whole flow · real screens</span>
@@ -296,6 +293,7 @@
    · …
 
 <span class="dim">basis: 12 kinds read · 16 requests, 0 object writes · checks: k8s.reliability.node-drain-budget, … · 47ms</span>   <span class="exit">exit 2</span></pre>
+        <figure class="ph-only ph-shot"><img data-src="assets/phone-drain.jpg" width="358" height="219" decoding="async" data-ui-w="358" alt="The app answers a drain: shoalcheck-e2e-worker2 cannot be evacuated, blocked by budget e2e-demo/drain-blocked-pdb; 16 reads, 0 writes"></figure>
       </div>
       <div class="pane-q" role="tabpanel" id="t-zone" aria-labelledby="tab-zone" hidden>
         <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight zone eu-central-1a --context kind-shoalcheck-mesh
@@ -305,6 +303,7 @@
 <span class="dim">k8s.reliability.zone-pinned-volume · 91ms</span>
 <span class="dim">this model checks a subset of what the scheduler checks: it can say a change will stop, and it cannot</span>
 <span class="dim">promise one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
+        <figure class="ph-only ph-shot"><img data-src="assets/phone-zone.jpg" width="358" height="229" decoding="async" data-ui-w="358" alt="The app answers a zone loss: every pod this model can place has somewhere else to go if eu-central-1a fails; exit 0"></figure>
       </div>
       <div class="pane-q" role="tabpanel" id="t-upgrade" aria-labelledby="tab-upgrade" hidden>
         <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight upgrade 1.37
@@ -322,8 +321,10 @@
 <span class="dim">k8s.upgrade.crd-conversion-webhook-unbacked, api-removals@2026-08-30 · 26ms</span>
 <span class="dim">this model checks a subset of what the scheduler checks: it can say a change will stop, and it cannot</span>
 <span class="dim">promise one will succeed.</span>   <span class="exit">exit 2</span></pre>
+        <figure class="ph-only ph-shot"><img data-src="assets/phone-upgrade.jpg" width="358" height="161" decoding="async" data-ui-w="358" alt="The app answers an upgrade to 1.37: 1 thing stops it, a node roll meets 1 of 3 nodes it cannot evacuate"></figure>
       </div>
     </div>
+    <p class="ph-only ph-note">The app's own answers, from its interactive demo. Each one read-only.</p>
   </div>
 </section>
 
@@ -403,6 +404,8 @@
       <h2 id="r-title" class="grad">A reading you work in, not a PDF you scroll.</h2>
       <p>One self-contained file: every finding with its object, every dollar with its rate, and what could not be read named as such — never counted as clean.</p>
     </div>
+    <figure class="ph-only ph-shot"><img data-src="assets/phone-evidence.jpg" width="390" height="392" decoding="async" data-ui-w="390" alt="One finding in the sample reading: three lines of evidence for StatefulSet monitoring/prometheus-k8s and a kubectl command offered for copying, never run"><figcaption>One finding: the evidence it rests on, and a command it offers but never runs.</figcaption></figure>
+    <figure class="ph-only ph-shot"><img data-src="assets/phone-compare.jpg" width="358" height="417" decoding="async" data-ui-w="358" alt="Two readings of the kind test cluster compared: 1 new, 1 no longer in the set, 0 got worse; no longer in the set is not fixed"><figcaption>Two readings compared. An absence is never reported as a fix.</figcaption></figure>
     <figure class="live-main reveal">
       <div class="live-frame" id="live-frame" data-w="1440" data-h="900">
         <img class="live-poster" src="assets/shot-reading.png" width="1440" height="900" loading="lazy" alt="The overview of the sample reading of acme-pay-prod, labelled Illustrative sample: 153 findings, 11 critical or high, $1,659 a month identified, the four claims it leads with, a severity by category grid and findings by namespace.">
@@ -496,12 +499,8 @@
 
 
 
-<!-- ═══ HOW IT COMPARES ═══
-     A sourced matrix: eleven capabilities down, Shoalcheck and six tools across. The body is drawn by landing.js
-     from comparison.json (testdata/site/comparison-sources.json keeps a quote behind every cell), fetched as the
-     section nears — the same lazy pattern the GitHub scene uses — so the 18 KB of data never lands on the first
-     screen. Each cell is that vendor's own documentation on 2026-10-20; a dash means not in their docs that day,
-     not that they cannot. internal/gatecheck/landing_comparison_test.go holds the data honest. -->
+<!-- ═══ HOW IT COMPARES ═══ A sourced matrix drawn by landing.js from comparison.json (a quote behind every
+     cell in testdata/site/comparison-sources.json), fetched as the section nears. -->
 <section class="band band-alt" id="compare" aria-labelledby="cmp-title">
   <div class="wrap">
     <div class="band-head reveal">
