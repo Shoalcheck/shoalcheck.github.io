@@ -1266,17 +1266,18 @@
     var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); im.src = im.getAttribute('data-src'); } }, { rootMargin: '80px 0px' });
     io.observe(im);
   });
-  /* ON A PHONE EACH SYSTEM IS A HEADING (landing.css, the short phone page): its rows open under the one tapped, the
-     detected system's open from the start. */
+  /* ON A PHONE EACH SYSTEM IS A HEADING whose button opens its rows; the detected one starts open. */
   if (window.matchMedia && window.matchMedia('(max-width: 600px)').matches) {
     $$('.os').forEach(function (c) {
       var h = $('h3', c);
       if (!h) return;
-      var set = function (open) { c.classList.toggle('shut', !open); h.setAttribute('aria-expanded', String(open)); };
-      h.setAttribute('role', 'button'); h.setAttribute('tabindex', '0');
+      var b = document.createElement('button');
+      b.type = 'button';
+      while (h.firstChild) b.appendChild(h.firstChild);
+      h.appendChild(b);
+      var set = function (open) { c.classList.toggle('shut', !open); b.setAttribute('aria-expanded', String(open)); };
       set(c.classList.contains('here'));
-      h.addEventListener('click', function () { set(c.classList.contains('shut')); });
-      h.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(c.classList.contains('shut')); } });
+      b.addEventListener('click', function () { set(c.classList.contains('shut')); });
     });
   }
   /* Plan buttons: the shop sells and issues keys. Its buy page takes the plan and the period the cards show, so a

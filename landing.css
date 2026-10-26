@@ -1300,11 +1300,8 @@ main, .foot { position: relative; z-index: 1; }
 .motion main > section.band > .wrap, .motion main > section.strip > .wrap { will-change: transform, opacity; }
 @media (prefers-reduced-motion: reduce) { .gallery.playing .gal-dots button.run::after { animation: none; } }
 
-/* ── A PHONE GETS A SHORT PAGE (founder, 2026-10-26, on his phone: "it's simply awful", "far too much text… it
-   needs MANY times less"). Measured before: 4,706 words over 52 screens. Under 600 px the page is the hero, three
-   proof cards, the three steps, the read-only promise, the prices, the downloads and six questions — about ten
-   screens and a few hundred words; every other act stays on the desktop and in the pages the footer links. Nothing
-   is pinned: the scroll scenes made screens of near-empty scrolling. landing-check 4q holds the budget. ── */
+/* ── A PHONE GETS A SHORT PAGE (founder, 2026-10-26: "far too much text"; it was 4,706 words over 52 screens).
+   Nothing pinned, the other acts stay on the desktop. landing-check 4q holds the budget. ── */
 .ph-only { display: none; }
 @media (max-width: 600px) {
   .ph-only, .band-head > p.ph-only { display: block !important; }
@@ -1347,13 +1344,12 @@ main, .foot { position: relative; z-index: 1; }
   /* downloads: each system a heading; its rows open under the one tapped (landing.js) */
   .dl { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .os.shut .files, .os.shut .note, .os.shut .here-tag { display: none; }
-  .os h3 { min-height: 44px; display: flex; align-items: center; cursor: pointer; }
+  .os h3 > button { min-height: 44px; width: 100%; display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
   .os .files a { min-height: 44px; }
   .faq summary { min-height: 44px; }
   .foot-in ul { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
   .foot-in li a { min-height: 44px; display: flex; align-items: center; }
-  /* one real panel of the reading, captured at a phone's own scale (390 px wide at DPR 2) and shown at about that
-     size: never a desktop window shrunk into a frame (founder: the laptop on a phone was "a disgrace") */
+  /* one panel of the reading captured at a phone's own scale, never a desktop window shrunk */
   .ph-shot { margin: 20px auto 0; }
   .ph-shot img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line2); }
   .ph-shot figcaption { margin-top: 10px; color: var(--dim); font-size: 14px; }
