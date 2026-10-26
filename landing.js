@@ -1260,6 +1260,25 @@
     var card = $('.os[data-os="' + os + '"]');
     if (card) { card.classList.add('here'); var t = $('.here-tag', card); if (t) t.hidden = false; }
   }
+  /* The phone's reading panel is fetched as it comes near, not with the first screen (landing-check 4i). */
+  $$('img[data-src]').forEach(function (im) {
+    if (!('IntersectionObserver' in window)) { im.src = im.getAttribute('data-src'); return; }
+    var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); im.src = im.getAttribute('data-src'); } }, { rootMargin: '80px 0px' });
+    io.observe(im);
+  });
+  /* ON A PHONE EACH SYSTEM IS A HEADING (landing.css, the short phone page): its rows open under the one tapped, the
+     detected system's open from the start. */
+  if (window.matchMedia && window.matchMedia('(max-width: 600px)').matches) {
+    $$('.os').forEach(function (c) {
+      var h = $('h3', c);
+      if (!h) return;
+      var set = function (open) { c.classList.toggle('shut', !open); h.setAttribute('aria-expanded', String(open)); };
+      h.setAttribute('role', 'button'); h.setAttribute('tabindex', '0');
+      set(c.classList.contains('here'));
+      h.addEventListener('click', function () { set(c.classList.contains('shut')); });
+      h.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(c.classList.contains('shut')); } });
+    });
+  }
   /* Plan buttons: the shop sells and issues keys. Its buy page takes the plan and the period the cards show, so a
      button follows the Yearly/Monthly switch. A contact that is an address gets a mail; without one, nothing is on
      sale yet, and the page says so instead of sending anyone to an address nobody reads. */

@@ -63,7 +63,7 @@
 <section class="hero" aria-labelledby="hero-title">
     <div class="wrap hero-grid">
     <div class="hero-copy">
-      <span class="eyebrow hero-name">Shoalcheck <em>Read-only Kubernetes audit · nothing installed</em></span>
+      <span class="eyebrow hero-name">Shoalcheck <em>Read-only Kubernetes audit<span class="ph-cut"> · nothing installed</span></em></span>
       <h1 id="hero-title">Find what's unsafe, overpriced, or breaking <span class="hl">— before it bites.</span></h1>
       <p class="lede">A read-only audit you run from your laptop: <b>get</b> and <b>list</b>, nothing installed. Every risk, every wasted dollar and what blocks your next change, each with the object it rests on.</p>
       <div class="cta">
@@ -173,6 +173,11 @@
       <button class="gal-play" type="button" aria-label="Pause the highlights" aria-pressed="false"></button>
     </div>
   </div>
+
+  <figure class="ph-only ph-shot wrap">
+    <img data-src="assets/phone-reading.jpg" width="366" height="438" decoding="async" data-ui-w="366" alt="The sample reading on a phone: what it found first — 5 nodes cannot be evacuated, 1 dated obligation inside 90 days, 14 references point at nothing, $1,659/mo identified">
+    <figcaption>A real reading of the sample cluster, as a phone shows it.</figcaption>
+  </figure>
 </section>
 
 <!-- ═══ PROOF STRIP ═══ -->
@@ -340,8 +345,9 @@
     <div class="wrap ro-grid">
       <div class="band-head reveal">
         <span class="eyebrow">Read-only, provably</span>
-        <h2 id="ro-title">It cannot change your cluster. It counts every request to show it.</h2>
+        <h2 id="ro-title">It cannot change your cluster. <span class="ph-cut">It counts every request to show it.</span></h2>
         <p>A recorder wraps the only transport the binary has and counts every request it makes. <b>Secret values, pod logs and node shells are never read at all.</b></p>
+        <p class="ph-only">Get and list only: 0 object writes, counted on every run.</p>
         <a class="btn" href="read-only.html">What it reads, line by line</a>
       </div>
       <ol class="ro-stats" aria-label="What a reading does to a cluster, counted">
@@ -537,7 +543,7 @@
       <article class="plan reveal" data-monthly="59" data-yearly="590">
         <h3>Pro</h3>
         <p class="for">For an engineer with a few clusters.</p>
-        <div class="price"><b data-price>$59</b><span>/ month</span></div>
+        <div class="price"><b data-price>$59</b><span>/ month</span></div><p class="ph-year ph-only">or $590 a year</p>
         <div class="billing-line"><span data-line>billed monthly</span><span class="save" data-save>yearly: two months free</span></div>
         <div class="cap">3 clusters in any 30 days</div>
         <ul>
@@ -553,7 +559,7 @@
         <span class="tag">TEAMS</span>
         <h3>Team</h3>
         <p class="for">For a platform team and its pipeline.</p>
-        <div class="price"><b data-price>$299</b><span>/ month</span></div>
+        <div class="price"><b data-price>$299</b><span>/ month</span></div><p class="ph-year ph-only">or $2,990 a year</p>
         <div class="billing-line"><span data-line>billed monthly</span><span class="save" data-save>yearly: two months free</span></div>
         <div class="cap">20 clusters in any 30 days</div>
         <ul>
@@ -568,7 +574,7 @@
       <article class="plan reveal" data-monthly="899" data-yearly="8990">
         <h3>Business</h3>
         <p class="for">For an organisation running many clusters.</p>
-        <div class="price"><b data-price>$899</b><span>/ month</span></div>
+        <div class="price"><b data-price>$899</b><span>/ month</span></div><p class="ph-year ph-only">or $8,990 a year</p>
         <div class="billing-line"><span data-line>billed monthly</span><span class="save" data-save>yearly: two months free</span></div>
         <div class="cap">100 clusters in any 30 days</div>
         <ul>

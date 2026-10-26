@@ -114,7 +114,7 @@ p { margin: 0; }
 @media (max-width: 480px) { .top-cta .btn-ghost { display: none; } }
 
 /* ── hero ───────────────────────────────────────────────────────────────── */
-.hero { position: relative; padding: clamp(24px, min(6vw, 6vh), 88px) 0 clamp(56px, 8vw, 112px); }
+.hero { position: relative; overflow-x: clip; padding: clamp(24px, min(6vw, 6vh), 88px) 0 clamp(56px, 8vw, 112px); }
 /* THE OPENING IS A PRODUCT SHOT. The promise centred on the stage, the reading being taken below it, rising into place
    the way the film's camera settles on its subject (transform only: the h1 is the largest paint and is never hidden). */
 .hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: clamp(28px, 3.5vw, 48px); }
@@ -1299,3 +1299,66 @@ main, .foot { position: relative; z-index: 1; }
 @keyframes dotfill { from { transform: scaleX(.08); } to { transform: scaleX(1); } }
 .motion main > section.band > .wrap, .motion main > section.strip > .wrap { will-change: transform, opacity; }
 @media (prefers-reduced-motion: reduce) { .gallery.playing .gal-dots button.run::after { animation: none; } }
+
+/* ── A PHONE GETS A SHORT PAGE (founder, 2026-10-26, on his phone: "it's simply awful", "far too much text… it
+   needs MANY times less"). Measured before: 4,706 words over 52 screens. Under 600 px the page is the hero, three
+   proof cards, the three steps, the read-only promise, the prices, the downloads and six questions — about ten
+   screens and a few hundred words; every other act stays on the desktop and in the pages the footer links. Nothing
+   is pinned: the scroll scenes made screens of near-empty scrolling. landing-check 4q holds the budget. ── */
+.ph-only { display: none; }
+@media (max-width: 600px) {
+  .ph-only, .band-head > p.ph-only { display: block !important; }
+  .ph-cut, .hero-copy .hl, .hero-copy .lede, .hero-copy .price-anchor, .hero-copy .trust, .hero .device,
+  .strip, #zone, #questions, .break, #integrations, #reading, #app, #deadlines, #compare, .final,
+  .band-head > p, .flow-lede, .flow-end, .flow-device, .flow-bar, .fc p, .ro-stats,
+  #finds .gal-ctl, #finds .cap-scene, #finds .cap-card > p,
+  #finds .cap-card:not(:has([data-cap="security"], [data-cap="reliability"], [data-cap="money"])),
+  .bill, .plan .for, .plan ul, .plan .billing-line, .plans-note, .more-ways,
+  .faq > :nth-child(2) > details:nth-of-type(1), .faq > :nth-child(2) > details:nth-of-type(4) { display: none !important; }
+  body { font-size: 16px; }
+  .band, .flow { padding: 56px 0 8px; }
+  .band-head { gap: 12px; margin-bottom: 24px; }
+  .band-head h2, .flow-head h2 { font-size: 30px; line-height: 1.12; }
+  .hero { padding-top: 32px; padding-bottom: 8px; min-height: 0; }
+  .hero-copy h1 { font-size: 36px; line-height: 1.08; }
+  .hero-copy .cta { margin-top: 20px; }
+  /* the proof: three cards stacked, each its figure and the way into the sample */
+  #finds .caps { flex-direction: column; overflow: visible; scroll-snap-type: none; padding: 0 20px; gap: 12px; }
+  #finds .cap-card { flex: none; min-height: 0; padding: 20px; gap: 8px; transform: none !important; opacity: 1 !important; }
+  #finds .cap-fig { font-size: 22px; }
+  #finds .cap-go { min-height: 44px; display: inline-flex; align-items: center; }
+  /* the three steps, as a list, still */
+  .flow.scrub .flow-run, .flow .flow-run { height: auto; }
+  .flow.scrub .flow-pin, .flow .flow-pin { position: static; height: auto; display: block; }
+  .flow-grid { display: block; }
+  .flow-copy { min-height: 0; display: flex; flex-direction: column; gap: 18px; }
+  .fc { position: static; opacity: 1; transform: none; pointer-events: auto; gap: 6px; }
+  .fc h3 { font-size: 20px; }
+  /* the read-only promise: one card */
+  .motion .ro, .ro { height: auto; padding: 56px 0 8px; }
+  .motion .ro-pin, .ro-pin { position: static; height: auto; display: block; }
+  .ro-grid { display: block; }
+  .ro .ph-only { color: var(--fg2); font-size: 16px; line-height: 1.5; }
+  /* prices: name, the monthly price, the year, the clusters, the button */
+  .plans { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .plan { padding: 18px 20px; gap: 6px; }
+  .ph-year { margin: 0; color: var(--dim); font-size: 15px; }
+  .plan .btn { min-height: 44px; }
+  /* downloads: each system a heading; its rows open under the one tapped (landing.js) */
+  .dl { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .os.shut .files, .os.shut .note, .os.shut .here-tag { display: none; }
+  .os h3 { min-height: 44px; display: flex; align-items: center; cursor: pointer; }
+  .os .files a { min-height: 44px; }
+  .faq summary { min-height: 44px; }
+  .foot-in ul { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+  .foot-in li a { min-height: 44px; display: flex; align-items: center; }
+  /* one real panel of the reading, captured at a phone's own scale (390 px wide at DPR 2) and shown at about that
+     size: never a desktop window shrunk into a frame (founder: the laptop on a phone was "a disgrace") */
+  .ph-shot { margin: 20px auto 0; }
+  .ph-shot img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line2); }
+  .ph-shot figcaption { margin-top: 10px; color: var(--dim); font-size: 14px; }
+  .tag, .plan .tag { font-size: 13px; }
+  header.top .brand, header.top .menu, header.top .btn { min-height: 44px; }
+  .ro .btn { min-height: 44px; display: inline-flex; align-items: center; }
+  .release-line a { display: inline-flex; min-height: 44px; min-width: 44px; padding: 0 4px; align-items: center; }
+}
