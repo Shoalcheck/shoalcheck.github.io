@@ -92,9 +92,7 @@ p { margin: 0; }
 .brand.small svg { width: 20px; height: 20px; }
 .nav { display: flex; gap: 22px; }
 .nav a { color: var(--fg2); text-decoration: none; font-size: 13px; transition: color .15s; white-space: nowrap; }
-/* ONE LINE. Brand, seven sections and three buttons are about 1,110 px; below that the links wrapped onto a second
-   line (D50 site review). Under 1,240 px the two ghost buttons leave the bar — the mode switch is in the final call
-   and the demo in the page — and the Menu fold takes over under 900 px. */
+/* One line: ghost buttons leave the bar under 1,240 px, the Menu fold takes over under 900 px. */
 @media (max-width: 1240px) { .top-cta .btn-ghost { display: none; } .nav { gap: 18px; } }
 .nav a:hover { color: var(--fg); }
 .top-cta { margin-left: auto; display: flex; gap: 8px; }
@@ -252,10 +250,7 @@ p { margin: 0; }
    its labels are read at and scrolls sideways inside its tile. */
 @media (max-width: 1100px) { .caps { grid-template-columns: minmax(0, 1fr); } }
 
-/* ── the opening: a reading being taken (landing.js) ───────────────────────────────────────────────────────
-   A window like the reading's own: the cluster and its "Illustrative sample" chip across the top, what it read,
-   what it found by severity and category, what it identified, then the claims it leads with. Colour is kept for
-   severity and money, as in the reading. */
+/* ── the opening: a reading being taken (landing.js); colour only for severity and money ── */
 .rd { container: rd / inline-size; margin: 0; border: 1px solid var(--line2); border-radius: 16px; background: linear-gradient(180deg, rgba(18, 28, 30, .92), rgba(10, 15, 16, .96)); box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .7), 0 0 0 1px rgba(45, 212, 191, .06), 0 0 60px -20px rgba(45, 212, 191, .25); overflow: hidden; min-width: 0; display: flex; flex-direction: column; }
 .rd-bar { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--line); min-width: 0; }
 .rd-cl { font: 600 12.5px var(--mono); color: var(--fg); white-space: nowrap; }
@@ -372,9 +367,7 @@ html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not
 .scene-copy { display: flex; flex-direction: column; gap: 18px; }
 .scene-steps { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; counter-reset: s; }
 .scene-steps li { position: relative; padding: 12px 14px 12px 46px; border-radius: 12px; border: 1px solid transparent; color: var(--faint); font-size: 15px; line-height: 1.5; transition: color .3s, border-color .3s, background .3s; counter-increment: s; }
-/* A NUMBER IN A RING SITS IN ITS CENTRE. Line-height centring puts the font's line box in the middle, and a digit
-   sits above the baseline inside it — low by a pixel or two, more in a fallback face. The ring is a grid that centres
-   its one item, and text-box trims that item to the digits' cap height, so what is centred is the figure itself. */
+/* A ring centres its digit by grid + text-box trim, not line-height (which sat it low). */
 .scene-steps li::before { content: counter(s); position: absolute; left: 13px; top: 11px; width: 24px; height: 24px; display: grid; place-items: center;
                           border-radius: 50%; border: 1px solid currentColor; font: 600 12px/1 var(--mono); font-variant-numeric: tabular-nums;
                           text-box: trim-both cap alphabetic; }
@@ -507,9 +500,7 @@ html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not
 @media (max-width: 900px) { .bar { grid-template-columns: 92px minmax(0, 1fr) 82px; } }
 
 .calc { margin-top: 18px; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); border: 1px solid var(--line2); border-radius: var(--r); background: linear-gradient(135deg, rgba(45, 212, 191, .06), transparent 50%), var(--surface); overflow: clip; }
-/* THE CONTROLS STAY IN VIEW while the figures they move are read: the column of figures runs twice their height, and
-   the controls scrolled away above an empty column. `overflow: clip` on .calc, not hidden — hidden makes it a scroll
-   container, and a sticky child of one never sticks. */
+/* The controls stay in view: overflow clip, not hidden, or the sticky child never sticks. */
 .calc-in { display: flex; flex-direction: column; gap: 18px; padding: 28px; position: sticky; top: 80px; align-self: start; }
 .calc > .calc-out { border-left: 1px solid var(--line); }
 .calc-in > label { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 8px; font-size: 14px; color: var(--fg2); }
@@ -707,9 +698,7 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 
 /* ── a screenshot at full size (landing.js) ─────────────────────────────── */
 
-/* ── just the output ─────────────────────────────────────────────────────
-   Our sentences go; what the product printed stays, with every caption that says what it rests on (a gate in
-   internal/gatecheck refuses a rule here that hides a caption, a basis line or the sample's label). */
+/* ── just the output: our sentences go, the product's captions stay (gated) ── */
 .just-output .hero .lede, .just-output .cap-card p, .just-output .band-head p, .just-output .compare-copy p, .just-output .scene-steps,
 .just-output .st-cap, .just-output .ro-grid .band-head ~ p, .just-output #faq, .just-output .final-in > p:not(.just-note),
 .just-output .break, .just-output .finale { display: none; }
@@ -941,9 +930,7 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 @keyframes rim { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(820px, -40px, 0); } }
 main, .foot { position: relative; z-index: 1; }
 
-/* ═══ HEADINGS RISE OUT OF THEIR OWN MASKS ═══════════════════════════════
-   motion.js wraps each word of a section heading as it comes into view; the word travels 140% of its height (100%
-   left ascenders peeking out of the mask) and is hidden until it moves. The heading's text is never changed. */
+/* ═══ HEADINGS RISE OUT OF THEIR OWN MASKS (motion.js wraps the words; the text is never changed) ═══ */
 .split .w { display: inline-block; overflow: hidden; vertical-align: top; padding: .06em .04em .22em; margin: -.06em -.04em -.22em; }
 .split .w > i { display: inline-block; font-style: inherit; transform: translateY(140%); visibility: hidden; transition: transform 1.1s var(--ramp); }
 .split.on .w > i { transform: none; visibility: visible; }
@@ -986,9 +973,7 @@ main, .foot { position: relative; z-index: 1; }
 /* the light's head runs inside the stroke, narrower than it: wider, its white rim showed grey over the black */
 .fin-mark .fm-ha, .fin-mark .fm-hb { stroke: #fff; stroke-width: 1.4; stroke-dasharray: .05 1.2; opacity: 0; }
 .fin-name { font-size: calc(clamp(48px, 7.4vw, 108px) * var(--z, 1)); font-weight: 750; letter-spacing: -.05em; line-height: 1; color: var(--fg); }
-/* LAID OUT AT THE MACRO'S SIZE, SCALED DOWN TO REST. Scaled up from its resting size, the lockup was a bitmap of a
-   128 px mark stretched 3.2 times — soft edges, a smeared glow (founder: "жахлива якість"). A layer drawn large and
-   shrunk stays sharp; one drawn small and enlarged cannot. motion.js reads --z. */
+/* Laid out at the macro's size and scaled down, so it stays sharp; motion.js reads --z. */
 .motion .finale .fin-lock { --z: 3.2; position: absolute; left: 50%; top: 50%; margin: 0; transform-origin: 0 0; opacity: 0; }
 .motion .finale .fin-name { opacity: 0; }
 @media (prefers-reduced-motion: reduce) {
@@ -1244,9 +1229,7 @@ main, .foot { position: relative; z-index: 1; }
   .cmp-cap-full { display: none; }
 }
 
-/* ═══ THE AGENT, AS A CONVERSATION ═══════════════════════════════════════
-   Who talks to whom, in one line; then each exchange: the question on the left in plain words with the call it made,
-   the answer on the right, arriving after it. On a phone, one under the other. */
+/* ═══ THE AGENT, AS A CONVERSATION: question left, answer right; stacked on a phone ═══ */
 .sq-talk { gap: 22px; }
 .sq-path { display: flex; align-items: center; gap: 0; }
 .sq-node { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border-radius: 14px; background: var(--tile2); text-align: center; }

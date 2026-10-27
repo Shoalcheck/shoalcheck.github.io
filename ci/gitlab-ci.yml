@@ -4,7 +4,7 @@
 #
 # WHAT IT NEEDS (CI/CD variables): KUBECONFIG_FILE, a kubeconfig with the read-only access
 # `shoalcheck audit --show-permissions` prints; SHOALCHECK_LICENCE, a masked variable holding a Team licence key (the
-# gate is a Team command); SHOALCHECK_VERSION, the release to pin without the leading v (e.g. 0.1.0-rc.12).
+# gate is a Team command); SHOALCHECK_VERSION, the release to pin without the leading v (e.g. 0.1.0).
 #
 # WHERE THE FINDINGS LAND: the merge request's test report (JUnit) and Code Quality widget, which list what is new
 # against the target branch's own pipeline; a short Markdown verdict in the job log and the artifacts; the report.

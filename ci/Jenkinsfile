@@ -8,7 +8,7 @@
 // JUnit (all in the suggested set). Two credentials: `shoalcheck-kubeconfig`, a Secret file holding a kubeconfig with
 // the read-only access `shoalcheck audit --show-permissions` prints, whose context is the one named below; and
 // `shoalcheck-licence`, a Secret text holding a Team licence key (the gate is a Team command). SHOALCHECK_VERSION, the
-// release to pin without the leading v (e.g. 0.1.0-rc.12), as a global or folder environment variable -- a pipeline
+// release to pin without the leading v (e.g. 0.1.0), as a global or folder environment variable -- a pipeline
 // should not change under you, so this never asks for "latest".
 //
 // TWO RUNS FROM ONE FILE, in a multibranch job. The cron reads the cluster from main every weekday against the

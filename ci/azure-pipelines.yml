@@ -6,7 +6,7 @@
 # under CodeAnalysisLogs for the SARIF SAST Scans Tab).
 #
 # WHAT IT NEEDS. Pipeline variables: SHOALCHECK_VERSION, the release to pin without the leading v (e.g.
-# 0.1.0-rc.12) -- a pipeline should not change under you, so this never asks for "latest"; SHOALCHECK_LICENCE, a
+# 0.1.0) -- a pipeline should not change under you, so this never asks for "latest"; SHOALCHECK_LICENCE, a
 # SECRET variable holding a Team licence key (the gate is a Team command). A secure file named `kubeconfig`
 # (Pipelines > Library > Secure files) with the read-only access `shoalcheck audit --show-permissions` prints, whose
 # context is the one named below. The first run asks you to permit the pipeline to use the secure file.

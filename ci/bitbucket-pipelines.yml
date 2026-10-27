@@ -8,7 +8,7 @@
 # with the read-only access `shoalcheck audit --show-permissions` prints, base64-encoded on one line
 # (`base64 < kubeconfig | tr -d '\n'`, because a variable is one line), whose context is the one named below;
 # SHOALCHECK_LICENCE, a SECURED variable holding a Team licence key (the gate is a Team command); SHOALCHECK_VERSION,
-# the release to pin without the leading v (e.g. 0.1.0-rc.12) -- a pipeline should not change under you, so this
+# the release to pin without the leading v (e.g. 0.1.0) -- a pipeline should not change under you, so this
 # never asks for "latest".
 #
 # TWO RUNS FROM ONE FILE. The custom pipeline `shoalcheck-drift` reads the cluster against the committed baseline;

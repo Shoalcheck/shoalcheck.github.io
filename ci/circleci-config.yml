@@ -8,7 +8,7 @@
 # WHAT IT NEEDS. A context named `shoalcheck` (Organization settings > Contexts) holding KUBECONFIG_B64, a kubeconfig
 # with the read-only access `shoalcheck audit --show-permissions` prints, base64-encoded on one line
 # (`base64 < kubeconfig | tr -d '\n'`), whose context is the one named below, and SHOALCHECK_LICENCE, a Team licence
-# key (the gate is a Team command). SHOALCHECK_VERSION, the release to pin without the leading v (e.g. 0.1.0-rc.12),
+# key (the gate is a Team command). SHOALCHECK_VERSION, the release to pin without the leading v (e.g. 0.1.0),
 # as a project environment variable -- a pipeline should not change under you, so this never asks for "latest". And
 # SHOALCHECK_BASE_BRANCH if pull requests merge into something other than main: CircleCI does not tell a job which
 # branch a pull request targets.

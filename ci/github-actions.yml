@@ -10,7 +10,7 @@
 # WHAT IT NEEDS. A `KUBECONFIG` secret with the read-only access `shoalcheck audit --show-permissions` prints; a
 # Team licence key in the `SHOALCHECK_LICENCE` secret (the gate is a Team command, and without the key it exits 4
 # naming the plan); and the release to pin in the `SHOALCHECK_VERSION` variable, without the leading v
-# (e.g. 0.1.0-rc.12). A pipeline should not change under you, so this never asks for "latest".
+# (e.g. 0.1.0). A pipeline should not change under you, so this never asks for "latest".
 #
 # A RUN WITHOUT THE SECRETS DOES NOT GATE, AND SAYS SO. GitHub gives a pull request from a fork no secrets. Such a run
 # reads nothing, compares nothing, warns "shoalcheck did not gate this run" and skips every step after it -- not exit

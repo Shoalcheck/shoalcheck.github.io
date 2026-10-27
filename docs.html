@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Shoalcheck — docs</title>
+<title>Documentation — Shoalcheck</title>
 <meta name="description" content="Install Shoalcheck, run its first commands, read its exit codes, and see which plan each command needs — as the binary checks it. Verify a download; what to do when something does not work." />
 <meta name="color-scheme" content="dark" />
 <meta name="theme-color" content="#08080a" />
+<link rel="canonical" href="https://shoalcheck.com/docs.html">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -84,23 +85,23 @@
 
 <header class="top" id="top">
   <div class="wrap">
-    <a class="brand" href="index.html" aria-label="Shoalcheck, home">
+    <a class="brand" href="/" aria-label="Shoalcheck, home">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0b1417"/><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g></svg>
       Shoalcheck
     </a>
     <button class="menu" aria-expanded="false" aria-controls="site-nav">Menu</button>
     <nav class="nav" id="site-nav" aria-label="Sections">
-      <a href="index.html#flow">The flow</a>
-      <a href="index.html#finds">What it finds</a>
-      <a href="index.html#integrations">Integrations</a>
-      <a href="index.html#zone">Before a change</a>
-      <a href="index.html#pricing">Pricing</a>
-      <a href="index.html#faq">FAQ</a>
+      <a href="/#flow">The flow</a>
+      <a href="/#finds">What it finds</a>
+      <a href="/#integrations">Integrations</a>
+      <a href="/#zone">Before a change</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
       <a href="docs.html" aria-current="page">Docs</a>
     </nav>
     <div class="top-cta">
       <a class="btn btn-ghost" href="app-demo.html">Live demo</a>
-      <a class="btn btn-primary" href="index.html#download">Download</a>
+      <a class="btn btn-primary" href="/#download">Download</a>
     </div>
   </div>
 </header>
@@ -129,11 +130,13 @@
       <div class="dc-wrap"><table class="dc-table">
         <thead><tr><th>File</th><th>What it is</th></tr></thead>
         <tbody>
-          <tr><td>Shoalcheck_&lt;v&gt;_macos_universal.dmg</td><td>The desktop app for macOS 12 and later, signed with a Developer ID and checked by Apple's notary service from
-            0.1.0-rc.12.</td></tr>
-          <tr><td>shoalcheck_&lt;v&gt;_&lt;os&gt;_&lt;arch&gt;</td><td>The command line (<code>.zip</code> on Windows). On macOS it is signed and checked by Apple's notary service from
-            0.1.0-rc.12; on Windows, SmartScreen may warn once (More info → Run anyway).</td></tr>
-          <tr><td>shoalcheck-app_&lt;v&gt;_&lt;os&gt;_&lt;arch&gt;</td><td>The desktop app for Windows and Linux: it serves the window on this machine and opens it in your browser.</td></tr>
+          <tr><td>Shoalcheck_&lt;v&gt;_macos_universal.dmg</td><td>The desktop app for macOS 12 and later, signed with a Developer ID and checked by Apple's notary service.</td></tr>
+          <tr><td>Shoalcheck_&lt;v&gt;_windows_&lt;arch&gt;_setup.exe</td><td>The Windows installer: the app, the command line and the kubectl plugin, for your user only, with no
+            administrator. It adds a Start menu entry and, unless you untick it, puts the command line on your PATH. Run a newer one over it to upgrade.</td></tr>
+          <tr><td>shoalcheck_&lt;v&gt;_&lt;os&gt;_&lt;arch&gt;</td><td>The command line (<code>.zip</code> on Windows). On macOS it is signed and checked by Apple's notary service; on Windows, SmartScreen may warn once (More info → Run anyway).</td></tr>
+          <tr><td>shoalcheck-app_&lt;v&gt;_&lt;os&gt;_&lt;arch&gt;</td><td>The desktop app for Windows and Linux, in a window of its own; closing it stops it. On Windows the window is native (the
+            system's WebView2); on Linux it is an app window of Chrome, Chromium, Brave or Edge, otherwise your browser, and
+            <code>install-desktop-entry.sh</code> in the archive adds it to the menu.</td></tr>
           <tr><td>kubectl-shoalcheck_&lt;v&gt;_&lt;os&gt;_&lt;arch&gt;</td><td>The same command line as a kubectl plugin, run as <code>kubectl shoalcheck …</code>.</td></tr>
           <tr><td>shoalcheck-mcp_&lt;v&gt;_&lt;os&gt;_&lt;arch&gt;</td><td>An MCP server that hands an assistant the readings already on this machine. It has no kubeconfig and cannot read a cluster.</td></tr>
         </tbody>
@@ -181,7 +184,9 @@ shoalcheck audit --context prod --output report.html --json reading.json   <span
           <tr data-cmd="support" data-plan="Free"><td>support</td><td><span class="dc-plan free">Free</span></td><td>Writes a file describing this install, and with <code>--input reading.json</code> a reading, without naming anything in the cluster.</td></tr>
           <tr data-cmd="upgrade" data-plan="Free"><td>upgrade</td><td><span class="dc-plan free">Free</span></td><td>Replaces this program with the newest release once its signature, digest and version check out; <code>--check</code> only asks.</td></tr>
           <tr data-cmd="licence" data-plan="Free"><td>licence show | install | plans | fingerprint</td><td><span class="dc-plan free">Free</span></td><td>What the key on this machine covers and until when; installs a key; lists the plans; prints a cluster's fingerprint for a key bound to it.</td></tr>
-          <tr data-cmd="activate" data-plan="Free"><td>activate</td><td><span class="dc-plan free">Free</span></td><td>Installs a key, the same as <code>licence install</code>.</td></tr>
+          <tr data-cmd="activate" data-plan="Free"><td>activate</td><td><span class="dc-plan free">Free</span></td><td>Installs a key, the same as <code>licence install</code>; or binds the activation code from your order (<code>SCA-…</code>) to
+            the cluster you are on — up to three in all — and installs the key the shop returns. It sends the shop the code and each cluster's fingerprint — a one-way hash of its
+            kube-system namespace UID — and nothing else.</td></tr>
           <tr data-cmd="render" data-plan="Pro"><td>render</td><td><span class="dc-plan">Pro</span></td><td>Renders a kept reading (<code>--input reading.json</code>) as the report or, with <code>--instrument</code>, as the workspace. A kept fleet (<code>fleet --json</code>) renders too, on Team.</td></tr>
           <tr data-cmd="findings" data-plan="Pro"><td>findings</td><td><span class="dc-plan">Pro</span></td><td>Lists a reading's findings, filtered by severity, rule, category or namespace; as a table, JSON, Markdown or SARIF.</td></tr>
           <tr data-cmd="explain" data-plan="Pro"><td>explain</td><td><span class="dc-plan">Pro</span></td><td>One finding in full: what it is, why it matters, what it rests on, the fix.</td></tr>
@@ -252,7 +257,7 @@ shasum -a 256 --ignore-missing -c checksums.txt</pre>
   <div class="wrap foot-in">
     <span class="brand small"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0b1417"/><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g></svg>Shoalcheck</span>
     <ul>
-      <li><a href="sample-report.html">The sample reading</a></li>
+      <li><a href="sample-report.html">A sample Kubernetes audit</a></li>
       <li><a href="sample-compare.html">A real comparison</a></li>
       <li><a href="sample-fleet.html">The sample fleet</a></li>
       <li><a href="sample-evidence-pack.zip" download>The sample evidence pack (zip)</a></li>
