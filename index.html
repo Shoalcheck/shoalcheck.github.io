@@ -109,6 +109,13 @@
   </div>
 </section>
 
+<!-- ═══ THE FILM, on a phone: fetched after the first scroll (landing.js), so it stays out of the first load ═══ -->
+<section class="ph-only ph-film" aria-label="Shoalcheck in 38 seconds">
+  <div class="wrap">
+    <figure><span class="ph-film-idle" aria-hidden="true">Shoalcheck in 38 seconds</span><video data-src="assets/promo.mp4" data-poster="assets/promo-poster.jpg" muted loop playsinline preload="none" width="720" height="1280" aria-label="A 38-second film: a drain answered in 47 ms, 1,894 checks, an agent asking the reading, shoalcheck.com"></video><button class="ph-sound" type="button" aria-pressed="false">Sound</button></figure>
+  </div>
+</section>
+
 <!-- ═══ WHAT A READING FINDS ═══ -->
 <section class="band" id="finds" aria-labelledby="c-title">
   <div class="wrap">
@@ -119,7 +126,7 @@
     </div>
   </div>
   <div class="gallery" data-gallery>
-    <div class="caps">
+    <div class="caps" data-scroll-x>
       <a class="cap-card reveal" href="sample-report.html#v=eyJ3cyI6ImFjY2VzcyJ9">
         <div class="cap-scene" data-scene="security"></div>
         <div class="cap-head"><span class="cap-ico" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 4 5v4.6c0 3.7 2.6 6.6 6 7.9 3.4-1.3 6-4.2 6-7.9V5z"/><path d="m7.5 10 1.8 1.8L12.8 8"/></svg></span><h3>Security &amp; access</h3></div>
@@ -176,10 +183,6 @@
     </div>
   </div>
 
-  <figure class="ph-only ph-shot wrap">
-    <img data-src="assets/phone-reading.jpg" width="366" height="438" decoding="async" data-ui-w="366" alt="The sample reading on a phone: what it found first — 5 nodes cannot be evacuated, 1 dated obligation inside 90 days, 14 references point at nothing, $1,659/mo identified">
-    <figcaption>A real reading of the sample cluster, as a phone shows it.</figcaption>
-  </figure>
 </section>
 
 <!-- ═══ PROOF STRIP ═══ -->
@@ -293,7 +296,6 @@
    · …
 
 <span class="dim">basis: 12 kinds read · 16 requests, 0 object writes · checks: k8s.reliability.node-drain-budget, … · 47ms</span>   <span class="exit">exit 2</span></pre>
-        <figure class="ph-only ph-shot"><img data-src="assets/phone-drain.jpg" width="358" height="219" decoding="async" data-ui-w="358" alt="The app answers a drain: shoalcheck-e2e-worker2 cannot be evacuated, blocked by budget e2e-demo/drain-blocked-pdb; 16 reads, 0 writes"></figure>
       </div>
       <div class="pane-q" role="tabpanel" id="t-zone" aria-labelledby="tab-zone" hidden>
         <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight zone eu-central-1a --context kind-shoalcheck-mesh
@@ -303,7 +305,6 @@
 <span class="dim">k8s.reliability.zone-pinned-volume · 91ms</span>
 <span class="dim">this model checks a subset of what the scheduler checks: it can say a change will stop, and it cannot</span>
 <span class="dim">promise one will succeed.</span>   <span class="exit ok">exit 0</span></pre>
-        <figure class="ph-only ph-shot"><img data-src="assets/phone-zone.jpg" width="358" height="229" decoding="async" data-ui-w="358" alt="The app answers a zone loss: every pod this model can place has somewhere else to go if eu-central-1a fails; exit 0"></figure>
       </div>
       <div class="pane-q" role="tabpanel" id="t-upgrade" aria-labelledby="tab-upgrade" hidden>
         <pre class="term-body solo"><span class="p">$</span> shoalcheck preflight upgrade 1.37
@@ -321,10 +322,18 @@
 <span class="dim">k8s.upgrade.crd-conversion-webhook-unbacked, api-removals@2026-08-30 · 26ms</span>
 <span class="dim">this model checks a subset of what the scheduler checks: it can say a change will stop, and it cannot</span>
 <span class="dim">promise one will succeed.</span>   <span class="exit">exit 2</span></pre>
-        <figure class="ph-only ph-shot"><img data-src="assets/phone-upgrade.jpg" width="358" height="161" decoding="async" data-ui-w="358" alt="The app answers an upgrade to 1.37: 1 thing stops it, a node roll meets 1 of 3 nodes it cannot evacuate"></figure>
       </div>
     </div>
-    <p class="ph-only ph-note">The app's own answers, from its interactive demo. Each one read-only.</p>
+    <div class="ph-only ph-stage" id="ph-stage">
+      <div class="ph-pin">
+        <figure class="ph-step"><figcaption>Will this node drain?</figcaption><img data-src="assets/phone-drain.jpg" width="358" height="219" decoding="async" data-ui-w="358" alt="The app answers a drain: shoalcheck-e2e-worker2 cannot be evacuated, a PodDisruptionBudget blocks it"></figure>
+        <figure class="ph-step"><figcaption>What if a zone fails?</figcaption><img data-src="assets/phone-zone.jpg" width="358" height="229" decoding="async" data-ui-w="358" alt="The app answers a zone loss: every pod this model can place has somewhere else to go"></figure>
+        <figure class="ph-step"><figcaption>What stops an upgrade?</figcaption><img data-src="assets/phone-upgrade.jpg" width="358" height="161" decoding="async" data-ui-w="358" alt="The app answers an upgrade to 1.37: a node roll meets 1 of 3 nodes it cannot evacuate"></figure>
+        <figure class="ph-step"><figcaption>What does each finding rest on?</figcaption><img data-src="assets/phone-evidence.jpg" width="390" height="387" decoding="async" data-ui-w="390" alt="One finding of the sample reading: its evidence, and a kubectl command offered for copying, never run"></figure>
+        <figure class="ph-step"><figcaption>What changed since the last reading?</figcaption><img data-src="assets/phone-compare.jpg" width="358" height="417" decoding="async" data-ui-w="358" alt="Two readings compared: 1 new, 1 no longer in the set, 0 got worse"></figure>
+        <p class="ph-note">The app's own answers and the sample reading. Every one read-only.</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -404,8 +413,6 @@
       <h2 id="r-title" class="grad">A reading you work in, not a PDF you scroll.</h2>
       <p>One self-contained file: every finding with its object, every dollar with its rate, and what could not be read named as such — never counted as clean.</p>
     </div>
-    <figure class="ph-only ph-shot"><img data-src="assets/phone-evidence.jpg" width="390" height="392" decoding="async" data-ui-w="390" alt="One finding in the sample reading: three lines of evidence for StatefulSet monitoring/prometheus-k8s and a kubectl command offered for copying, never run"><figcaption>One finding: the evidence it rests on, and a command it offers but never runs.</figcaption></figure>
-    <figure class="ph-only ph-shot"><img data-src="assets/phone-compare.jpg" width="358" height="417" decoding="async" data-ui-w="358" alt="Two readings of the kind test cluster compared: 1 new, 1 no longer in the set, 0 got worse; no longer in the set is not fixed"><figcaption>Two readings compared. An absence is never reported as a fix.</figcaption></figure>
     <figure class="live-main reveal">
       <div class="live-frame" id="live-frame" data-w="1440" data-h="900">
         <img class="live-poster" src="assets/shot-reading.png" width="1440" height="900" loading="lazy" alt="The overview of the sample reading of acme-pay-prod, labelled Illustrative sample: 153 findings, 11 critical or high, $1,659 a month identified, the four claims it leads with, a severity by category grid and findings by namespace.">

@@ -46,12 +46,8 @@
   };
   typeOut($('[data-type]'), 500);
 
-  /* ── the opening: the sample reading being taken ──────────────────────────
-     The product is the reading, so the page opens on one being taken — the kinds it read, the checks it ran, the
-     findings arriving by severity and category, the money with its basis, the claims it leads with — every figure
-     the sample's own (#hero-reading, written from testdata/golden/sample-history.json by make site-data and held
-     to it by a gate). What is drawn at a moment is a function of the moment alone, so a replay, a reduced-motion
-     visit and the gate that reads the end state all see the same reading. */
+  /* ── the opening: the sample reading being taken, every figure the sample's own (#hero-reading, make site-data,
+     gated). What is drawn is a function of the moment alone, so replay, reduced motion and the gate see one reading. */
   /* Its own scope: this file is one function, and a `var play` or `var T` further down (the scene's, the
      deadlines') would silently replace this block's. */
   (function () {
@@ -401,14 +397,9 @@
     var timers = [], playing = false;
     new IntersectionObserver(function (es) {
       var e = es[0];
-      /* SEEN IS 40% OF THE SCENE, 60% OF THE SCREEN, OR A SCENE TALLER THAN THE SCREEN SPANNING ITS MIDDLE. A phone
-         scene runs 2,000–3,000 px: at most 844/2,959 of it fits a 390×844 screen, 0.29, and the GitHub pipeline's own
-         card header pushes its top down so under 60% of a short 700 px screen is covered when it is parked at the
-         card's top (it is the last section, so the page cannot scroll its top to zero). The third clause is the
-         honest one for a tall scene: it fills the screen's lower half and its top has come up past 80% of the screen.
-         That clause used to wait for the top to pass the middle; a tall scene's first beats are at its top, and a
-         phone reader reaching its lower pages before the run did met them empty (2026-10-21), so it now starts as
-         it comes in and the run stays ahead of the reader. */
+      /* SEEN IS 40% OF THE SCENE, 60% OF THE SCREEN, OR A SCENE TALLER THAN THE SCREEN SPANNING ITS MIDDLE: a phone
+         scene of 2,000–3,000 px never shows 40% of itself, and a tall scene starts as it comes in, so its first
+         beats are drawn before the reader reaches them (2026-10-21). */
       var rb = e.rootBounds, cr = e.boundingClientRect;
       var seen = e.intersectionRatio >= 0.4
         || (rb && e.intersectionRect.height >= rb.height * 0.6)
@@ -1007,13 +998,9 @@
   };
   var chosen = function (box) { var r = box.querySelector('input:checked'); return r ? r.value : ''; };
 
-  /* ── deadlines: the support windows, drawn (D62) ──────────────────────
-     The founder: "пункт з цінами на старі версії багато де 0$ … побудувати по іншому" — the calculator printed "$0"
-     for every version past its extension, most of its slider. Now the windows themselves: a bar per minor version of
-     the chosen provider, ordinary support then the paid extension, today's line across them, the chosen version lit
-     and spelled out beside it. Money appears only where a surcharge is due; a version past its window says it is
-     unsupported, and a provider with no published rate says that — never "$0". The windows and the rate are the
-     tables a reading uses (make site-data writes them; a gate holds them equal). Days count from the visitor's clock. */
+  /* ── deadlines: the support windows, drawn (D62) ──
+     A bar per minor version, support then paid extension, today's line across, never "$0" (founder): money only where
+     a surcharge is due. The windows and rate are a reading's own tables (make site-data, gated). */
   var supEl = $('#support-windows');
   if (supEl && $('#dl-calc')) {
     var T = JSON.parse(supEl.textContent || '{}');
@@ -1161,12 +1148,8 @@
     });
   }
 
-  /* ── the product, live ──────────────────────────────────────────────────
-     THE PRODUCT IN THE PAGE, NOT A RECORDING OF IT. Each live frame holds one of the product's own pages — the
-     sample reading, the sample fleet, the app's window — loaded when it comes near the screen and scaled to fit, so
-     what the visitor sees is the product's HTML drawn at their screen's resolution. The founder, on the recordings
-     that were here: terrible quality. A page cannot be blurred by an encoder. Until a frame loads, its screenshot
-     (where it has one) stands in; opening it is a view transition into the page itself. */
+  /* ── the product, live ── Each frame holds one of the product's own pages, loaded when near and scaled to fit:
+     its HTML at the screen's resolution, never a blurred recording (founder). Its screenshot stands in until loaded. */
   $$('.live-frame').forEach(function (live) {
     var frame = live.querySelector('iframe'), openA = live.querySelector('.live-open');
     if (!frame) return;
@@ -1266,6 +1249,24 @@
     var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); im.src = im.getAttribute('data-src'); } }, { rootMargin: '80px 0px' });
     io.observe(im);
   });
+  /* THE FILM ON A PHONE is fetched after the first scroll, once it is near, so the first load never carries it;
+     it plays muted while on the screen and stops off it; a tap gives sound. Under reduced motion it waits for play. */
+  var film = $('.ph-film video');
+  if (film && film.offsetHeight && 'IntersectionObserver' in window) {
+    var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches, filmArmed = false, filmIn = false, snd = $('.ph-sound');
+    var filmRun = function () {
+      if (!filmArmed || !filmIn) { film.pause(); return; }
+      if (!film.src) { film.poster = film.getAttribute('data-poster'); film.src = film.getAttribute('data-src'); film.controls = calm; }
+      if (!calm || !film.muted) { var filmPlay = film.play(); if (filmPlay) filmPlay.catch(function () {}); }
+    };
+    new IntersectionObserver(function (es) { filmIn = es[0].isIntersecting; filmRun(); }, { rootMargin: '160px 0px' }).observe(film);
+    window.addEventListener('scroll', function () { filmArmed = true; filmRun(); }, { passive: true, once: true });
+    snd.addEventListener('click', function () {
+      filmArmed = filmIn = true; film.muted = !film.muted;
+      snd.setAttribute('aria-pressed', String(!film.muted)); snd.textContent = film.muted ? 'Sound' : 'Mute';
+      filmRun();
+    });
+  }
   /* ON A PHONE EACH SYSTEM IS A HEADING whose button opens its rows; the detected one starts open. */
   if (window.matchMedia && window.matchMedia('(max-width: 600px)').matches) {
     $$('.os').forEach(function (c) {

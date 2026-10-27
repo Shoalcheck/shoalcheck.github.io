@@ -392,6 +392,22 @@
     zart.style.transformOrigin = '50% 40%';
     zart.style.transform = 'scale(' + (0.94 + 0.06 * ramp(t)).toFixed(4) + ')';
   } });
+  // The phone's stage: preflight's three answers, a finding's evidence, a comparison, one after another in one pinned
+  // frame; each panel is drawn from the top down as it is scrolled to, and gives way to the next.
+  var st = $('#ph-stage');
+  if (st && st.offsetHeight) {
+    var steps = $$('.ph-step', st);
+    scenes.push({ el: st, run: function () {
+      var p = pinned(st) * steps.length, k = Math.min(steps.length - 1, Math.floor(p)), t = p - k;
+      steps.forEach(function (s, j) {
+        var r = j < k ? 1 : j > k ? 0 : ramp(seg(t, 0.04, 0.55));
+        var o = j !== k ? 0 : j < steps.length - 1 ? 1 - seg(t, 0.88, 1) : 1;
+        s.style.opacity = o.toFixed(3);
+        s.style.transform = 'translate3d(0,' + ((1 - ramp(seg(t, 0, 0.3))) * (j === k ? 18 : 0)).toFixed(1) + 'px,0)';
+        s.style.setProperty('--r', r.toFixed(3));
+      });
+    } });
+  }
   // Inside each highlight the drawing floats at its own depth, behind the words over it.
   $$('.gallery .cap-card').forEach(function (c) {
     var sc = $('.cap-scene', c); if (!sc) return;

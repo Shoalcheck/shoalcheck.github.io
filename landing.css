@@ -1283,16 +1283,14 @@ main, .foot { position: relative; z-index: 1; }
 .motion main > section.band > .wrap, .motion main > section.strip > .wrap { will-change: transform, opacity; }
 @media (prefers-reduced-motion: reduce) { .gallery.playing .gal-dots button.run::after { animation: none; } }
 
-/* ── A PHONE GETS A SHORT PAGE (founder, 2026-10-26: "far too much text"; it was 4,706 words over 52 screens).
-   Nothing pinned, the other acts stay on the desktop. landing-check 4q holds the budget. ── */
+/* ── A PHONE GETS ITS OWN CUT (founder, 2026-10-26: "far too much text"; 10-27: no "wow", none of the motion). The
+   desktop's scenes move here too; long copy, the laptop and the wide acts stay on the desktop. landing-check 4q. ── */
 .ph-only { display: none; }
 @media (max-width: 600px) {
   .ph-only, .band-head > p.ph-only { display: block !important; }
   .ph-cut, .hero-copy .hl, .hero-copy .lede, .hero-copy .price-anchor, .hero-copy .trust, .hero .device,
-  .strip, #zone, .break, #integrations, #app, #deadlines, #compare, .final,
-  .band-head > p, .flow-lede, .flow-end, .flow-device, .flow-bar, .fc p, .ro-stats,
-  #finds .gal-ctl, #finds .cap-scene, #finds .cap-card > p,
-  #questions .pane-q pre, #reading .live-main, #reading .reading-cta, #reading .compare,
+  #zone, #integrations, #app, #deadlines, #compare, #reading, #questions .tabs, #questions .panes,
+  .band-head > p, .flow-lede, .fc p, #finds .cap-card > p, .final-in > p, .final .cta > :nth-child(n+3),
   .bill, .plan ul, .plan .billing-line, .plans-note, .more-ways,
   .faq > :nth-child(2) > details:nth-of-type(1), .faq > :nth-child(2) > details:nth-of-type(4) { display: none !important; }
   body { font-size: 16px; }
@@ -1302,23 +1300,6 @@ main, .foot { position: relative; z-index: 1; }
   .hero { padding-top: 32px; padding-bottom: 8px; min-height: 0; }
   .hero-copy h1 { font-size: 36px; line-height: 1.08; }
   .hero-copy .cta { margin-top: 20px; }
-  /* the proof: five cards stacked, each its figure and the way into the sample */
-  #finds .caps { flex-direction: column; overflow: visible; scroll-snap-type: none; padding: 0 20px; gap: 12px; }
-  #finds .cap-card { flex: none; min-height: 0; padding: 20px; gap: 8px; transform: none !important; opacity: 1 !important; }
-  #finds .cap-fig { font-size: 22px; }
-  #finds .cap-go { min-height: 44px; display: inline-flex; align-items: center; }
-  /* the three steps, as a list, still */
-  .flow.scrub .flow-run, .flow .flow-run { height: auto; }
-  .flow.scrub .flow-pin, .flow .flow-pin { position: static; height: auto; display: block; }
-  .flow-grid { display: block; }
-  .flow-copy { min-height: 0; display: flex; flex-direction: column; gap: 18px; }
-  .fc { position: static; opacity: 1; transform: none; pointer-events: auto; gap: 6px; }
-  .fc h3 { font-size: 20px; }
-  /* the read-only promise: one card */
-  .motion .ro, .ro { height: auto; padding: 56px 0 8px; }
-  .motion .ro-pin, .ro-pin { position: static; height: auto; display: block; }
-  .ro-grid { display: block; }
-  .ro .ph-only { color: var(--fg2); font-size: 16px; line-height: 1.5; }
   /* prices: name, who it is for, the monthly price, the year, the clusters, the button */
   .plans { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .plan { padding: 18px 20px; gap: 6px; }
@@ -1329,12 +1310,35 @@ main, .foot { position: relative; z-index: 1; }
   .os.shut .files, .os.shut .note, .os.shut .here-tag { display: none; }
   .os h3 > button { min-height: 44px; width: 100%; display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
   #questions .band-head > p { display: block !important; }
+  #finds .cap-go { min-height: 44px; display: inline-flex; align-items: center; }
+  .gal-dots { display: none; }
+  .btn { min-height: 44px; }
   .os .files a { min-height: 44px; }
-  .tab { min-height: 44px; }
   .faq summary { min-height: 44px; }
   .foot-in ul { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
   .foot-in li a { min-height: 44px; display: flex; align-items: center; }
-  /* one panel of the reading captured at a phone's own scale, never a desktop window shrunk */
+  /* the film, near the top: a phone's own shape, muted until tapped */
+  .ph-film { padding: 8px 0 0; }
+  .ph-film figure { position: relative; margin: 0 auto; max-width: 340px; aspect-ratio: 9 / 16; border-radius: 22px; overflow: hidden; border: 1px solid var(--line2); background: #050809; }
+  .ph-film video { position: relative; display: block; width: 100%; height: 100%; object-fit: cover; }
+  .ph-film-idle { position: absolute; inset: 0; display: grid; place-items: center; color: var(--dim); font: 600 15px var(--sans); }
+  .ph-sound { position: absolute; right: 12px; bottom: 12px; min-height: 44px; padding: 0 18px; border-radius: 22px; border: 1px solid var(--line2); background: rgba(5, 8, 9, .72); color: var(--fg); font: 600 14px var(--sans); }
+  /* preflight, then a finding, then a comparison: one pinned stage, each panel drawn top down as it is scrolled to
+     (motion.js); still, they stand one under another */
+  .ph-step { margin: 0 0 24px; }
+  .ph-step figcaption { margin: 0 0 12px; font: 600 21px/1.25 var(--sans); color: var(--fg); }
+  .ph-step img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line2); }
+  /* the pinned scenes run about half their desktop length: the same moves, sooner */
+  .flow.scrub .flow-run { height: 240vh; }
+  .motion .break { height: 140vh; }
+  .motion .ro { height: 160vh; }
+  .motion .finale { height: 200vh; }
+  .motion .ph-stage { height: 270svh; }
+  .motion .ph-pin { position: sticky; top: 64px; height: calc(100svh - 64px); }
+  .motion .ph-step { position: absolute; inset: 0 0 auto; margin: 0; opacity: 0; will-change: opacity, transform; }
+  .motion .ph-step img { clip-path: inset(0 0 calc(100% - var(--r, 0) * 100%) 0 round 14px); }
+  .motion .ph-stage .ph-note { position: absolute; left: 0; right: 0; bottom: 20px; }
+  /* a panel captured at a phone's own scale, never a desktop window shrunk */
   .ph-shot { margin: 20px auto 0; }
   .ph-shot img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line2); }
   .ph-shot figcaption, .ph-note { margin-top: 10px; color: var(--dim); font-size: 14px; }
