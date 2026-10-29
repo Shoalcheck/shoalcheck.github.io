@@ -104,9 +104,11 @@
       </p>
       <p class="ro-deck">
         Every claim below names the file or the gate that holds it, because a page about trust that asks to
-        be trusted is the wrong shape. The source is not public yet, so every check below is one you can run
-        without it: the binary prints its own permissions, and your API server's audit log is a witness we do
-        not control.
+        be trusted is the wrong shape. The code that talks to your cluster — the collector, the transport every
+        request goes through, and the rules — is public under Apache-2.0, as
+        <a href="https://github.com/Shoalcheck/shoalcheck-scan">Shoalcheck/shoalcheck-scan</a>, so you can read it and build it. Two checks need
+        no source at all: the binary prints its own permissions, and your API server's audit log is a witness
+        we do not control.
       </p>
     </div>
   </section>
@@ -126,7 +128,7 @@
       <div class="ro-claim">
         <p class="c">The role and the collector cannot drift apart. Adding a collection step without adding
           it to the published role — or the reverse — fails the build.</p>
-        <p class="b"><em>gate:</em> TestRBACContractMatchesCollector<br><em>source:</em> internal/collect/permissions.go · deploy/rbac.yaml</p>
+        <p class="b"><em>gate:</em> TestRBACContractMatchesCollector<br><em>source:</em> <a href="https://github.com/Shoalcheck/shoalcheck-scan/blob/main/internal/collect/permissions.go">internal/collect/permissions.go</a> · <a href="https://github.com/Shoalcheck/shoalcheck-scan/blob/main/deploy/rbac.yaml">deploy/rbac.yaml</a></p>
       </div>
       <div class="ro-claim">
         <p class="c">A kind you decline is reported as declined, in the reading, by name — not folded into
@@ -161,16 +163,20 @@
   <section class="ro-sec">
     <div class="wrap">
       <div class="eyebrow">What it never requests</div>
-      <h2>The role has no rule for these, so there is nothing to switch off</h2>
+      <h2>Refused twice: by the role, and inside the binary</h2>
       <p>
-        This is not a setting. The access simply is not granted, and a request the role does not cover is
-        refused by your API server rather than by our good intentions.
+        This is not a setting. The role has no rule for these, so the refusal comes from your API server, not
+        from our good intentions. And the binary refuses them first: every client it builds goes through one
+        transport, and that transport turns a request for a Secret, a ConfigMap, a pod's logs, an exec, an
+        attach or a ServiceAccount token into an error before it is sent — in any API group, and even when
+        you run it with a cluster-admin kubeconfig instead of our role.
       </p>
       <ul class="ro-never">
         <li><span class="k">secrets</span><span>Never requested. A Secret's value is the credential itself, and a tool that reads one has to be trusted with everything it protects.</span></li>
         <li><span class="k">configmaps</span><span>Never requested. Configuration is where people put connection strings when they run out of Secrets.</span></li>
         <li><span class="k">pods/exec · pods/attach</span><span>No rule. Nothing runs inside your containers.</span></li>
         <li><span class="k">pods/log</span><span>No rule. Logs carry request bodies, tokens and customer data.</span></li>
+        <li><span class="k">serviceaccounts/token</span><span>No rule. The audit never mints a credential.</span></li>
         <li><span class="k">pods/portforward</span><span>No rule for the audit. Reaching a Prometheus through a port-forward is a separate, explicit action you take.</span></li>
         <li><span class="k">pod env values</span><span>Container environment is read for what is DECLARED — that a variable exists, and where it comes from — never for a value.</span></li>
         <li><span class="k">create · update · patch<br>delete · deletecollection</span><span>No rule for any of them, on any kind. There is no flag that adds one.</span></li>
@@ -179,7 +185,13 @@
       <div class="ro-claim">
         <p class="c">Where a finding depends on something inside a Secret or a ConfigMap, the reading says
           it could not be established rather than guessing from the name of the object.</p>
-        <p class="b"><em>source:</em> internal/collect/rbac.go — <em>“a name can never be trusted about”</em></p>
+        <p class="b"><em>source:</em> <a href="https://github.com/Shoalcheck/shoalcheck-scan/blob/main/internal/collect/rbac.go">internal/collect/rbac.go</a> — <em>“a name can never be trusted about”</em></p>
+      </div>
+      <div class="ro-claim">
+        <p class="c">The guard is tested where it would matter: a real HTTP server counts what reaches it,
+          and for every refused kind the count is zero. A refused request is not in the reading's tally
+          either — your API server never saw it, so the tally still matches its audit log.</p>
+        <p class="b"><em>source:</em> <a href="https://github.com/Shoalcheck/shoalcheck-scan/blob/main/internal/trace/guard.go">internal/trace/guard.go</a><br><em>test:</em> <a href="https://github.com/Shoalcheck/shoalcheck-scan/blob/main/internal/trace/guard_test.go">internal/trace/guard_test.go</a><br><em>gate:</em> transport-gate — every client goes through it</p>
       </div>
     </div>
   </section>
@@ -210,7 +222,7 @@ streams  0      <span class="cm">watches and long-lived connections</span></div>
       <div class="ro-claim">
         <p class="c">A write to somewhere that is not your API server is counted separately, so “zero
           object writes” keeps meaning Kubernetes objects and cannot be diluted by anything else.</p>
-        <p class="b"><em>source:</em> internal/trace/recorder.go — <em>OffTargetWrite</em></p>
+        <p class="b"><em>source:</em> <a href="https://github.com/Shoalcheck/shoalcheck-scan/blob/main/internal/trace/recorder.go">internal/trace/recorder.go</a> — <em>OffTargetWrite</em></p>
       </div>
       <div class="ro-claim">
         <p class="c">A reading whose trace was not recorded says <span style="white-space:nowrap">“no trace
@@ -248,7 +260,7 @@ streams  0      <span class="cm">watches and long-lived connections</span></div>
           this build: a bundle source exists only if whoever builds the binary injects one. Prices and
           schedules come from tables that ship with the build, and each reading names which table it used and
           when that table was generated.</p>
-        <p class="b"><em>source:</em> internal/refdata/fetch.go — empty by default; a build with no source refuses rather than fetches<br><em>gate:</em> TestFetch_ACallerCannotSupplyAURL</p>
+        <p class="b"><em>source:</em> <a href="https://github.com/Shoalcheck/shoalcheck-scan/blob/main/internal/refdata/fetch.go">internal/refdata/fetch.go</a> — empty by default; a build with no source refuses rather than fetches<br><em>gate:</em> TestFetch_ACallerCannotSupplyAURL</p>
       </div>
       <div class="ro-claim">
       </div>
@@ -297,6 +309,7 @@ streams  0      <span class="cm">watches and long-lived connections</span></div>
       <li><a href="read-only.html" aria-current="page">What it reads</a></li>
       <li><a href="docs.html">Documentation</a></li>
       <li><a href="https://github.com/shoalcheck/shoalcheck/releases">Changelog and releases</a></li>
+      <li><a href="https://github.com/Shoalcheck/shoalcheck-scan">Scanner source code</a></li>
       <li><a href="https://www.youtube.com/@shoalcheck">Films on YouTube</a></li>
       <li><a href="terms.html">Terms</a></li>
       <li><a href="privacy.html">Privacy</a></li>
