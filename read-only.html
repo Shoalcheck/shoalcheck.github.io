@@ -166,7 +166,7 @@
       <h2>Refused twice: by the role, and inside the binary</h2>
       <p>
         This is not a setting. The role has no rule for these, so the refusal comes from your API server, not
-        from our good intentions. And the binary refuses them first: every client it builds goes through one
+        from our good intentions. And from v0.1.5 the binary refuses them first: every client it builds goes through one
         transport, and that transport turns a request for a Secret, a ConfigMap, a pod's logs, an exec, an
         attach or a ServiceAccount token into an error before it is sent — in any API group, and even when
         you run it with a cluster-admin kubeconfig instead of our role.
@@ -191,7 +191,7 @@
         <p class="c">The guard is tested where it would matter: a real HTTP server counts what reaches it,
           and for every refused kind the count is zero. A refused request is not in the reading's tally
           either — your API server never saw it, so the tally still matches its audit log.</p>
-        <p class="b"><em>source:</em> <a href="https://github.com/Shoalcheck/shoalcheck-scan/blob/main/internal/trace/guard.go">internal/trace/guard.go</a><br><em>test:</em> <a href="https://github.com/Shoalcheck/shoalcheck-scan/blob/main/internal/trace/guard_test.go">internal/trace/guard_test.go</a><br><em>gate:</em> transport-gate — every client goes through it</p>
+        <p class="b"><em>since:</em> v0.1.5<br><em>source:</em> <a href="https://github.com/Shoalcheck/shoalcheck-scan/blob/main/internal/trace/guard.go">internal/trace/guard.go</a><br><em>test:</em> <a href="https://github.com/Shoalcheck/shoalcheck-scan/blob/main/internal/trace/guard_test.go">internal/trace/guard_test.go</a><br><em>gate:</em> transport-gate — every client goes through it</p>
       </div>
     </div>
   </section>

@@ -56,7 +56,7 @@ code { padding: .1em .38em; border-radius: 6px; background: var(--surface2); col
 
 .wrap { width: min(1200px, 100%); margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
 
-/* ── type ───────────────────────────────────────────────────────────────── */
+/* ── type ─── */
 h1, h2, h3 { margin: 0; text-wrap: balance; letter-spacing: -.025em; }
 /* The headline also answers to the screen's HEIGHT: at 88 px it was 359 px tall and pushed Download below the fold
    on 1280×720, 1366×768 and 1536×864 laptops (D50 site review). */
@@ -71,7 +71,7 @@ p { margin: 0; }
 .lede { font-size: var(--t-l); line-height: 1.55; color: var(--fg2); max-width: 46ch; }
 .note { font-size: var(--t-xs); line-height: 1.55; color: var(--faint); }
 
-/* ── buttons ────────────────────────────────────────────────────────────── */
+/* ── buttons ─── */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 42px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line2); background: rgba(255, 255, 255, .03); color: var(--fg); font: 600 14.5px/1 var(--sans); text-decoration: none; cursor: pointer; transition: transform .16s var(--ease), background .16s, border-color .16s, box-shadow .16s; }
 .btn svg { width: 17px; height: 17px; }
 .btn:hover { border-color: rgba(220, 245, 240, .28); background: rgba(255, 255, 255, .06); }
@@ -83,7 +83,7 @@ p { margin: 0; }
 .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .pending { font-size: 13px; color: var(--faint); padding: 11px 0 2px; }
 
-/* ── top bar ────────────────────────────────────────────────────────────── */
+/* ── top bar ─── */
 .top { position: sticky; top: 0; z-index: 50; backdrop-filter: saturate(140%) blur(16px); -webkit-backdrop-filter: saturate(140%) blur(16px); background: rgba(4, 5, 6, .66); border-bottom: 1px solid transparent; transition: border-color .2s; }
 .top.scrolled { border-bottom-color: var(--line); }
 .top .wrap { display: flex; align-items: center; gap: 28px; min-height: 56px; }
@@ -111,7 +111,7 @@ p { margin: 0; }
 }
 @media (max-width: 480px) { .top-cta .btn-ghost { display: none; } }
 
-/* ── hero ───────────────────────────────────────────────────────────────── */
+/* ── hero ─── */
 .hero { position: relative; overflow-x: clip; padding: clamp(24px, min(6vw, 6vh), 88px) 0 clamp(56px, 8vw, 112px); }
 /* THE OPENING IS A PRODUCT SHOT. The promise centred on the stage, the reading being taken below it, rising into place
    the way the film's camera settles on its subject (transform only: the h1 is the largest paint and is never hidden). */
@@ -142,7 +142,7 @@ p { margin: 0; }
 .term { margin: 0; border: 1px solid var(--line2); border-radius: 16px; background: linear-gradient(180deg, rgba(18, 28, 30, .92), rgba(10, 15, 16, .96)); box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .7), 0 0 0 1px rgba(45, 212, 191, .06), 0 0 60px -20px rgba(45, 212, 191, .25); overflow: hidden; min-width: 0; }
 .term-body { margin: 0; padding: 18px 20px 20px; font: 12.6px/1.7 var(--mono); color: var(--fg2); white-space: pre; overflow-x: auto; min-height: 340px; }
 .term-body.solo { border: 1px solid var(--line2); border-radius: 14px; background: var(--surface); min-height: 0; }
-/* ── what one reading finds: seven tiles, each with one of the sample's figures ─────────────────────────────── */
+/* ── what one reading finds: seven tiles, each with one of the sample's figures ─── */
 /* TWO COLUMNS, SO A SCENE CAN BE READ. Three columns drew each at 335×138 with 8–10 px text and cut its labels
    ("auth-servi…"); a graph, a terminal and the fleet take the whole width (D50 site review). */
 .caps { display: flex; gap: 20px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); padding: 8px var(--gutter) 24px; scrollbar-width: none; }
@@ -333,7 +333,7 @@ html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not
 .cursor { display: inline-block; width: .6em; height: 1.1em; vertical-align: -2px; background: var(--accent); animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* ── proof strip ────────────────────────────────────────────────────────── */
+/* ── proof strip ─── */
 .strip { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .strip-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .stat { display: flex; flex-direction: column; gap: 10px; padding: clamp(28px, 4vw, 48px) 24px; border-left: 1px solid var(--line); }
@@ -342,14 +342,14 @@ html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not
 .stat span { font-size: var(--t-s); line-height: 1.45; color: var(--dim); max-width: 26ch; }
 @media (max-width: 760px) { .strip-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stat:nth-child(3) { border-left: 0; } .stat { border-top: 1px solid var(--line); } }
 
-/* ── bands ──────────────────────────────────────────────────────────────── */
+/* ── bands ─── */
 .band { position: relative; padding: clamp(80px, 10vw, 136px) 0; }
 .band-alt { border-top: 1px solid var(--line); }
 .band-head { display: flex; flex-direction: column; gap: 22px; max-width: 880px; margin-bottom: clamp(40px, 6vw, 72px); }
 .band-head p { color: var(--fg2); font-size: var(--t-l); line-height: 1.6; max-width: 52ch; }
 .band-head.center { margin-left: auto; margin-right: auto; text-align: center; align-items: center; }
 
-/* ── the scene ──────────────────────────────────────────────────────────── */
+/* ── the scene ─── */
 /* PINNED ONLY WHERE IT FITS: landing.js pins the scene (.pinned) when its copy fits under the bar; anywhere else
    it stays in the page and plays once when seen. Pinned by CSS alone it spilled over the strip. */
 .scene { position: relative; border-top: 1px solid var(--line); }
@@ -464,12 +464,12 @@ html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not
   .tray .t-row { opacity: 1; transform: none; }
 }
 
-/* ── tabs ───────────────────────────────────────────────────────────────── */
+/* ── tabs ─── */
 .tabs { display: inline-flex; flex-wrap: wrap; gap: 6px; padding: 5px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); margin-bottom: 18px; }
 .tab { min-height: 38px; padding: 0 16px; border: 0; border-radius: 9px; background: none; color: var(--dim); font: 600 14px var(--sans); cursor: pointer; transition: background .15s, color .15s; }
 .tab[aria-selected="true"] { background: var(--surface2); color: var(--fg); box-shadow: 0 0 0 1px var(--line2); }
 
-/* ── the reading and the fleet ─────────────────────────────────────────── */
+/* ── the reading and the fleet ─── */
 .reading-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 34px; }
 .compare { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 36px; align-items: center; margin-top: 72px; }
 .compare figure { margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
@@ -479,7 +479,7 @@ html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not
 .compare-copy p { margin: 0; color: var(--dim); }
 @media (max-width: 900px) { .compare { grid-template-columns: minmax(0, 1fr); gap: 22px; margin-top: 48px; } }
 
-/* ── the app ────────────────────────────────────────────────────────────── */
+/* ── the app ─── */
 /* The video takes the full width under the words: in a half column it played at half its size, where the
    window's text could not be read. */
 .app-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; align-items: start; }
@@ -487,7 +487,7 @@ html:not(.js) .rd-bar, html:not(.js) .rd-body, html:not(.js) .rd-first, html:not
 .app-grid .band-head { margin-bottom: 0; }
 @media (max-width: 980px) { .app-grid { grid-template-columns: minmax(0, 1fr); } }
 
-/* ── the arithmetic ─────────────────────────────────────────────────────── */
+/* ── the arithmetic ─── */
 .bars { position: relative; display: flex; flex-direction: column; gap: 14px; }
 .bar { display: grid; grid-template-columns: 112px minmax(0, 1fr) 92px; gap: 12px; align-items: center; font-size: 13.5px; }
 .bt { height: 12px; border-radius: 6px; background: rgba(255, 255, 255, .05); overflow: visible; position: relative; }
@@ -613,12 +613,12 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 }
 @media (prefers-reduced-motion: reduce) { .dl-track i { transition: none; } }
 
-/* ── read-only ──────────────────────────────────────────────────────────── */
+/* ── read-only ─── */
 .ro-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 48px; align-items: center; }
 .ro-grid .band-head { margin-bottom: 0; }
 @media (max-width: 900px) { .ro-grid { grid-template-columns: minmax(0, 1fr); } }
 
-/* ── pricing ────────────────────────────────────────────────────────────── */
+/* ── pricing ─── */
 .bill { display: inline-flex; gap: 4px; padding: 5px; border: 1px solid var(--line2); border-radius: 13px; background: var(--surface); }
 .bill-b { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 16px; border: 0; border-radius: 9px; background: none; color: var(--dim); font: 600 14px var(--sans); cursor: pointer; transition: background .15s, color .15s; }
 .bill-b[aria-pressed="true"] { background: var(--surface2); color: var(--fg); box-shadow: 0 0 0 1px var(--line2); }
@@ -641,7 +641,7 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 @media (max-width: 1100px) { .plans { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .plans { grid-template-columns: minmax(0, 1fr); } }
 
-/* ── download ───────────────────────────────────────────────────────────── */
+/* ── download ─── */
 .dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .os { display: flex; flex-direction: column; gap: 14px; padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); min-width: 0; }
 .os.here { border-color: rgba(45, 212, 191, .55); }
@@ -659,7 +659,7 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 .release-line { margin-top: 20px; font-size: 13px; color: var(--faint); }
 @media (max-width: 960px) { .dl, .more-ways { grid-template-columns: minmax(0, 1fr); } }
 
-/* ── faq ────────────────────────────────────────────────────────────────── */
+/* ── faq ─── */
 .faq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; }
 .faq > div { display: flex; flex-direction: column; gap: 12px; }
 .faq details { border: 1px solid var(--line); border-radius: 13px; background: var(--surface); padding: 0 18px; transition: border-color .15s; }
@@ -671,7 +671,7 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 .faq details p { padding: 0 0 16px; color: var(--dim); font-size: 14.5px; line-height: 1.65; }
 @media (max-width: 860px) { .faq { grid-template-columns: minmax(0, 1fr); } }
 
-/* ── final + footer ─────────────────────────────────────────────────────── */
+/* ── final + footer ─── */
 /* clip, not hidden: overflow: hidden makes a scroll box, and a scroll box holds the pinned finale in place of the page */
 .final { position: relative; overflow: clip; padding: 0 0 clamp(96px, 12vw, 160px); border-top: 1px solid var(--line); }
 .final::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(50% 60% at 50% 100%, rgba(45, 212, 191, .14), transparent 70%); }
@@ -686,7 +686,7 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 .foot a { color: var(--dim); text-decoration: none; font-size: 14px; }
 .foot a:hover { color: var(--fg); }
 
-/* ── motion: things arrive as you reach them ────────────────────────────── */
+/* ── motion: things arrive as you reach them ─── */
 .js .reveal { opacity: 0; transform: translateY(28px) scale(.985); transition: opacity 1s var(--ramp), transform 1.2s var(--ramp); }
 .js .reveal.in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
@@ -696,7 +696,7 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
   .cursor { animation: none; }
 }
 
-/* ── a screenshot at full size (landing.js) ─────────────────────────────── */
+/* ── a screenshot at full size (landing.js) ─── */
 
 /* ── just the output: our sentences go, the product's captions stay (gated) ── */
 .just-output .hero .lede, .just-output .cap-card p, .just-output .band-head p, .just-output .compare-copy p, .just-output .scene-steps,
@@ -729,9 +729,9 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 .js .live-main.reveal.in .live-frame, .js .app-live.reveal.in .live-frame { transform: none; opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .js .live-main.reveal .live-frame, .js .app-live.reveal .live-frame { transform: none; opacity: 1; transition: none; } }
 
-/* ── into the flow, from the hero ─────────────────────────────────────── */
+/* ── into the flow, from the hero ─── */
 
-/* ── integrations ─────────────────────────────────────────────────────────
+/* ── integrations ───
    Six places a reading goes, each headed by what it does for the team and footed by the command that does it. */
 .ints { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
 .int { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 28px 28px 24px; border-radius: var(--rt); border: 0; background: var(--tile); }
@@ -935,7 +935,7 @@ main, .foot { position: relative; z-index: 1; }
 .split .w > i { display: inline-block; font-style: inherit; transform: translateY(140%); visibility: hidden; transition: transform 1.1s var(--ramp); }
 .split.on .w > i { transform: none; visibility: visible; }
 
-/* ═══ THE BREAK ═════════════════════════════════════════════════════════
+/* ═══ THE BREAK ═══
    The film's held breath: plain words on black between the acts. */
 .break { position: relative; background: #000; text-align: center; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .break-pin { padding: clamp(120px, 18vw, 240px) 0; }
@@ -951,7 +951,7 @@ main, .foot { position: relative; z-index: 1; }
 .say { font-size: clamp(52px, 10vw, 148px); line-height: .98; font-weight: 800; letter-spacing: -.055em; }
 .say em { font-style: normal; color: var(--bad); }
 
-/* ═══ THE FINALE ═════════════════════════════════════════════════════════
+/* ═══ THE FINALE ═══
    The category line, then the word alone on black; then the mark drawn by light, and the offer once more. */
 /* black, and at its foot the black lifts into the stage, so the offer under it never sits on a hard edge */
 .finale { position: relative; background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0, #000 30vh, #000 calc(100% - 46vh), rgba(0, 0, 0, 0) 100%); text-align: center; }
@@ -1151,7 +1151,7 @@ main, .foot { position: relative; z-index: 1; }
 .motion .live-main, .motion .app-live, .motion .faq details, .motion .more-ways > div { transition: opacity 1s var(--ramp); will-change: transform; }
 .motion .band-head h2, .motion .flow-head h2 { will-change: transform; }
 
-/* ═══ A PRODUCT PAGE'S GRAMMAR ═══════════════════════════════════════════
+/* ═══ A PRODUCT PAGE'S GRAMMAR ═══
    After apple.com's product pages, scene by scene: the statements in a gradient, the highlights as a gallery that
    moves sideways, the bento of tiles, the counts taken one at a time. */
 .grad { background: linear-gradient(90deg, #eef4f3 0%, #9ef0e3 48%, #74c7ff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -1284,7 +1284,8 @@ main, .foot { position: relative; z-index: 1; }
   #zone, #integrations, #app, #deadlines, #compare, #reading, #questions .tabs, #questions .panes,
   .band-head > p, .flow-lede, .fc p, #finds .cap-card > p, .final-in > p, .final .cta > :nth-child(n+3),
   .bill, .plan ul, .plan .billing-line, .plans-note, .more-ways,
-  .faq > :nth-child(2) > details:nth-of-type(1), .faq > :nth-child(2) > details:nth-of-type(4) { display: none !important; }
+  .faq > :nth-child(2) > details:nth-of-type(2), .faq > :nth-child(2) > details:nth-of-type(3),
+  .faq > :nth-child(2) > details:nth-of-type(5) { display: none !important; }
   body { font-size: 16px; }
   .band, .flow { padding: 56px 0 8px; }
   .band-head { gap: 12px; margin-bottom: 24px; }
