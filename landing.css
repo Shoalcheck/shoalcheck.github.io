@@ -1268,6 +1268,15 @@ main, .foot { position: relative; z-index: 1; }
 
 /* ── A PHONE GETS ITS OWN CUT (founder, 2026-10-26: "far too much text"; 10-27: no "wow", none of the motion). The
    desktop's scenes move here too; long copy, the laptop and the wide acts stay on the desktop. landing-check 4q. ── */
+/* The walkthrough: a still and a play button; the frame is YouTube's only after the press. */
+.walk { padding: 56px 0 0; }
+.walk-play, .walk-frame { position: relative; display: block; max-width: 880px; margin: 0 auto; aspect-ratio: 16 / 9; border-radius: 18px; overflow: hidden; border: 1px solid var(--line2); background: #050809; }
+.walk-play img, .walk-frame iframe { display: block; width: 100%; height: 100%; object-fit: cover; border: 0; }
+.walk-btn { position: absolute; left: 6.25%; bottom: 11%; width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; background: var(--accent); color: #04211c; transition: transform .2s ease; }
+.walk-btn svg { width: 26px; height: 26px; margin-left: 3px; }
+.walk-play:hover .walk-btn, .walk-play:focus-visible .walk-btn { transform: scale(1.06); }
+.walk-cap { margin: 14px 0 0; text-align: center; font: 500 13px var(--mono); color: var(--dim); }
+@media (max-width: 600px) { .walk { padding-top: 32px; } .walk-play, .walk-frame { border-radius: 14px; } .walk-btn { width: 40px; height: 40px; bottom: 4%; } .walk-btn svg { width: 16px; height: 16px; } }
 .ph-only { display: none; }
 @media (max-width: 600px) {
   .ph-only, .band-head > p.ph-only { display: block !important; }

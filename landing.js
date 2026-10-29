@@ -22,9 +22,7 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  /* ── a terminal types itself, once ────────────────────────────────────
-     The hero's, and each preflight question's the first time it is shown: the real output of the command, line by
-     line at the pace a terminal prints it. Nothing is typed for anyone who asked for reduced motion. */
+  /* ── a terminal types itself, once: the command's real output, line by line; nothing typed under reduced motion. */
   var typeOut = function (term, delay) {
     if (!term || reduce || term.getAttribute('data-typed')) return;
     term.setAttribute('data-typed', '1');
@@ -153,9 +151,7 @@
           cells[ci][si].classList.toggle('on', v > 0);
         });
       });
-      /* ON THE WAY, A COUNT SAYS IT IS NOT YET THE TOTAL. The in-between figures are the totals eased in, not
-         states the reading passed through, so they say "so far", and the basis — which is the total's — appears
-         only under the total (D50 site review). */
+      /* ON THE WAY, A COUNT SAYS "SO FAR"; the basis appears only under the total (D50). */
       foundSum.textContent = ms < T.read ? '' : word(total, 'finding', 'findings') + (pj < 1 ? ' so far' : '') + ' · ' +
         fmt(RD.checks * pj) + ' of ' + fmt(RD.checks) + '\u00a0checks · ' + RD.rules + '\u00a0rules';
       /* pricing */
@@ -195,11 +191,8 @@
   }
   })();
 
-  /* ── what one reading finds: a small scene in every tile ───────────────────
-     Each capability tile draws one thing the sample holds — its grants, its nodes, its money by rule, its observed
-     flows, its controls, a drain answer, its fleet — from #caps-data (written from the goldens by make site-data,
-     held by a gate). A scene plays once when its tile comes into view; with reduced motion it is drawn finished.
-     Text goes in through textContent: the data is ours, and still never markup. */
+  /* ── what one reading finds: each tile draws one thing the sample holds, from #caps-data (make site-data, gated),
+     once in view, finished under reduced motion. Text goes in through textContent. */
   (function () {
     var dataEl = $('#caps-data');
     if (!dataEl || !dataEl.textContent.trim()) return;
@@ -356,9 +349,8 @@
         return parts;
       }
     };
-    /* A SCENE PLAYS EACH TIME IT IS SEEN. It played once and stayed finished (D50 site review); now it plays when
-       its tile comes into view, and is set back once the tile has left the screen entirely, so scrolling back plays
-       it again. With reduced motion it is drawn finished and stays so. */
+    /* A SCENE PLAYS EACH TIME IT IS SEEN (D50), and is reset once its tile has left the screen; finished under reduced
+       motion. */
     $$('.cap-scene[data-scene]').forEach(function (box) {
       var make = builders[box.getAttribute('data-scene')];
       if (!make) return;
@@ -382,11 +374,8 @@
     });
   })();
 
-  /* ── the integrations, drawn (D59) ──────────────────────────────────────
-     An agent's calls to shoalcheck-mcp as a sequence: the agent, shoalcheck-mcp and the readings on this machine
-     as lifelines, each call an arrow drawn from its caller, each answer drawn back with what shoalcheck-mcp returned
-     over the sample (#film-mcp; the flow draws its diff_readings too). Beside them the cluster, behind a crossed line:
-     shoalcheck-mcp has no kubeconfig and no client-go. Played each time it is seen; drawn whole with reduced motion. */
+  /* ── the integrations, drawn (D59): an agent's calls to shoalcheck-mcp over the sample (#film-mcp), each answer
+     what the server returned; the cluster sits behind a crossed line, since shoalcheck-mcp has no kubeconfig. */
   var playWhenSeen = function (box, parts, step) {
     /* A part is an element, given "on" at its turn — 250 ms in, then one every `step` — or a beat { el, cls, at }: an
        element given its class at its own time (the pipeline's story is paced to its run, not to a metronome). */
@@ -397,9 +386,7 @@
     var timers = [], playing = false;
     new IntersectionObserver(function (es) {
       var e = es[0];
-      /* SEEN IS 40% OF THE SCENE, 60% OF THE SCREEN, OR A SCENE TALLER THAN THE SCREEN SPANNING ITS MIDDLE: a phone
-         scene of 2,000–3,000 px never shows 40% of itself, and a tall scene starts as it comes in, so its first
-         beats are drawn before the reader reaches them (2026-10-21). */
+      /* SEEN IS 40% OF THE SCENE, 60% OF THE SCREEN, OR A TALL SCENE SPANNING ITS MIDDLE (a phone scene never shows 40%). */
       var rb = e.rootBounds, cr = e.boundingClientRect;
       var seen = e.intersectionRatio >= 0.4
         || (rb && e.intersectionRect.height >= rb.height * 0.6)
@@ -416,10 +403,8 @@
       }
     }, { threshold: [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4] }).observe(box);
   };
-  /* REVEALED AS READ, NOT ON A CLOCK. A tall scene played on a timer kept its own height empty for the seconds it took
-     — a reader scrolling at reading pace met a box with one line at its top and 600 px of nothing (2026-10-21 tour).
-     Here a part is drawn when its top comes up past 86% of the screen, those arriving together a beat apart, so what
-     is on the screen is always filled; all of it clears once the scene is wholly below the screen again. */
+  /* REVEALED AS READ, NOT ON A CLOCK: a part is drawn when its top passes 86% of the screen, so what is on screen is
+     always filled; all of it clears once the scene is below the screen again. */
   var revealAsRead = function (box, parts) {
     var put = function (p, on, delay) { p.style.transitionDelay = on ? delay + 'ms' : ''; p.classList[on ? 'add' : 'remove']('on'); };
     if (reduce) { box.classList.add('played'); parts.forEach(function (p) { put(p, true, 0); }); return; }
@@ -455,10 +440,8 @@
       return n;
     };
     var usd = function (n) { return '$' + Math.round(Math.abs(n)).toLocaleString('en-US'); };
-    /* A CONVERSATION A READER CAN FOLLOW (2026-10-21: "ця графа незрозуміла користувачу"). It was drawn as a sequence
-       diagram — lifelines and arrows — which only an engineer reads. Now each of the three calls is an exchange: what the
-       agent asked, in plain words, with the call it made beside it as it was made; then shoalcheck-mcp's answer, its
-       own figures. The plain words are ours and say what the call asks; the call and every figure are the server's. */
+    /* A CONVERSATION A READER CAN FOLLOW (2026-10-21): each call is an exchange, the question in plain words beside the
+       call as made, then the server's own figures. */
     var sq = el('div', 'sq sq-talk', null, box), parts = [];
     var path = el('div', 'sq-path', null, sq);
     [['Your agent', 'Claude · Cursor · any MCP client'], ['shoalcheck-mcp', 'on your machine'], ['The readings', 'kept and signed on this machine']]
@@ -537,9 +520,8 @@
     revealAsRead(box, parts);
   })();
 
-  /* THE PIPELINE IS GITHUB (D64): its pages are drawn by gh-scene.js with gh-scene.css from #gate-demo — 29 KB the first
-     screen does not need (landing-check 4i holds the first load under 450 KB), fetched at the reader's first scroll or
-     as the Integrations band nears, whichever comes first; the stylesheet is in before anything is drawn. */
+  /* THE PIPELINE IS GITHUB (D64): gh-scene.js and gh-scene.css, 29 KB, fetched at the first scroll or as the band
+     nears (landing-check 4i); the stylesheet is in before anything is drawn. */
   (function () {
     var box = $('.isc[data-isc="ci"]'), src = $('#gate-demo'), asked = false;
     if (!box || !src) return;
@@ -562,11 +544,8 @@
     new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { o.disconnect(); load(); } }, { rootMargin: '2000px 0px' }).observe(box);
   })();
 
-  /* HOW IT COMPARES (D63): the sourced matrix is drawn from comparison.json, fetched as the section nears or at the
-     reader's first scroll — the 18 KB of data stays off the first screen (landing-check 4i), the same lazy shape the
-     GitHub scene uses. Each cell is one vendor's own documentation; a mark carries the verdict, colour is spent only
-     on a yes and on our own column, the note opens on hover or focus, and every competitor cell links to its source.
-     On a phone the one grid becomes a stack of cards, each cell naming its own vendor. */
+  /* HOW IT COMPARES (D63): comparison.json, fetched as the section nears (landing-check 4i). Each cell is one vendor's
+     own documentation and links to it; on a phone the grid becomes cards. */
   (function () {
     var host = $('[data-compare]');
     if (!host) return;
@@ -851,11 +830,8 @@
       if (shown < 0) paint(0);
     }
 
-    /* ── ask it yourself: the engine's own answer for any zone and any node ──
-       testdata/golden/sample-preflight.json is internal/preflight asked about every zone and node of the sample;
-       the page carries it verbatim (make site-data, gated). A pod whose eviction is refused — by a disruption budget,
-       or by kubectl itself for a pod no controller manages — stays where it is, in amber; a pod with nowhere to go drops to the floor, in red; a bare pod fades; the rest are drawn on nodes
-       that remain — where, exactly, is for the picture, as in the story above. */
+    /* ── ask it yourself: the engine's own answer for any zone and any node, from sample-preflight.json (make site-data,
+       gated). Refused eviction stays in amber, nowhere to go drops in red, a bare pod fades. */
     var verEl = $('#scene-verdicts'), tryBox = $('#scene-try');
     var V = verEl ? JSON.parse(verEl.textContent || '{}') : {};
     if (tryBox && V.zones && V.nodes) {
@@ -972,10 +948,7 @@
     }
   }
 
-  /* ── the page's own controls ──────────────────────────────────────────────
-     A SLIDER SAYS HOW FAR IT IS SET: its track fills to the thumb, and --p is the one number the stylesheet needs.
-     A CHOICE SHOWS EVERY OPTION: four models or four providers fit on a line, so each is a button that says what
-     it is, instead of a native select that hides them behind a click in the browser's own look. */
+  /* ── the page's own controls: a slider's track fills to the thumb (--p); a choice shows every option as a button. */
   var fillRange = function (el) {
     var span = el.max - el.min;
     el.style.setProperty('--p', (span > 0 ? (el.value - el.min) / span * 100 : 0) + '%');
@@ -1044,9 +1017,7 @@
       now.style.left = pct(today) + '%'; axisEl.appendChild(now);
       rowsEl.style.setProperty('--today-f', (pct(today) / 100).toFixed(4));
       rowsEl.textContent = ''; parts = [];
-      /* YEAR GRIDLINES THROUGH THE ROWS, on the same scale as the bars and the today line, so a version's span reads
-         against the calendar instead of floating (the founder: the timeline looked "криво"). A line sits at each
-         January, over the track's own column. */
+      /* YEAR GRIDLINES THROUGH THE ROWS, at each January on the bars' scale, so a span reads against the calendar. */
       var grid = document.createElement('li'); grid.className = 'dl-grid'; grid.setAttribute('aria-hidden', 'true');
       for (var gy = t0.getFullYear(); gy <= t1.getFullYear(); gy++) {
         var gl = document.createElement('span');
@@ -1162,9 +1133,7 @@
       frame.style.width = W + 'px'; frame.style.height = Hh + 'px';
       frame.style.transform = 'scale(' + (live.clientWidth / W) + ')';
     };
-    /* THE PAGE IS DARK, SO ITS FRAMES ARE. A frame follows the visitor's system theme, and a light system drew a
-       white panel in the dark page (D50 site review). The theme is set on this frame's document only — never stored,
-       so the sample opened on its own still follows the visitor's choice. */
+    /* THE PAGE IS DARK, SO ITS FRAMES ARE (D50): the theme is set on this frame's document only, never stored. */
     frame.addEventListener('load', function () {
       if (!frame.getAttribute('src')) return;
       try { frame.contentDocument.documentElement.setAttribute('data-theme', 'dark'); } catch (e) { /* another origin */ }
@@ -1246,8 +1215,25 @@
   /* The phone's reading panel is fetched as it comes near, not with the first screen (landing-check 4i). */
   $$('img[data-src]').forEach(function (im) {
     if (!('IntersectionObserver' in window)) { im.src = im.getAttribute('data-src'); return; }
-    var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); im.src = im.getAttribute('data-src'); } }, { rootMargin: '80px 0px' });
+    var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); if (im.hasAttribute('data-srcset')) im.srcset = im.getAttribute('data-srcset'); im.src = im.getAttribute('data-src'); } }, { rootMargin: '80px 0px' });
     io.observe(im);
+  });
+  /* THE WALKTHROUGH plays where it is: the press swaps the poster for YouTube's no-cookie player. A modified click,
+     or no script, opens it on YouTube instead. */
+  $$('.walk-play').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+      e.preventDefault();
+      var f = document.createElement('div'), fr = document.createElement('iframe');
+      f.className = 'walk-frame';
+      fr.src = 'https://www.youtube-nocookie.com/embed/' + a.getAttribute('data-yt') + '?autoplay=1&rel=0';
+      fr.title = 'The Shoalcheck walkthrough';
+      fr.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      fr.allowFullscreen = true;
+      f.appendChild(fr);
+      a.replaceWith(f);
+      fr.focus();
+    });
   });
   /* THE FILM ON A PHONE is fetched after the first scroll, once it is near, so the first load never carries it;
      it plays muted while on the screen and stops off it; a tap gives sound. Under reduced motion it waits for play. */
@@ -1281,9 +1267,8 @@
       b.addEventListener('click', function () { set(c.classList.contains('shut')); });
     });
   }
-  /* Plan buttons: the shop sells and issues keys. Its buy page takes the plan and the period the cards show, so a
-     button follows the Yearly/Monthly switch. A contact that is an address gets a mail; without one, nothing is on
-     sale yet, and the page says so instead of sending anyone to an address nobody reads. */
+  /* Plan buttons follow the Yearly/Monthly switch to the shop's buy page; with no shop address, the page says nothing
+     is on sale yet. */
   var ctas = $$('[data-plan-cta]');
   if (/^https?:/.test(contact)) {
     setPlanLinks = function () {
@@ -1319,10 +1304,8 @@
       line.appendChild(all);
     }
   };
-  /* THE RELEASE IS IN THE PAGE. publish-site.sh writes the release the downloads point at into #release when it
-     publishes, so a visit costs no request to GitHub's API — unauthenticated, sixty an hour per address, after which
-     every row silently fell back to the releases page (D50 site review). Only a copy that was never published, such
-     as this repository's own site/, asks the API. */
+  /* THE RELEASE IS IN THE PAGE: publish-site.sh writes it into #release, so a visit asks GitHub's API nothing (D50);
+     only an unpublished copy, such as site/ in the repository, asks. */
   var relEl = $('#release'), given = null;
   try { given = relEl && relEl.textContent.trim() ? JSON.parse(relEl.textContent) : null; } catch (e) { given = null; }
   if (given) { useRelease(given); return; }
