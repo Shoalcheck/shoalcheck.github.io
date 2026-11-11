@@ -655,6 +655,7 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--
 .more-ways { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
 .more-ways div { display: flex; flex-direction: column; gap: 10px; padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: var(--bg2); min-width: 0; }
 .more-ways code { display: block; padding: 10px 12px; overflow-x: auto; white-space: nowrap; font-size: 13px; }
+.more-ways code.brk { white-space: normal; overflow-wrap: anywhere; }
 .more-ways p { font-size: 13.5px; color: var(--dim); }
 .release-line { margin-top: 20px; font-size: 13px; color: var(--faint); }
 @media (max-width: 960px) { .dl, .more-ways { grid-template-columns: minmax(0, 1fr); } }

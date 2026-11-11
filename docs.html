@@ -141,6 +141,9 @@
           <tr><td>shoalcheck-mcp_&lt;v&gt;_&lt;os&gt;_&lt;arch&gt;</td><td>An MCP server that hands an assistant the readings already on this machine. It has no kubeconfig and cannot read a cluster.</td></tr>
         </tbody>
       </table></div>
+      <p>Through a package manager instead: <code>brew install shoalcheck/tap/shoalcheck</code> on macOS and Linux, and the
+        kubectl plugin through krew from our own index — <code>kubectl krew index add shoalcheck-index https://github.com/Shoalcheck/krew-index.git</code>,
+        then <code>kubectl krew install shoalcheck-index/shoalcheck</code>. Each upgrades with its own command.</p>
     </div>
   </section>
 

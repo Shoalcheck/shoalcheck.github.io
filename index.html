@@ -650,8 +650,9 @@
       </div>
       <div>
         <h3>As a kubectl plugin</h3>
-        <code>kubectl shoalcheck preflight drain node-1</code>
-        <p>Put <span class="mono">kubectl-shoalcheck</span> from the release on your PATH; kubectl finds it by its name.</p>
+        <code class="brk">kubectl krew index add shoalcheck-index https://github.com/Shoalcheck/krew-index.git</code>
+        <code>kubectl krew install shoalcheck-index/shoalcheck</code>
+        <p>Then <span class="mono">kubectl shoalcheck preflight drain node-1</span>. Without krew, put <span class="mono">kubectl-shoalcheck</span> from the release on your PATH.</p>
       </div>
       <div>
         <h3>Staying current</h3>
