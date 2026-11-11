@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shoalcheck vs Kubescape, Popeye and Trivy — Shoalcheck</title>
+<meta name="description" content="How Shoalcheck compares with Kubescape, Popeye and Trivy: what each one reads, where it runs, what it covers, and what each does that Shoalcheck does not. Facts about the other tools come from their own READMEs, read on 11 November 2026." />
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#08080a" />
+<link rel="canonical" href="https://shoalcheck.com/compare.html">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="landing.css" />
+
+<style>
+/* A reference page in read-only.html's shell: the landing's stylesheet, header and footer, and only what a
+   comparison needs on top — one table that scrolls inside itself on a phone, and a section per tool. */
+:root { --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 56px; --s-8: 80px;
+        --t-xs: 12.5px; --t-sm: 14px; --t-lg: 18px; --t-xl: clamp(1.4rem, 2.6vw, 1.9rem);
+        --fg-muted: var(--dim); --fg-soft: var(--fg2); --fg-faint: var(--faint); --border: var(--line2);
+        --border-subtle: var(--line); --font-mono: var(--mono); --primary: var(--accent); }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent2); }
+.ro-head { padding: var(--s-8) 0 var(--s-6); }
+.ro-title { font-size: clamp(1.9rem, 4vw, 3rem); line-height: 1.08; letter-spacing: -0.02em; margin: var(--s-4) 0 0; }
+.ro-deck { margin-top: var(--s-5); font-size: var(--t-lg); line-height: 1.55; color: var(--fg-muted); max-width: 62ch; }
+.ro-deck strong { color: var(--fg-soft); font-weight: 600; }
+
+.ro-sec { padding: var(--s-7) 0; border-top: 1px solid var(--border); }
+.ro-sec > .wrap > h2 { font-size: var(--t-xl); letter-spacing: -0.012em; margin: var(--s-3) 0 0; }
+.ro-sec p { max-width: 68ch; line-height: 1.6; color: var(--fg-muted); }
+.ro-sec p strong { color: var(--fg-soft); font-weight: 600; }
+
+/* The table is the page's one wide thing. It scrolls inside its own box under ~760px, so the page never does,
+   and the box takes focus so a keyboard can scroll it too. The first column stays put while the rest moves. */
+.cmp-box { margin-top: var(--s-5); overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; }
+.cmp { width: 100%; min-width: 760px; border-collapse: collapse; font-size: var(--t-sm); line-height: 1.5; }
+.cmp th, .cmp td { padding: var(--s-3) var(--s-4); text-align: left; vertical-align: top; border-bottom: 1px solid var(--border-subtle); }
+.cmp tr:last-child th, .cmp tr:last-child td { border-bottom: none; }
+.cmp thead th { font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; color: var(--fg-soft);
+                letter-spacing: .04em; border-bottom: 1px solid var(--border); }
+.cmp thead th.us { color: var(--accent2); }
+.cmp tbody th { font-weight: 600; color: var(--fg-soft); width: 9.5rem; position: sticky; left: 0; background: var(--bg, #08080a); }
+.cmp td { color: var(--fg-muted); }
+.cmp td.us { color: var(--fg-soft); }
+.cmp-cap { margin-top: var(--s-2); font-size: 13px; color: var(--fg-faint); }
+
+.tool { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-6); margin-top: var(--s-5); }
+.tool h3 { margin: 0 0 var(--s-2); font-size: var(--t-sm); font-family: var(--font-mono); font-weight: 500;
+           letter-spacing: .04em; color: var(--fg-soft); }
+.tool ul { margin: 0; padding-left: 1.1em; color: var(--fg-muted); line-height: 1.6; font-size: var(--t-sm); }
+.tool li { margin: 4px 0; }
+.both { margin-top: var(--s-5); padding: var(--s-4) var(--s-5); border: 1px solid var(--border);
+        border-left: 3px solid var(--primary); border-radius: 6px; }
+.both p { margin: 0; }
+@media (max-width: 780px) { .tool { grid-template-columns: 1fr; gap: var(--s-5); } }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+                   clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.ro-note { margin-top: var(--s-6); padding: var(--s-5); border: 1px solid var(--border);
+           border-left: 3px solid var(--primary); border-radius: 6px; }
+.ro-note p { margin: 0; max-width: 74ch; }
+.ro-note p + p { margin-top: var(--s-3); }
+</style>
+</head>
+<body>
+
+<header class="top" id="top">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Shoalcheck, home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0b1417"/><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g></svg>
+      Shoalcheck
+    </a>
+    <button class="menu" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Sections">
+      <a href="/#flow">The flow</a>
+      <a href="/#finds">What it finds</a>
+      <a href="/#integrations">Integrations</a>
+      <a href="/#zone">Before a change</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+      <a href="docs.html">Docs</a>
+    </nav>
+    <div class="top-cta">
+      <a class="btn btn-ghost" href="app-demo.html">Live demo</a>
+      <a class="btn btn-primary" href="/#download">Download</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="ro-head">
+    <div class="wrap">
+      <div class="eyebrow">How it compares</div>
+      <h1 class="ro-title">Shoalcheck, Kubescape, Popeye and Trivy</h1>
+      <p class="ro-deck">
+        All four read a Kubernetes cluster and tell you what is wrong with it, and they answer different questions.
+        Shoalcheck is a <strong>read-only audit across reliability, security and cost</strong>: it prices what it
+        finds and checks a drain, a lost zone or an upgrade before you make the change. The other three are free
+        and open source, and each of them does something Shoalcheck does not.
+      </p>
+      <p class="ro-deck">
+        What this page says about the other tools comes from each project's own README, read on 11 November 2026.
+        Projects move; where a line here has gone stale, the README is right and this page is wrong.
+      </p>
+    </div>
+  </section>
+
+  <section class="ro-sec">
+    <div class="wrap">
+      <div class="eyebrow">At a glance</div>
+      <h2>Four tools, seven questions</h2>
+      <div class="cmp-box" role="region" aria-label="Comparison table, scrolls sideways on a narrow screen" tabindex="0">
+        <table class="cmp">
+          <thead>
+            <tr>
+              <th scope="col"><span class="visually-hidden">Question</span></th>
+              <th scope="col" class="us">Shoalcheck</th>
+              <th scope="col">Kubescape</th>
+              <th scope="col">Popeye</th>
+              <th scope="col">Trivy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">What it is</th>
+              <td class="us">A read-only audit of a running cluster: reliability, security and cost</td>
+              <td>Security posture and compliance scanning; created by ARMO, a CNCF incubating project</td>
+              <td>A linter for a live cluster's deployed resources</td>
+              <td>A security scanner for images, code, infrastructure as code and clusters, by Aqua Security</td>
+            </tr>
+            <tr>
+              <th scope="row">Where it runs</th>
+              <td class="us">Your laptop or CI. Nothing is installed in the cluster</td>
+              <td>A CLI, or an operator installed in the cluster</td>
+              <td>A CLI against the live cluster</td>
+              <td>A CLI, or the Trivy Operator installed in the cluster</td>
+            </tr>
+            <tr>
+              <th scope="row">Changes to the cluster</th>
+              <td class="us">None: get and list only, and every reading counts its own object writes (0)</td>
+              <td>The CLI is agentless; node-level host checks, admission control and runtime monitoring need components in the cluster</td>
+              <td>None; its README says it "does not alter any of your Kubernetes resources". An optional mode runs it as a CronJob in the cluster</td>
+              <td><code>trivy k8s</code> uses your kubeconfig but by default runs a node-collector Job in the cluster; the operator scans from inside and writes its reports there</td>
+            </tr>
+            <tr>
+              <th scope="row">Image vulnerabilities</th>
+              <td class="us">Not scanned</td>
+              <td>Yes, with Grype</td>
+              <td>Not scanned</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <th scope="row">Cost</th>
+              <td class="us">In dollars, from your cloud's list prices, and from measured usage when the cluster's Prometheus is reachable</td>
+              <td>Not among its listed features</td>
+              <td>Over- and under-allocation, when the cluster runs metrics-server; no dollar figure</td>
+              <td>Not among its listed features</td>
+            </tr>
+            <tr>
+              <th scope="row">Before a change</th>
+              <td class="us">Preflight for a drain, a lost zone or an upgrade, with an exit code a script can act on</td>
+              <td>No drain, zone-loss or upgrade-blocker check found; it flags an outdated Kubernetes version</td>
+              <td>Lints a missing PDB, deprecated API groups and an old Kubernetes version; no per-node drain or zone check</td>
+              <td>Flags deprecated and removed APIs; no drain or zone-loss check</td>
+            </tr>
+            <tr>
+              <th scope="row">Licence and price</th>
+              <td class="us">Preflight and the size of any reading are free. Every finding with its evidence is from $59 a month. The code that touches the cluster is Apache-2.0</td>
+              <td>Apache-2.0, free</td>
+              <td>Apache-2.0, free</td>
+              <td>Apache-2.0, free</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cmp-cap">Sources: the READMEs of kubescape/kubescape, derailed/popeye, aquasecurity/trivy and
+        aquasecurity/trivy-operator on GitHub, read on 11 November 2026, and their licence files. A longer matrix with a quote
+        behind every cell, covering Kubecost, Komodor and Chkk as well, is <a href="/#compare">on the home page</a>.</p>
+    </div>
+  </section>
+
+  <section class="ro-sec">
+    <div class="wrap">
+      <div class="eyebrow">Kubescape</div>
+      <h2>Wider on security, and it runs inside the cluster</h2>
+      <div class="tool">
+        <div>
+          <h3>Where Kubescape is stronger</h3>
+          <ul>
+            <li>Checks against NSA-CISA, MITRE ATT&amp;CK and CIS Benchmarks</li>
+            <li>Scans YAML files and Helm charts as well as clusters</li>
+            <li>Finds CVEs in images with Grype and patches them with Copacetic</li>
+            <li>Admission control with Validating Admission Policies, and eBPF runtime monitoring</li>
+            <li>Free, open source, and a CNCF incubating project</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Where Shoalcheck differs</h3>
+          <ul>
+            <li>Reliability and cost in the same reading as security, with the cost in dollars</li>
+            <li>Preflight for a drain, a lost zone or an upgrade</li>
+            <li>Nothing runs in the cluster, at any point</li>
+            <li>No admission control, runtime monitoring or image scanning</li>
+          </ul>
+        </div>
+      </div>
+      <div class="both"><p>Teams that want policy enforcement and runtime detection have it in Kubescape. Shoalcheck
+        answers a different question: what a change will strand, and what the cluster costs.</p></div>
+    </div>
+  </section>
+
+  <section class="ro-sec">
+    <div class="wrap">
+      <div class="eyebrow">Popeye</div>
+      <h2>The closest in spirit: read-only, live cluster, free</h2>
+      <div class="tool">
+        <div>
+          <h3>Where Popeye is stronger</h3>
+          <ul>
+            <li>Free and open source, with nothing to buy</li>
+            <li>Quick to run, with a report you can dump to HTML</li>
+            <li>Read-only, like Shoalcheck</li>
+            <li>Flags over- and under-allocation when metrics-server is present</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Where Shoalcheck differs</h3>
+          <ul>
+            <li>Cost in dollars, from list prices and from measured usage</li>
+            <li>Preflight for a drain, a lost zone or an upgrade</li>
+            <li>A history of readings, and a comparison of two</li>
+            <li>A CI gate with SARIF, and findings filed in Jira or Linear</li>
+            <li>Each finding names the object it rests on, with its evidence</li>
+          </ul>
+        </div>
+      </div>
+      <div class="both"><p>If Popeye already answers your questions, keep it. Shoalcheck is for the questions that need
+        a dollar figure or a yes-or-no before a change.</p></div>
+    </div>
+  </section>
+
+  <section class="ro-sec">
+    <div class="wrap">
+      <div class="eyebrow">Trivy</div>
+      <h2>Almost no overlap: what is in your images, against how the cluster runs them</h2>
+      <div class="tool">
+        <div>
+          <h3>Where Trivy is stronger</h3>
+          <ul>
+            <li>Known vulnerabilities in images and dependencies, and SBOMs</li>
+            <li>Secrets and licences in code, and infrastructure-as-code misconfigurations</li>
+            <li>CIS, NSA and Pod Security Standards compliance reports</li>
+            <li>Many targets beyond Kubernetes</li>
+            <li>Free and open source</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Where Shoalcheck differs</h3>
+          <ul>
+            <li>It does not scan images or code at all</li>
+            <li>It reads the running cluster's configuration for reliability, cost and security</li>
+            <li>It never requests Secrets, ConfigMaps or logs</li>
+            <li>Nothing is installed in the cluster</li>
+          </ul>
+        </div>
+      </div>
+      <div class="both"><p>Most teams that run Trivy would run Shoalcheck beside it, not instead of it.</p></div>
+    </div>
+  </section>
+
+  <section class="ro-sec">
+    <div class="wrap">
+      <div class="eyebrow">Shoalcheck, in the same terms</div>
+      <h2>What it is, and what it is not</h2>
+      <p>
+        <strong>89 detection rules and 15 stack analyzers</strong> across reliability, security and cost, and each
+        finding names the object it rests on. It asks with get and list only, installs nothing, and leaves nothing
+        running after the command exits. Every reading counts its own requests and object writes.
+      </p>
+      <p>
+        It never requests Secrets, ConfigMaps or logs. Run it under the ClusterRole it ships with, and your API
+        server refuses them too — <a href="read-only.html">what it reads, line by line</a>.
+      </p>
+      <p>
+        Preflight answers a drain, a lost zone or an upgrade before you make it: exit 0 when nothing it checks
+        stops the change, 2 when something does, 1 when a read it needed was refused. Around the reading: a CI gate
+        with SARIF, tickets in Jira or Linear, a desktop app, and a document you can hand to someone.
+      </p>
+      <p>
+        It does not scan images, enforce admission policies, monitor between readings, or change anything in
+        the cluster. Preflight and the size of any reading are free; every finding with its evidence and fix is
+        Pro at $59 a month, and Team and Business cover more clusters — <a href="/#pricing">plans and prices</a>.
+      </p>
+      <div class="ro-note"><p><b>Something here out of date?</b> The rows about other tools quote their READMEs as
+        of 11 November 2026. When a project changes, its README is the source.</p></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <span class="brand small"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0b1417"/><g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5c1.3-1.2 2.7-1.2 4 0s2.7 1.2 4 0 2.7-1.2 4 0 2.7 1.2 4 0" stroke="#7fe7d9"/><path d="M3.5 18.5c3.4 0 5-5 8.5-5s5.1 5 8.5 5" stroke="#2dd4bf"/></g></svg>Shoalcheck</span>
+    <ul>
+      <li><a href="sample-report.html">A sample Kubernetes audit</a></li>
+      <li><a href="sample-compare.html">A real comparison</a></li>
+      <li><a href="sample-fleet.html">The sample fleet</a></li>
+      <li><a href="sample-evidence-pack.zip" download>The sample evidence pack (zip)</a></li>
+      <li><a href="app-demo.html">The interactive demo</a></li>
+      <li><a href="read-only.html">What it reads</a></li>
+      <li><a href="compare.html" aria-current="page">How it compares</a></li>
+      <li><a href="docs.html">Documentation</a></li>
+      <li><a href="https://github.com/shoalcheck/shoalcheck/releases">Changelog and releases</a></li>
+      <li><a href="https://github.com/Shoalcheck/shoalcheck-scan">Scanner source code</a></li>
+      <li><a href="https://www.youtube.com/@shoalcheck">Films on YouTube</a></li>
+      <li><a href="terms.html">Terms</a></li>
+      <li><a href="privacy.html">Privacy</a></li>
+      <li><a href="refunds.html">Refunds</a></li>
+    </ul>
+  </div>
+</footer>
+<script src="nav.js"></script>
+</body>
+</html>
